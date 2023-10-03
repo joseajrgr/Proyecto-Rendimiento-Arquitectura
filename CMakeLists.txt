@@ -1,11 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
-project(Proyecto_Rendimiento_Arquitectura)
-
-set(CMAKE_CXX_STANDARD 14)
-
-add_executable(Proyecto_Rendimiento_Arquitectura
-        main.cpp)
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.21)
 project( fluid LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
