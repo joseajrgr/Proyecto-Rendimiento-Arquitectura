@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="WSL - Ubuntu" type="wsl" uuid="cb21fe36-4661-4b73-a037-5d9ca1b2827b">
+        <config>
+          <option name="distributionMsId" value="Ubuntu-22.04" />
+          <option name="projectRootOnTarget" value="{exitCode=0, timeout=false, cancelled=false, stdout=/mnt/c/Program Files/JetBrains/CLion 2023.2.2/jbr/bin&#10;, stderr=}/fluid" />
+        </config>
+      </target>
+    </targets>
+  </component>
+</project>
