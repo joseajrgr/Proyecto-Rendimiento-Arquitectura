@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set compiler options
-add_compile_options(−Wall −Wextra −Werror −pedantic −pedantic−errors)
+add_compile_options(-Wall -Wextra -Werror -pedantic -pedantic-errors)
 set(CMAKE_CXX_FLAGS_RELEASE −march=native)
 # Enable GoogleTest Library
 include(FetchContent)

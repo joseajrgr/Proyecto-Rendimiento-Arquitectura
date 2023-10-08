@@ -65,7 +65,6 @@ int main(int argc, char* argv[]) {
     output.write(reinterpret_cast<char*>(&np), sizeof(int));
     output.write(reinterpret_cast<char*>(particles.data()), np * sizeof(Particle));
     output.close();
-
     std::cout << "Simulación completada. Estado final del fluido guardado en: " << archivoSalida << "\n";
 
     return 0;
