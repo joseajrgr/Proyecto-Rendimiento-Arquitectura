@@ -9,7 +9,6 @@ struct Particle {
     float hvx, hvy, hvz;
     float vx, vy, vz;
 };
-
 int main(int argc, char* argv[]) {
     if (argc != 4) {
         std::cerr << "Error: Invalid number of arguments. Usage: " << argv[0] << " <nts> <inputfile> <outputfile>\n";
