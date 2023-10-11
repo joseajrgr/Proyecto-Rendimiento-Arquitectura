@@ -14,8 +14,8 @@ struct Particle {
     //float vx, vy, vz;
 };
 struct Fluid {
-    float ppm = 0;  // Partículas por metro
-    int np = 0;  // Número de partículas
+    float particlespermeter = 0;  // Partículas por metro
+    int numberparticles = 0;  // Número de partículas
     std::vector<Particle> particles;
 };
 
@@ -24,22 +24,22 @@ void mesh_simulation(const Fluid &fluid);
 void print_simulation(int iteraciones, const Fluid &fluid);
 
 void readFluid(std::ifstream &in, Fluid &fluid) {
-    in.read(static_cast<char *>(static_cast<void *>(&fluid.ppm)), sizeof(fluid.ppm));
-    in.read(static_cast<char *>(static_cast<void *>(&fluid.np)), sizeof(fluid.np));
-    fluid.particles.resize(fluid.np);
-    for (int i = 0; i < fluid.np; ++i) {
+    in.read(static_cast<char *>(static_cast<void *>(&fluid.particlespermeter)), sizeof(fluid.particlespermeter));
+    in.read(static_cast<char *>(static_cast<void *>(&fluid.numberparticles)), sizeof(fluid.numberparticles));
+    fluid.particles.resize(fluid.numberparticles);
+    for (int i = 0; i < fluid.numberparticles; ++i) {
         in.read(static_cast<char *>(static_cast<void *>(&fluid.particles[i])), sizeof(Particle));
     }
 }
 
 void writeFluid(std::ofstream &out, const Fluid &fluid) {
-    std::array<char, sizeof(fluid.ppm)> ppmBuffer = {0};
-    std::memcpy(ppmBuffer.data(), &fluid.ppm, sizeof(fluid.ppm));
-    out.write(ppmBuffer.data(), sizeof(fluid.ppm));
+    std::array<char, sizeof(fluid.particlespermeter)> ppmBuffer = {0};
+    std::memcpy(ppmBuffer.data(), &fluid.particlespermeter, sizeof(fluid.particlespermeter));
+    out.write(ppmBuffer.data(), sizeof(fluid.particlespermeter));
 
-    std::array<char, sizeof(fluid.np)> npBuffer = {0};
-    std::memcpy(npBuffer.data(), &fluid.np, sizeof(fluid.np));
-    out.write(npBuffer.data(), sizeof(fluid.np));
+    std::array<char, sizeof(fluid.numberparticles)> npBuffer = {0};
+    std::memcpy(npBuffer.data(), &fluid.numberparticles, sizeof(fluid.numberparticles));
+    out.write(npBuffer.data(), sizeof(fluid.numberparticles));
 
     for (const auto &particle: fluid.particles) {
         std::array<char, sizeof(Particle)> particleBuffer = {0};
@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
     readFluid(input, fluid);
 
     // Verificar si el número de partículas leídas coincide con numberparticles OPCIONAL
-    if (fluid.particles.size() != static_cast<std::vector<Particle>::size_type>(fluid.np)) {
+    if (fluid.particles.size() != static_cast<std::vector<Particle>::size_type>(fluid.numberparticles)) {
         std::cerr << "Error: El número de partículas leídas (" << fluid.particles.size()
-                  << ") no coincide con numberparticles (" << fluid.np << ").\n";
+                  << ") no coincide con numberparticles (" << fluid.numberparticles << ").\n";
         return ERROR_INVALID_PARTICLE_COUNT;
     }
     mesh_simulation(fluid);
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 void print_simulation(const int iteraciones, const Fluid &fluid) {// Realizar la simulación
     for (int iter = 0; iter < iteraciones; ++iter) {
         std::cout << "Iteración " << iter + 1 << ":\n";
-        for (int i = 0; i < fluid.np; ++i) {
+        for (int i = 0; i < fluid.numberparticles; ++i) {
             const Particle &particula = fluid.particles[i];
             // Aquí se puede hacer la simulación para la partícula actual
             std::cout << "Partícula " << i + 1 << ": px=" << particula.px << " py=" << particula.py << " pz="
@@ -121,8 +121,8 @@ void print_simulation(const int iteraciones, const Fluid &fluid) {// Realizar la
 }
 
 void mesh_simulation(const Fluid &fluid) {
-    const double smoothingLength = 1.695 / fluid.np;
-    const double particleMass = std::pow(10.0, 3.0) / std::pow(fluid.np, 3.0);
+    const double smoothingLength = 1.695 / fluid.particlespermeter;
+    const double particleMass = std::pow(10.0, 3.0) / std::pow(fluid.particlespermeter, 3.0);
     const double xmax = 0.065;
     const double ymax = 0.1;
     const double zmax = 0.065;
@@ -137,8 +137,8 @@ void mesh_simulation(const Fluid &fluid) {
     const double meshy = (ymax - ymin) / numberblocksy;
     const double meshz = (zmax - zmin) / numberblocksz;
     // Mostrar los valores por pantalla en el formato requerido
-    std::cout << "Number of particles: " << fluid.np << "\n";
-    std::cout << "Particles per meter: " << fluid.ppm << "\n";
+    std::cout << "Number of particles: " << fluid.numberparticles << "\n";
+    std::cout << "Particles per meter: " << fluid.particlespermeter << "\n";
     std::cout << "Smoothing length: " << smoothingLength << "\n";
     std::cout << "Particle mass: " << particleMass << "\n";
     std::cout << "Grid size: " << numberblocksx << " x " << numberblocksy << " x " << numberblocksz << "\n";
