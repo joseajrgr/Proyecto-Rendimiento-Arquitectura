@@ -6,12 +6,14 @@
 #include <span>
 #include <cstring>  // Para std::memcpy
 #include <array>
+#include "sim/grid.hpp"
+#include "sim/constantes.hpp"
 
 
 struct Particle {
-    float px, py, pz;
-    //float hvx, hvy, hvz;
-    //float vx, vy, vz;
+    float px, py, pz; // Coordenadas de su posicion
+    //float hvx, hvy, hvz; // Coordenadas del gradiente de velocidad
+    //float vx, vy, vz; // Coordenadas de la velocidad
 };
 struct Fluid {
     float particlespermeter = 0;  // Partículas por metro
@@ -120,8 +122,9 @@ void print_simulation(const int iteraciones, const Fluid &fluid) {// Realizar la
     }
 }
 
+/* Funcion que simula la malla
 void mesh_simulation(const Fluid &fluid) {
-    const double smoothingLength = 1.695 / fluid.particlespermeter;
+    const double smoothingLength = Constantes::multRadio / fluid.particlespermeter;
     const double particleMass = std::pow(10.0, 3.0) / std::pow(fluid.particlespermeter, 3.0);
     const double xmax = 0.065;
     const double ymax = 0.1;
@@ -144,5 +147,23 @@ void mesh_simulation(const Fluid &fluid) {
     std::cout << "Grid size: " << numberblocksx << " x " << numberblocksy << " x " << numberblocksz << "\n";
     std::cout << "Number of blocks: " << numBlocks << "\n";
     std::cout << "Block size: " << meshx << " x " << meshy << " x " << meshz << "\n";
-}
+} */
 
+// Funcion que simula la malla
+void mesh_simulation(const Fluid &fluid) {
+    const double smoothingLength = Constantes::multRadio / fluid.particlespermeter;
+    const double particleMass = std::pow(10.0, 3.0) / std::pow(fluid.particlespermeter, 3.0);
+
+    // Calcula los valores utilizando la función calculateValues
+    Grid malla(Constantes::limInferior, Constantes::limSuperior);
+    malla.dividirEnBloques(smoothingLength);
+
+    // Mostrar los valores por pantalla en el formato requerido
+    std::cout << "Number of particles: " << fluid.numberparticles << "\n";
+    std::cout << "Particles per meter: " << fluid.particlespermeter << "\n";
+    std::cout << "Smoothing length: " << smoothingLength << "\n";
+    std::cout << "Particle mass: " << particleMass << "\n";
+    std::cout << "Grid size: " << malla.numberblocksx << " x " << malla.numberblocksy << " x " << malla.numberblocksz << "\n";
+    std::cout << "Number of blocks: " << malla.numBlocks << "\n";
+    std::cout << "Block size: " << malla.meshx << " x " << malla.meshy << " x " << malla.meshz << "\n";
+}
