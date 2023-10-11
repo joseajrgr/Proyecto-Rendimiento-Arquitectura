@@ -11,19 +11,29 @@ struct Particle {
 
 int main(int argc, char* argv[]) {
     if (argc != 4) {
-        std::cerr << "Uso: " << argv[0] << " <iteraciones> <archivo_entrada> <archivo_salida>\n";
-        return 1;
+        std::cerr << "Error: Invalid number of arguments. Usage: " << argv[0] << " <nts> <inputfile> <outputfile>\n";
+        return -1;
+    }
+    int iteraciones;
+    try {
+        iteraciones = std::stoi(argv[1]);
+        if (iteraciones<0){
+            std::cerr << "Error: Invalid number of time steps.\n";
+            return -2;
+        }
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Error: time steps must be numeric.\n";
+        return -1;
     }
 
-    int iteraciones = std::stoi(argv[1]);
     std::string archivoEntrada = argv[2];
     std::string archivoSalida = argv[3];
 
     // Leer el archivo de entrada
     std::ifstream input(archivoEntrada, std::ios::binary);
     if (!input) {
-        std::cerr << "Error al abrir el archivo de entrada: " << archivoEntrada << "\n";
-        return 1;
+        std::cerr << "Error: Cannot open " << archivoEntrada << " for reading\n";
+        return -3;
     }
 
     float ppm;
@@ -57,8 +67,8 @@ int main(int argc, char* argv[]) {
     // Guardar el estado final del fluido en un archivo de salida
     std::ofstream output(archivoSalida, std::ios::binary);
     if (!output) {
-        std::cerr << "Error al abrir el archivo de salida: " << archivoSalida << "\n";
-        return 1;
+        std::cerr << "Error: Cannot open " << archivoSalida << " for writing\n";
+        return -4;
     }
 
     output.write(reinterpret_cast<char*>(&ppm), sizeof(float));
