@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <cmath>
 
 struct Particle {
     float px, py, pz;
@@ -45,12 +46,37 @@ int main(int argc, char* argv[]) {
     input.read(reinterpret_cast<char*>(particles.data()), np * sizeof(Particle));
     input.close();
 
+
     // Verificar si el número de partículas leídas coincide con np OPCIONAL
     int numParticulasLeidas = particles.size();
     if (numParticulasLeidas != np) {
         std::cerr << "Error: El número de partículas leídas (" << numParticulasLeidas << ") no coincide con np (" << np << ").\n";
-        return 1;
+        return -5;
     }
+
+    // Calcular otros valores requeridos
+    float smoothingLength = 1.695 / ppm;
+    float particleMass = std::pow(10, 3) / std::pow(ppm, 3);
+
+    // Calcular el tamaño de la malla (grid size) y el número de bloques
+    float xmax = 0.065, ymax = 0.1, zmax = 0.065;
+    float xmin = -0.065, ymin = -0.08, zmin = -0.065;
+    int nx = static_cast<int>((xmax - xmin) / smoothingLength);
+    int ny = static_cast<int>((ymax - ymin) / smoothingLength);
+    int nz = static_cast<int>((zmax - zmin) / smoothingLength);
+    int numBlocks = nx * ny * nz;
+    float sx = (xmax - xmin) / nx;
+    float sy = (ymax - ymin) / ny;
+    float sz = (zmax - zmin) / nz;
+
+    // Mostrar los valores por pantalla en el formato requerido
+    std::cout << "Number of particles: " << np << std::endl;
+    std::cout << "Particles per meter: " << ppm << std::endl;
+    std::cout << "Smoothing length: " << smoothingLength << std::endl;
+    std::cout << "Particle mass: " << particleMass << std::endl;
+    std::cout << "Grid size: " << nx << " x " << ny << " x " << nz << std::endl;
+    std::cout << "Number of blocks: " << numBlocks << std::endl;
+    std::cout << "Block size: " << sx << " x " << sy << " x " << sz << std::endl;
 
     // Realizar la simulación
     for (int iter = 0; iter < iteraciones; ++iter) {
