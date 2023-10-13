@@ -10,11 +10,6 @@
 #include "sim/constantes.hpp"
 
 
-struct Particle {
-    float px, py, pz; // Coordenadas de su posicion
-    //float hvx, hvy, hvz; // Coordenadas del gradiente de velocidad
-    //float vx, vy, vz; // Coordenadas de la velocidad
-};
 struct Fluid {
     float particlespermeter = 0;  // Partículas por metro
     int numberparticles = 0;  // Número de partículas
@@ -122,33 +117,6 @@ void print_simulation(const int iteraciones, const Fluid &fluid) {// Realizar la
     }
 }
 
-/* Funcion que simula la malla
-void mesh_simulation(const Fluid &fluid) {
-    const double smoothingLength = Constantes::multRadio / fluid.particlespermeter;
-    const double particleMass = std::pow(10.0, 3.0) / std::pow(fluid.particlespermeter, 3.0);
-    const double xmax = 0.065;
-    const double ymax = 0.1;
-    const double zmax = 0.065;
-    const double xmin = -0.065;
-    const double ymin = -0.08;
-    const double zmin = -0.065;
-    const double numberblocksx = floor((xmax - xmin) / smoothingLength);
-    const double numberblocksy = floor((ymax - ymin) / smoothingLength);
-    const double numberblocksz = floor((zmax - zmin) / smoothingLength);
-    const double numBlocks = numberblocksx * numberblocksy * numberblocksz;
-    const double meshx = (xmax - xmin) / numberblocksx;
-    const double meshy = (ymax - ymin) / numberblocksy;
-    const double meshz = (zmax - zmin) / numberblocksz;
-    // Mostrar los valores por pantalla en el formato requerido
-    std::cout << "Number of particles: " << fluid.numberparticles << "\n";
-    std::cout << "Particles per meter: " << fluid.particlespermeter << "\n";
-    std::cout << "Smoothing length: " << smoothingLength << "\n";
-    std::cout << "Particle mass: " << particleMass << "\n";
-    std::cout << "Grid size: " << numberblocksx << " x " << numberblocksy << " x " << numberblocksz << "\n";
-    std::cout << "Number of blocks: " << numBlocks << "\n";
-    std::cout << "Block size: " << meshx << " x " << meshy << " x " << meshz << "\n";
-} */
-
 // Funcion que simula la malla
 void mesh_simulation(const Fluid &fluid) {
     const double smoothingLength = Constantes::multRadio / fluid.particlespermeter;
@@ -166,4 +134,22 @@ void mesh_simulation(const Fluid &fluid) {
     std::cout << "Grid size: " << malla.numberblocksx << " x " << malla.numberblocksy << " x " << malla.numberblocksz << "\n";
     std::cout << "Number of blocks: " << malla.numBlocks << "\n";
     std::cout << "Block size: " << malla.meshx << " x " << malla.meshy << " x " << malla.meshz << "\n";
+}
+
+void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks) {
+    for (int i = 0; i < fluid.numberparticles; ++i) {
+        const Particle &particula = fluid.particles[i];
+
+        // Colocar la partícula en el bloque correspondiente
+        for (auto &block : blocks) {
+
+            // AQUI CREO QUE PODEMOS CAMBIARLO POR LA FUNCION particula_en_bloque!!!!
+            if (particula.px >= block.minPoint.x && particula.px <= block.maxPoint.x &&
+                particula.py >= block.minPoint.y && particula.py <= block.maxPoint.y &&
+                particula.pz >= block.minPoint.z && particula.pz <= block.maxPoint.z) {
+                block.addParticle(particula);
+                break;  // La partícula solo puede estar en un bloque, así que pasamos a la siguiente partícula
+            }
+        }
+    }
 }

@@ -1,10 +1,7 @@
-//
-// Created by quinc on 03/10/2023.
-//
-
 #ifndef PROYECTO_RENDIMIENTO_ARQUITECTURA_GRID_HPP
 #define PROYECTO_RENDIMIENTO_ARQUITECTURA_GRID_HPP
 
+#include <vector>
 #include "block.hpp"  // Incluimos block.hpp para tener acceso a la estructura "Punto"
 
 class Grid {
@@ -19,10 +16,12 @@ class Grid {
 
         Grid(const Punto& bmin, const Punto& bmax);
         void dividirEnBloques(double smoothingLength);
+        const std::vector<Block>& getBlocks() const;
 
     private:
         Punto bmin; // Limite inferior del recinto
         Punto bmax; // Limite superior del recinto
+        std::vector<Block> blocks;
 };
 
 
