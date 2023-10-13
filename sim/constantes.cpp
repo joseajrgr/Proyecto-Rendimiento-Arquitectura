@@ -12,6 +12,6 @@ namespace Constantes {
 
     const Gravedad gravedad = {0.0, -9.8, 0.0};
 
-    const Punto limInferior = {-0.065, -0.8, -0.065};
-    const Punto limSuperior = {0.065, 0.1, -0.065};
+    const Punto limInferior = {-0.065, -0.08, -0.065};
+    const Punto limSuperior = {0.065, 0.1, 0.065};
 }
