@@ -10,8 +10,10 @@ struct Punto {
 struct Particle {
     int id;
     float px, py, pz; // Coordenadas de su posicion
-    //float hvx, hvy, hvz; // Coordenadas del gradiente de velocidad
-    //float vx, vy, vz; // Coordenadas de la velocidad
+    float hvx, hvy, hvz; // Coordenadas del gradiente de velocidad
+    float vx, vy, vz; // Coordenadas de la velocidad
+    float ax, ay, az; // Coordenadas de la aceleración
+    float density;
 };
 
 class Block {
