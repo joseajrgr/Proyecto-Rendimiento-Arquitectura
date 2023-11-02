@@ -1,6 +1,6 @@
 #include "block.hpp"
 
-Block::Block(int id, const Punto& minPoint, const Punto& maxPoint) : id(id), minPoint(minPoint), maxPoint(maxPoint) {}
+Block::Block(int id, const Punto& minPoint, const Punto& maxPoint, int cx , int cy , int cz) : id(id), minPoint(minPoint), maxPoint(maxPoint) , cx(cx) ,cy(cy), cz(cz) {}
 
 bool Block::particula_en_bloque(const Punto& point) const {
     return (point.x >= minPoint.x && point.x <= maxPoint.x &&

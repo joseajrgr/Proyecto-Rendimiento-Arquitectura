@@ -19,7 +19,7 @@ void Grid::dividirEnBloques(double smoothingLength) {
             for (int k = 0; k < numberblocksz; ++k) {
                 Punto blockBmin = {bmin.x + i * smoothingLength, bmin.y + j * smoothingLength, bmin.z + k * smoothingLength};
                 Punto blockBmax = {blockBmin.x + smoothingLength, blockBmin.y + smoothingLength, blockBmin.z + smoothingLength};
-                blocks.emplace_back(blockId++, blockBmin, blockBmax);
+                blocks.emplace_back(blockId++, blockBmin, blockBmax , i ,j, k);
             }
         }
     }
