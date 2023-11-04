@@ -245,6 +245,94 @@ void transferAcceleration(Fluid &fluid, double h, double ps, double mu, double p
         }
     }
 }
+//funcion para calcular las colisiones de particulas
+void particleColissions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz) {
+    for (auto& block : blocks) {
+        /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las particulas de ese bloque, llamando
+        a handleXCollisions*/
+        if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
+            for (auto& particle : block.particles) {
+                handleXCollisions(particle, block.cx,numberblocksx);
+            }
+        }
+        /* si un bloque tiene cy==0 o cy== numbrblocks-1 se actualiza el ay de todas las particulas de ese bloque, llamando
+        a handleYCollisions*/
+        if (block.cy == 0 || block.cy == static_cast<int>(numberblocksy) - 1) {
+            for (auto& particle : block.particles) {
+                handleYCollisions(particle, block.cy,numberblocksy);
+            }
+        }
+        /* si un bloque tiene cz==0 o cz== numbrblocks-1 se actualiza el az de todas las particulas de ese bloque, llamando
+        a handleZCollisions*/
+        if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
+            for (auto& particle : block.particles) {
+                handleZCollisions(particle, block.cz,numberblocksz);
+            }
+        }
+    }
+}
+void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
+    double x = particle.px + particle.hvx * Constantes::pasoTiempo;
+    double deltaX;
 
+    if (cx == 0) {
+        deltaX = Constantes::tamParticula - (x - Constantes::limInferior.x);
+        if (deltaX > 1e-10) {
+            particle.ax += Constantes::colisRigidez * deltaX - Constantes::amortiguamiento * particle.vx;
+        }
+    } else if (cx == static_cast<int>numberblocksx - 1) {
+        deltaX = Constantes::tamParticula - (Constantes::limSuperior.x - x);
+        if (deltaX > 1e-10) {
+            particle.ax -= Constantes::colisRigidez * deltaX + Constantes::amortiguamiento * particle.vx;
+        }
+    }
+}
+void handleYCollisions(Particle& particle, int cy, double numberblocksy) {
+    double y = particle.py + particle.hvy * Constantes::pasoTiempo;
+    double deltaY;
+
+    if (cy == 0) {
+        deltaY = Constantes::tamParticula - (y - Constantes::limInferior.y);
+        if (deltaY > 1e-10) {
+            particle.ay += Constantes::colisRigidez * deltaY - Constantes::amortiguamiento * particle.vy;
+        }
+    } else if (cy == static_cast<int>numberblocksy - 1) {
+        deltaY = Constantes::tamParticula - (Constantes::limSuperior.y - y);
+        if (deltaY > 1e-10) {
+            particle.ay -= Constantes::colisRigidez * deltaY + Constantes::amortiguamiento * particle.vy;
+        }
+    }
+}
+void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
+    double z = particle.pz + particle.hvz * Constantes::pasoTiempo;
+    double deltaZ;
+
+    if (cz == 0) {
+        deltaZ = Constantes::tamParticula - (z - Constantes::limInferior.z);
+        if (deltaZ > 1e-10) {
+            particle.az += Constantes::colisRigidez * deltaZ - Constantes::amortiguamiento * particle.vz;
+        }
+    } else if (cz == static_cast<int>numberblocksz - 1) {
+        deltaZ = Constantes::tamParticula - (Constantes::limSuperior.z - z);
+        if (deltaZ > 1e-10) {
+            particle.az -= Constantes::colisRigidez * deltaZ + Constantes::amortiguamiento * particle.vz;
+        }
+    }
+}
+//funcion para realizar el movimiento de particulas
+void particlesMovement(Fluid &fluid){
+    for (Particle& particle : fluid.particles) {
+        particle.px = particle.px + particle.hvx * Constantes::pasoTiempo + particle.ax * std::pow(Constantes::pasoTiempo,2);
+        particle.py = particle.py + particle.hvy * Constantes::pasoTiempo + particle.ay * std::pow(Constantes::pasoTiempo,2);
+        particle.pz = particle.pz + particle.hvz * Constantes::pasoTiempo + particle.az * std::pow(Constantes::pasoTiempo,2);
+
+        particle.vx = particle.hvx + (particle.ax * Constantes::pasoTiempo) * 0.5;
+        particle.vy = particle.hvy + (particle.ay * Constantes::pasoTiempo) * 0.5;
+        particle.vz = particle.hvz + (particle.az * Constantes::pasoTiempo) * 0.5;
+
+        particle.hvx = particle.hvx + particle.ax * Constantes::pasoTiempo;
+        particle.hvy = particle.hvy + particle.ay * Constantes::pasoTiempo;
+        particle.hvz = particle.hvz + particle.az * Constantes::pasoTiempo;
+}
 
 
