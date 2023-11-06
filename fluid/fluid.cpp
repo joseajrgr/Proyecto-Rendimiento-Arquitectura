@@ -160,19 +160,15 @@ void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks) {
         const Particle &particula = fluid.particles[i];
 
         // Para cada bloque, se comprueba si la particula esta dentro
-        for (auto &block : blocks) {
+        for (auto &block: blocks) {
             if (block.particula_en_bloque(particula)) {
                 block.addParticle(particula);
+                std::cout << "La partícula " << i << " está en el bloque " << block.id << "\n";
                 break;  // La particula solo puede estar en un bloque, asi que pasamos a la siguiente
             }
         }
-    }
-
-    // Imprimir en que bloque estan las particulas
-    for (const auto& block : blocks) {
-        for (std::vector<Particle>::size_type i = 0; i < block.getParticles().size(); ++i) {
-            std::cout << "La partícula " << i << " está en el bloque " << block.id << std::endl;
-        }
+        std::cout << "La partícula " << i << " no está en ningún bloque\n";
+        std::cout << "La partícula " << i << " tiene " << particula.px << " " << particula.py << " " << particula.pz << "\n";
     }
 }
 
