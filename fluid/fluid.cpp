@@ -6,9 +6,10 @@
 #include <span>
 #include <cstring>  // Para std::memcpy
 #include <array>
+#include <ctime>
 #include "sim/grid.hpp"
 #include "sim/constantes.hpp"
-
+unsigned t0, t1;
 
 struct Fluid {
     float particlespermeter = 0;  // Partículas por metro
@@ -54,6 +55,7 @@ void writeFluid(std::ofstream &out, const Fluid &fluid) {
 const int ERROR_INVALID_PARTICLE_COUNT = -5;
 
 int main(int argc, char *argv[]) {
+    t0=clock();
     std::span const args_view{argv, static_cast<std::size_t>(argc)};
     std::vector<std::string> const arguments{args_view.begin() + 1, args_view.end()};
     if (argc != 4) {
@@ -110,7 +112,9 @@ int main(int argc, char *argv[]) {
 
     output.close();
     std::cout << "Simulación completada. Estado final del fluido guardado en: " << archivoSalida << "\n";
-
+    t1 = clock();
+    double time = (double(t1-t0)/CLOCKS_PER_SEC);
+    std::cout << "Execution Time: " << time;
     return 0;
 }
 
