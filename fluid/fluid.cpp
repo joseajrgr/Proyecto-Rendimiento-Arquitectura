@@ -126,7 +126,6 @@ void print_simulation(const int iteraciones, const Fluid &fluid) {// Realizar la
             // Aquí se puede hacer la simulación para la partícula actual
             std::cout << "Partícula " << i + 1 << ": px=" << particula.px << " py=" << particula.py << " pz="
                       << particula.pz << "\n";
-
         }
         std::cout << "\n";
     }
@@ -153,37 +152,30 @@ std::pair<double, double> mesh_simulation(const Fluid &fluid) {
     std::vector<Block> blocks = malla.getBlocks();
     reposicionarParticulas(fluid, blocks);
     return std::make_pair(smoothingLength, particleMass);
-
 }
 
 void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks) {
+    // Se realiza el reposicionamiento para cada particula
     for (int i = 0; i < fluid.numberparticles; ++i) {
         const Particle &particula = fluid.particles[i];
 
-        // Colocar la partícula en el bloque correspondiente
+        // Para cada bloque, se comprueba si la particula esta dentro
         for (auto &block : blocks) {
-
-            // AQUI CREO QUE PODEMOS CAMBIARLO POR LA FUNCION particula_en_bloque!!!!
-            if (particula.px >= block.minPoint.x && particula.px <= block.maxPoint.x &&
-                particula.py >= block.minPoint.y && particula.py <= block.maxPoint.y &&
-                particula.pz >= block.minPoint.z && particula.pz <= block.maxPoint.z) {
+            if (block.particula_en_bloque(particula)) {
                 block.addParticle(particula);
-                break;  // La partícula solo puede estar en un bloque, así que pasamos a la siguiente partícula
+                break;  // La particula solo puede estar en un bloque, asi que pasamos a la siguiente
             }
-
         }
     }
-    //impresion de locaclizacion particulas
 
+    // Imprimir en que bloque estan las particulas
     for (const auto& block : blocks) {
         for (std::vector<Particle>::size_type i = 0; i < block.getParticles().size(); ++i) {
             std::cout << "La partícula " << i << " está en el bloque " << block.id << std::endl;
-
         }
     }
-
-
 }
+
 // Función para inicializar las aceleraciones
 void initAccelerations(Fluid &fluid) {
     for (int i = 0; i < fluid.numberparticles; ++i) {
@@ -197,6 +189,7 @@ void initAccelerations(Fluid &fluid) {
         fluid.particles[i].az = Constantes::gravedad.z;
     }
 }
+
 double calculateDistanceSquared(const Particle &particle1, const Particle &particle2) {
     double dx = particle1.px - particle2.px;
     double dy = particle1.py - particle2.py;
@@ -211,6 +204,7 @@ double calculateDeltaDensity(double h, double distSquared) {
     }
     return 0.0;
 }
+
 void incrementDensities(Fluid &fluid, double smoothingLength) {
     for (int i = 0; i < fluid.numberparticles; ++i) {
         for (int j = 0; j < fluid.numberparticles; ++j) {
@@ -228,6 +222,7 @@ void incrementDensities(Fluid &fluid, double smoothingLength) {
         }
     }
 }
+
 void transformDensities(Fluid &fluid, double h, double particleMass) {
     for (int i = 0; i < fluid.numberparticles; ++i) {
         // Realiza la transformación lineal de densidad para cada partícula
@@ -293,6 +288,7 @@ void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
         }
     }
 }
+
 void handleYCollisions(Particle& particle, int cy, double numberblocksy) {
     double y = particle.py + particle.hvy * Constantes::pasoTiempo;
     double deltaY;
@@ -309,6 +305,7 @@ void handleYCollisions(Particle& particle, int cy, double numberblocksy) {
         }
     }
 }
+
 void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
     double z = particle.pz + particle.hvz * Constantes::pasoTiempo;
     double deltaZ;
@@ -325,6 +322,7 @@ void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
         }
     }
 }
+
 //funcion para realizar el movimiento de particulas
 void particlesMovement(Fluid &fluid){
     for (Particle& particle : fluid.particles) {

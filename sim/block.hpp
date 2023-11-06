@@ -25,7 +25,7 @@ class Block {
         std::vector<Particle> particles;
 
         Block(int id, const Punto& minPoint, const Punto& maxPoint, int cx, int cy, int cz);
-        bool particula_en_bloque(const Punto& point) const;
+        bool particula_en_bloque(const Particle& particle) const;
         void addParticle(const Particle& particle);
         const std::vector<Particle>& getParticles() const;
 };
