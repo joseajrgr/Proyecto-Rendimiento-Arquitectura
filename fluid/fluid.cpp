@@ -97,7 +97,12 @@ int main(int argc, char *argv[]) {
     double smoothingLength = result.first;
     double particleMass = result.second;
     initAccelerations(fluid);
+    for (int iter = 0; iter < iteraciones; ++iter) {
+        incrementDensities(fluid,  smoothingLength);
+        transformDensities(fluid, smoothingLength, particleMass);
+        transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
 
+    }
     //print_simulation(iteraciones, fluid);
 
     // Escribir el estado final del fluido en el archivo de salida
