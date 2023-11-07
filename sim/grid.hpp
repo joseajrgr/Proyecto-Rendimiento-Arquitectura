@@ -4,6 +4,12 @@
 #include <vector>
 #include "block.hpp"  // Incluimos block.hpp para tener acceso a la estructura "Punto"
 
+struct Fluid {
+    float particlespermeter = 0;  // Partículas por metro
+    int numberparticles = 0;  // Número de partículas
+    std::vector<Particle> particles;
+};
+
 class Grid {
     public:
         double numberblocksx;
@@ -16,6 +22,7 @@ class Grid {
 
         Grid(const Punto& bmin, const Punto& bmax);
         void dividirEnBloques(double smoothingLength);
+        void reposicionarParticulas(const Fluid &fluid);
         const std::vector<Block>& getBlocks() const;
 
     private:

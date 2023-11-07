@@ -11,16 +11,10 @@
 #include "sim/constantes.hpp"
 unsigned t0, t1;
 
-struct Fluid {
-    float particlespermeter = 0;  // Partículas por metro
-    int numberparticles = 0;  // Número de partículas
-    std::vector<Particle> particles;
-};
-
 std::pair<double, double> mesh_simulation(const Fluid &fluid);
 
 void print_simulation(int iteraciones, const Fluid &fluid);
-void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks);
+// void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks);
 void initAccelerations(Fluid &fluid);
 void incrementDensities(Fluid &fluid, double smoothingLength);
 void transformDensities(Fluid &fluid, double h, double particleMass);
@@ -153,11 +147,11 @@ std::pair<double, double> mesh_simulation(const Fluid &fluid) {
     std::cout << "Block size: " << malla.meshx << " x " << malla.meshy << " x " << malla.meshz << "\n";
     // Obtener los bloques del grid
     std::vector<Block> blocks = malla.getBlocks();
-    reposicionarParticulas(fluid, blocks);
+    malla.reposicionarParticulas(fluid);
     return std::make_pair(smoothingLength, particleMass);
 }
 
-void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks) {
+/* void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks) {
     // Se realiza el reposicionamiento para cada particula
     for (int i = 0; i < fluid.numberparticles; ++i) {
         const Particle &particula = fluid.particles[i];
@@ -173,7 +167,7 @@ void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks) {
         std::cout << "La partícula " << i << " no está en ningún bloque\n";
         std::cout << "La partícula " << i << " tiene " << particula.px << " " << particula.py << " " << particula.pz << "\n";
     }
-}
+} */
 
 // Función para inicializar las aceleraciones
 void initAccelerations(Fluid &fluid) {

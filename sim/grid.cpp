@@ -1,3 +1,5 @@
+#include <iostream>
+#include <algorithm>
 #include <cmath>
 #include "grid.hpp"
 Grid::Grid(const Punto& bmin, const Punto& bmax) : bmin(bmin), bmax(bmax) {}
@@ -22,6 +24,24 @@ void Grid::dividirEnBloques(double smoothingLength) {
                 blocks.emplace_back(blockId++, blockBmin, blockBmax , i ,j, k);
             }
         }
+    }
+}
+
+void Grid::reposicionarParticulas(const Fluid &fluid) {
+    for (int i = 0; i < fluid.numberparticles; ++i) {
+        const Particle &particula = fluid.particles[i];
+
+        int ix = floor((particula.px - bmin.x) / meshx);
+        int iy = floor((particula.py - bmin.y) / meshy);
+        int iz = floor((particula.pz - bmin.z) / meshz);
+
+        ix = std::max(0, std::min(ix, static_cast<int>(numberblocksx) - 1));
+        iy = std::max(0, std::min(iy, static_cast<int>(numberblocksy) - 1));
+        iz = std::max(0, std::min(iz, static_cast<int>(numberblocksz) - 1));
+
+        Block &block = blocks[ix * numberblocksy * numberblocksz + iy * numberblocksz + iz];
+        block.addParticle(particula);
+        std::cout << "La partícula " << i << " está en el bloque " << block.id << '\n';
     }
 }
 
