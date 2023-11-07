@@ -92,6 +92,7 @@ int main(int argc, char *argv[]) {
     double particleMass = result.second;
     initAccelerations(fluid);
     for (int iter = 0; iter < iteraciones; ++iter) {
+        std::cout << "Iteración " << iter + 1 << "\n";
 //        incrementDensities(fluid,  smoothingLength);
 //        transformDensities(fluid, smoothingLength, particleMass);
 //        transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
