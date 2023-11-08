@@ -26,11 +26,11 @@ void particlesMovement(Fluid &fluid);
 void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 
 void readFluid(std::ifstream &in, Fluid &fluid) {
-    in.read(static_cast<char *>(static_cast<void *>(&fluid.particlespermeter)), sizeof(fluid.particlespermeter));
-    in.read(static_cast<char *>(static_cast<void *>(&fluid.numberparticles)), sizeof(fluid.numberparticles));
+    in.read(reinterpret_cast<char *>(&fluid.particlespermeter), sizeof(fluid.particlespermeter));
+    in.read(reinterpret_cast<char *>(&fluid.numberparticles), sizeof(fluid.numberparticles));
     fluid.particles.resize(fluid.numberparticles);
     for (int i = 0; i < fluid.numberparticles; ++i) {
-        in.read(static_cast<char *>(static_cast<void *>(&fluid.particles[i])), sizeof(Particle));
+        in.read(reinterpret_cast<char*>(fluid.particles.data()), fluid.numberparticles * sizeof(Particle));
     }
 }
 
