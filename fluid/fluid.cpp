@@ -22,6 +22,7 @@ void transferAcceleration(Fluid &fluid, double h, double ps, double mu, double p
 void performSPHCalculations(Fluid &fluid, double smoothingLength, double particleMass, double mu);
 void particleColissions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 void particlesMovement(Fluid &fluid);
+void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 
 void readFluid(std::ifstream &in, Fluid &fluid) {
     in.read(static_cast<char *>(static_cast<void *>(&fluid.particlespermeter)), sizeof(fluid.particlespermeter));
@@ -106,7 +107,7 @@ int main(int argc, char *argv[]) {
         transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
         particleColissions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
         particlesMovement(fluid);
-
+        limitInteractions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
     }
     //print_simulation(iteraciones, fluid);
 
@@ -357,5 +358,95 @@ void particlesMovement(Fluid &fluid){
         particle.hvx = particle.hvx + particle.ax * Constantes::pasoTiempo;
         particle.hvy = particle.hvy + particle.ay * Constantes::pasoTiempo;
         particle.hvz = particle.hvz + particle.az * Constantes::pasoTiempo;
+    }
+}
+
+//función que hace la interacción con el borde del recinto respecto a la X (si hay interacción)
+void InteractionLimitX(Particle& particle, int cx, double numberblocksx){
+    double dx;
+    if (cx == 0){
+        dx = particle.px - Constantes::limInferior.x;
+        if (dx < 0){
+            particle.px = Constantes::limInferior.x - dx;
+            particle.vx = -particle.vx;
+            particle.hvx = -particle.hvx;
+        }
+    }
+    else if(cx == static_cast<int>(numberblocksx - 1)){
+        dx = Constantes::limSuperior.x - particle.px;
+        if (dx < 0){
+            particle.px = Constantes::limSuperior.x + dx;
+            particle.vx = -particle.vx;
+            particle.hvx = -particle.hvx;
+        }
+    }
+}
+
+//función que hace la interacción con el borde del recinto respecto a la Y (si hay interacción)
+void InteractionLimitY(Particle& particle, int cy, double numberblocksy){
+   double dy;
+   if (cy == 0){
+          dy = particle.py - Constantes::limInferior.y;
+          if (dy < 0){
+              particle.py = Constantes::limInferior.y - dy;
+              particle.vy = -particle.vy;
+              particle.hvy = -particle.hvy;
+          }
+   }
+   else if(cy == static_cast<int>(numberblocksy - 1)){
+          dy = Constantes::limSuperior.y - particle.py;
+          if (dy < 0){
+              particle.py = Constantes::limSuperior.y + dy;
+              particle.vy = -particle.vy;
+              particle.hvy = -particle.hvy;
+          }
+   }
+}
+
+//función que hace la interacción con el borde del recinto respecto a la Z (si hay interacción)
+void InteractionLimitZ(Particle& particle, int cz, double numberblocksz){
+   double dz;
+   if (cz == 0){
+          dz = particle.pz - Constantes::limInferior.z;
+          if (dz < 0){
+            particle.pz = Constantes::limInferior.z - dz;
+            particle.vz = -particle.vz;
+            particle.hvz = -particle.hvz;
+          }
+   }
+   else if(cz == static_cast<int>(numberblocksz - 1)){
+          dz = Constantes::limSuperior.z - particle.pz;
+          if (dz < 0){
+            particle.pz = Constantes::limSuperior.z + dz;
+            particle.vz = -particle.vz;
+            particle.hvz = -particle.hvz;
+          }
+   }
+}
+
+//funcion para las interacciones con los límites del recinto de una partícula
+void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz){
+    for(auto& block : blocks){
+        /* si un bloque tiene cx==0 o cx== numbrblocks-1 se va a comprobar si la partícula está fuera del límite x
+        en InteractionLimitX*/
+        if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
+            for (auto& particle : block.particles) {
+                InteractionLimitX(particle, block.cx,numberblocksx);
+            }
+        }
+        /* si un bloque tiene cy==0 o cy== numbrblocks-1 se va a comprobar si la partícula está fuera del límite y
+        en InteractionLimitY*/
+        if (block.cy == 0 || block.cy == static_cast<int>(numberblocksy) - 1) {
+            for (auto& particle : block.particles) {
+                InteractionLimitY(particle, block.cy,numberblocksy);
+            }
+        }
+        /* si un bloque tiene cz==0 o cz== numbrblocks-1 se va a comprobar si la partícula está fuera del límite z
+        en InteractionLimitZ*/
+        if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
+            for (auto& particle : block.particles) {
+                InteractionLimitZ(particle, block.cz,numberblocksz);
+            }
+        }
     }
 }
