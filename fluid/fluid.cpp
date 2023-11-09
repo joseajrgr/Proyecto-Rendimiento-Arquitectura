@@ -31,6 +31,7 @@ void readFluid(std::ifstream& in, Fluid& fluid) {
 
     fluid.particles.resize(fluid.numberparticles);
     for (int i = 0; i < fluid.numberparticles; ++i) {
+        fluid.particles[i].id = i;
         in.read(reinterpret_cast<char*>(&fluid.particles[i].px), sizeof(float));
         in.read(reinterpret_cast<char*>(&fluid.particles[i].py), sizeof(float));
         in.read(reinterpret_cast<char*>(&fluid.particles[i].pz), sizeof(float));
