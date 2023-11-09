@@ -22,11 +22,10 @@ class Block {
         int id;
         Punto minPoint;
         Punto maxPoint;
-        int cx, cy, cz;
+        int cx, cy, cz; // Indice del bloque en cada coordenada
         std::vector<Particle> particles;
 
         Block(int id, const Punto& minPoint, const Punto& maxPoint, int cx, int cy, int cz);
-        bool particula_en_bloque(const Particle& particle) const;
         void addParticle(const Particle& particle);
         const std::vector<Particle>& getParticles() const;
 };

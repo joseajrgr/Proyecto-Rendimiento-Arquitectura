@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     for (int iter = 0; iter < iteraciones; ++iter) {
         std::cout << "Iteración " << iter + 1 << "\n";
-        malla.reposicionarParticulas(fluid);
+        malla.reposicionarParticulas(fluid, blocks);
         incrementDensities(fluid,  smoothingLength);
         transformDensities(fluid, smoothingLength, particleMass);
         transferAcceleration(fluid, smoothingLength, particleMass);
@@ -124,6 +124,16 @@ int main(int argc, char *argv[]) {
             std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
         }
         particleColissions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+        for (auto& block : blocks) {
+            // La aceleracion es la por defecto?
+            for (auto &particle: block.particles) {
+                std::cout << "La partícula " << particle.id << " está en el bloque " << block.id
+                          << " x: " << particle.px << " y: " << particle.py << " z: " << particle.pz << std::endl;
+                std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz << ")" <<
+                          "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az << ")"
+                          << std::endl;
+            }
+        }
         particlesMovement(fluid);
         limitInteractions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
     }
@@ -339,7 +349,8 @@ void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
         }
     }
 }
-//funcion para calcular las colisiones de particulas
+
+// Funcion para calcular las colisiones de particulas
 void particleColissions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz) {
     for (auto& block : blocks) {
         /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las particulas de ese bloque, llamando
@@ -365,7 +376,8 @@ void particleColissions(std::vector<Block>& blocks, double numberblocksx, double
         }
     }
 }
-//funcion para realizar el movimiento de particulas
+
+// Funcion para realizar el movimiento de particulas
 void particlesMovement(Fluid &fluid){
     for (Particle& particle : fluid.particles) {
         particle.px = particle.px + particle.hvx * Constantes::pasoTiempo + particle.ax * std::pow(Constantes::pasoTiempo,2);
@@ -382,7 +394,7 @@ void particlesMovement(Fluid &fluid){
     }
 }
 
-//función que hace la interacción con el borde del recinto respecto a la X (si hay interacción)
+// Funcion que hace la interaccion con el borde del recinto respecto a la X (si hay interaccion)
 void InteractionLimitX(Particle& particle, int cx, double numberblocksx){
     double dx;
     if (cx == 0){
@@ -403,7 +415,7 @@ void InteractionLimitX(Particle& particle, int cx, double numberblocksx){
     }
 }
 
-//función que hace la interacción con el borde del recinto respecto a la Y (si hay interacción)
+// Funcion que hace la interaccion con el borde del recinto respecto a la Y (si hay interaccion)
 void InteractionLimitY(Particle& particle, int cy, double numberblocksy){
    double dy;
    if (cy == 0){
@@ -424,7 +436,7 @@ void InteractionLimitY(Particle& particle, int cy, double numberblocksy){
    }
 }
 
-//función que hace la interacción con el borde del recinto respecto a la Z (si hay interacción)
+// Funcion que hace la interaccion con el borde del recinto respecto a la Z (si hay interaccion)
 void InteractionLimitZ(Particle& particle, int cz, double numberblocksz){
    double dz;
    if (cz == 0){
@@ -445,7 +457,7 @@ void InteractionLimitZ(Particle& particle, int cz, double numberblocksz){
    }
 }
 
-//funcion para las interacciones con los límites del recinto de una partícula
+// Funcion para las interacciones con los límites del recinto de una particula
 void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz){
     for(auto& block : blocks){
         /* si un bloque tiene cx==0 o cx== numbrblocks-1 se va a comprobar si la partícula está fuera del límite x
