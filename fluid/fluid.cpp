@@ -117,6 +117,9 @@ int main(int argc, char *argv[]) {
         std::cout << "Iteración " << iter + 1 << "\n";
         malla.reposicionarParticulas(fluid);
         incrementDensities(fluid,  smoothingLength);
+        for (int i = 0; i < fluid.numberparticles; ++i) {
+            std::cout << "La partícula " << fluid.particles[i].id << " Densidad: " << fluid.particles[i].density<< std::endl;
+        }
         transformDensities(fluid, smoothingLength, particleMass);
         //transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
         transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
@@ -185,27 +188,26 @@ double calculateDistanceSquared(const Particle &particle1, const Particle &parti
 
 double calculateDeltaDensity(double h, double distSquared) {
     if (distSquared < h * h) {
-        double q = 1.0 - distSquared / (h * h);
-        return (h * h * h) * (1.0 - q) * (1.0 - q) * (1.0 - q);
+        return std::pow(((h * h) - distSquared), 3);
     }
     return 0.0;
 }
 
-void incrementDensities(Fluid &fluid, double smoothingLength) {
-    const double smoothingLengthSquared = smoothingLength * smoothingLength;
-
+void incrementDensities(Fluid &fluid, double h) {
     for (int i = 0; i < fluid.numberparticles; ++i) {
         for (int j = i + 1; j < fluid.numberparticles; ++j) {
-            const double distSquared = calculateDistanceSquared(fluid.particles[i], fluid.particles[j]);
+            double distSquared = calculateDistanceSquared(fluid.particles[i], fluid.particles[j]);
 
-            if (distSquared < smoothingLengthSquared) {
-                const double deltaDensity = calculateDeltaDensity(smoothingLength, distSquared);
-                fluid.particles[i].density += deltaDensity;
-                fluid.particles[j].density += deltaDensity;
-            }
+            // Calcula el incremento de densidad ∆ρij
+            double deltaDensity = calculateDeltaDensity(h, distSquared);
+
+            // Incrementa la densidad de ambas partículas
+            fluid.particles[i].density += deltaDensity;
+            fluid.particles[j].density += deltaDensity;
         }
     }
 }
+
 
 void transformDensities(Fluid &fluid, double h, double particleMass) {
     const double factor = (315.0 / (64.0 * M_PI * std::pow(h, 9))) * particleMass * h * h * h * h * h * h;

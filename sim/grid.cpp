@@ -44,7 +44,7 @@ void Grid::reposicionarParticulas(const Fluid &fluid) {
 
         Block &block = blocks[indicex * num_blocksxy + indicey * numberblocksz + indicez];
         block.addParticle(particula);
-        std::cout << "La partícula " << i << " está en el bloque " << block.id << " x: "<< particula.px << " y: "<< particula.py << " z: "<< particula.pz <<'\n';
+        //std::cout << "La partícula " << i << " está en el bloque " << block.id << " x: "<< particula.px << " y: "<< particula.py << " z: "<< particula.pz <<'\n';
     }
 }
 
