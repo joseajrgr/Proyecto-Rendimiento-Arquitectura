@@ -111,19 +111,19 @@ int main(int argc, char *argv[]) {
     double particleMass = result.second;
 
     std::vector<Block> blocks = malla.getBlocks();
-    const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
-    const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
+    //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
+    //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     for (int iter = 0; iter < iteraciones; ++iter) {
         std::cout << "Iteración " << iter + 1 << "\n";
         malla.reposicionarParticulas(fluid);
         incrementDensities(fluid,  smoothingLength);
         transformDensities(fluid, smoothingLength, particleMass);
-        for (int i = 0; i < fluid.numberparticles; ++i) {
-            std::cout << "La partícula " << fluid.particles[i].id << " Densidad: " << fluid.particles[i].density<< std::endl;
-        }
-        //transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
-        transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
 
+        transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
+        //transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
+        for (int i = 0; i < fluid.numberparticles; ++i) {
+            std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
+        }
         particleColissions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
         particlesMovement(fluid);
         limitInteractions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
@@ -234,7 +234,7 @@ void transferAcceleration(Fluid &fluid, double h, double ps, double mu, double p
                 const double distY = fluid.particles[i].py - fluid.particles[j].py;
                 const double distZ = fluid.particles[i].pz - fluid.particles[j].pz;
 
-                const double deltaDensity = (fluid.particles[i].density + fluid.particles[j].density - 2 * 10000.0);
+                const double deltaDensity = (fluid.particles[i].density + fluid.particles[j].density - 2 * Constantes::densFluido);
                 const double deltaAijX = (distX * factor1 * (3.0 * particleMass * ps / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
                                           (fluid.particles[j].vx - fluid.particles[i].vx) * (factor2 / fluid.particles[i].density * fluid.particles[j].density));
                 const double deltaAijY = (distY * factor1 * (3.0 * particleMass * ps / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
