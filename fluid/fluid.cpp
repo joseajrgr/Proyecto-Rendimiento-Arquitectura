@@ -18,7 +18,7 @@ void print_simulation(int iteraciones, const Fluid &fluid);
 
 void incrementDensities(Fluid &fluid, double smoothingLength);
 void transformDensities(Fluid &fluid, double h, double particleMass);
-void transferAcceleration(Fluid &fluid, double h, double ps, double mu, double particleMass);
+void transferAcceleration(Fluid &fluid, double h, double particleMass);
 void transferAccelerationMejorada(Fluid &fluid, double h, double ps, double particleMass, double factor1, double factor2);
 void performSPHCalculations(Fluid &fluid, double smoothingLength, double particleMass, double mu);
 void particleColissions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
@@ -118,8 +118,7 @@ int main(int argc, char *argv[]) {
         malla.reposicionarParticulas(fluid);
         incrementDensities(fluid,  smoothingLength);
         transformDensities(fluid, smoothingLength, particleMass);
-
-        transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
+        transferAcceleration(fluid, smoothingLength, particleMass);
         //transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
         for (int i = 0; i < fluid.numberparticles; ++i) {
             std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
@@ -217,11 +216,11 @@ void transformDensities(Fluid &fluid, double h, double particleMass) {
     }
 }
 
-void transferAcceleration(Fluid &fluid, double h, double ps, double mu, double particleMass) {
+void transferAcceleration(Fluid &fluid, double h, double particleMass) {
     const double smoothingLengthSquared = h * h;
     const double smallQ = 10e-12;
-    const double factor1 = 15.0 / (M_PI * std::pow(h, 6));
-    const double factor2 = 45.0 / (M_PI * std::pow(h, 6) * mu * particleMass);
+    const double factor1 = 15 / (M_PI * std::pow(h, 6));
+    const double factor2 = (45 / (M_PI * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
 
     for (int i = 0; i < fluid.numberparticles; ++i) {
         for (int j = i + 1; j < fluid.numberparticles; ++j) {
@@ -235,12 +234,12 @@ void transferAcceleration(Fluid &fluid, double h, double ps, double mu, double p
                 const double distZ = fluid.particles[i].pz - fluid.particles[j].pz;
 
                 const double deltaDensity = (fluid.particles[i].density + fluid.particles[j].density - 2 * Constantes::densFluido);
-                const double deltaAijX = (distX * factor1 * (3.0 * particleMass * ps / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
-                                          (fluid.particles[j].vx - fluid.particles[i].vx) * (factor2 / fluid.particles[i].density * fluid.particles[j].density));
-                const double deltaAijY = (distY * factor1 * (3.0 * particleMass * ps / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
-                                          (fluid.particles[j].vy - fluid.particles[i].vy) * (factor2 / fluid.particles[i].density * fluid.particles[j].density));
-                const double deltaAijZ = (distZ * factor1 * (3.0 * particleMass * ps / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
-                                          (fluid.particles[j].vz - fluid.particles[i].vz) * (factor2 / fluid.particles[i].density * fluid.particles[j].density));
+                const double deltaAijX = ((distX * factor1 * ((3 * particleMass * Constantes::presRigidez) / 2) * ((std::pow(h - dist, 2)) / dist) * deltaDensity +
+                                          (fluid.particles[j].vx - fluid.particles[i].vx) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
+                const double deltaAijY = ((distY * factor1 * (3.0 * particleMass * Constantes::presRigidez / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
+                                          (fluid.particles[j].vy - fluid.particles[i].vy) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
+                const double deltaAijZ = ((distZ * factor1 * (3.0 * particleMass * Constantes::presRigidez / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
+                                          (fluid.particles[j].vz - fluid.particles[i].vz) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
 
                 fluid.particles[i].ax += deltaAijX;
                 fluid.particles[i].ay += deltaAijY;
