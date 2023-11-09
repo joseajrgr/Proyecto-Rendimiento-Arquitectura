@@ -175,24 +175,6 @@ std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla) {
     return std::make_pair(smoothingLength, particleMass);
 }
 
-/* void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks) {
-    // Se realiza el reposicionamiento para cada particula
-    for (int i = 0; i < fluid.numberparticles; ++i) {
-        const Particle &particula = fluid.particles[i];
-
-        // Para cada bloque, se comprueba si la particula esta dentro
-        for (auto &block: blocks) {
-            if (block.particula_en_bloque(particula)) {
-                block.addParticle(particula);
-                std::cout << "La partícula " << i << " está en el bloque " << block.id << "\n";
-                break;  // La particula solo puede estar en un bloque, asi que pasamos a la siguiente
-            }
-        }
-        std::cout << "La partícula " << i << " no está en ningún bloque\n";
-        std::cout << "La partícula " << i << " tiene " << particula.px << " " << particula.py << " " << particula.pz << "\n";
-    }
-} */
-
 // Función para inicializar las aceleraciones
 void initAccelerations(Fluid &fluid) {
     for (int i = 0; i < fluid.numberparticles; ++i) {
