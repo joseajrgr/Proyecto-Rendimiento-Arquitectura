@@ -117,10 +117,10 @@ int main(int argc, char *argv[]) {
         std::cout << "Iteración " << iter + 1 << "\n";
         malla.reposicionarParticulas(fluid);
         incrementDensities(fluid,  smoothingLength);
+        transformDensities(fluid, smoothingLength, particleMass);
         for (int i = 0; i < fluid.numberparticles; ++i) {
             std::cout << "La partícula " << fluid.particles[i].id << " Densidad: " << fluid.particles[i].density<< std::endl;
         }
-        transformDensities(fluid, smoothingLength, particleMass);
         //transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
         transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
 
@@ -210,10 +210,10 @@ void incrementDensities(Fluid &fluid, double h) {
 
 
 void transformDensities(Fluid &fluid, double h, double particleMass) {
-    const double factor = (315.0 / (64.0 * M_PI * std::pow(h, 9))) * particleMass * h * h * h * h * h * h;
+    const double factor = (315.0 / (64.0 * M_PI * std::pow(h, 9))) * particleMass;
 
     for (int i = 0; i < fluid.numberparticles; ++i) {
-        fluid.particles[i].density = (fluid.particles[i].density + 10000.0) * factor;
+        fluid.particles[i].density = (fluid.particles[i].density + std::pow(h, 6)) * factor;
     }
 }
 
