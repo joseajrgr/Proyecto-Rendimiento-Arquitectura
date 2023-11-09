@@ -25,14 +25,24 @@ void particleColissions(std::vector<Block>& blocks, double numberblocksx, double
 void particlesMovement(Fluid &fluid);
 void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 
-void readFluid(std::ifstream &in, Fluid &fluid) {
-    in.read(reinterpret_cast<char *>(&fluid.particlespermeter), sizeof(fluid.particlespermeter));
-    in.read(reinterpret_cast<char *>(&fluid.numberparticles), sizeof(fluid.numberparticles));
+void readFluid(std::ifstream& in, Fluid& fluid) {
+    in.read(reinterpret_cast<char*>(&fluid.particlespermeter), sizeof(float));
+    in.read(reinterpret_cast<char*>(&fluid.numberparticles), sizeof(int));
+
     fluid.particles.resize(fluid.numberparticles);
     for (int i = 0; i < fluid.numberparticles; ++i) {
-        in.read(reinterpret_cast<char*>(fluid.particles.data()), fluid.numberparticles * sizeof(Particle));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].px), sizeof(float));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].py), sizeof(float));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].pz), sizeof(float));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].hvx), sizeof(float));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].hvy), sizeof(float));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].hvz), sizeof(float));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].vx), sizeof(float));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].vy), sizeof(float));
+        in.read(reinterpret_cast<char*>(&fluid.particles[i].vz), sizeof(float));
     }
 }
+
 
 void writeFluid(std::ofstream &out, const Fluid &fluid) {
     std::array<char, sizeof(fluid.particlespermeter)> ppmBuffer = {0};
