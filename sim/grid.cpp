@@ -15,17 +15,18 @@ void Grid::dividirEnBloques(double smoothingLength) {
 
     // Generar los bloques y almacenarlos en el vector de blocks
     blocks.clear();
-    int blockId = 0;
     for (int i = 0; i < numberblocksx; ++i) {
         for (int j = 0; j < numberblocksy; ++j) {
             for (int k = 0; k < numberblocksz; ++k) {
                 Punto blockBmin = {bmin.x + i * smoothingLength, bmin.y + j * smoothingLength, bmin.z + k * smoothingLength};
                 Punto blockBmax = {blockBmin.x + smoothingLength, blockBmin.y + smoothingLength, blockBmin.z + smoothingLength};
-                blocks.emplace_back(blockId++, blockBmin, blockBmax , i ,j, k);
+                int blockId = i + j * numberblocksx + k * numberblocksx * numberblocksy;
+                blocks.emplace_back(blockId, blockBmin, blockBmax , i ,j, k);
             }
         }
     }
 }
+
 
 void Grid::reposicionarParticulas(const Fluid &fluid) {
     // Precalculamos valores para optimizar el rendimiento
