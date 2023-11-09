@@ -15,7 +15,7 @@ std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla);
 
 void print_simulation(int iteraciones, const Fluid &fluid);
 // void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks);
-void initAccelerations(Fluid &fluid);
+
 void incrementDensities(Fluid &fluid, double smoothingLength);
 void transformDensities(Fluid &fluid, double h, double particleMass);
 void transferAcceleration(Fluid &fluid, double h, double ps, double mu, double particleMass);
@@ -108,13 +108,13 @@ int main(int argc, char *argv[]) {
     auto result = mesh_simulation(fluid, malla);
     double smoothingLength = result.first;
     double particleMass = result.second;
-    malla.reposicionarParticulas(fluid);
-    initAccelerations(fluid);
+
     std::vector<Block> blocks = malla.getBlocks();
     const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
     const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     for (int iter = 0; iter < iteraciones; ++iter) {
         std::cout << "Iteración " << iter + 1 << "\n";
+        malla.reposicionarParticulas(fluid);
         incrementDensities(fluid,  smoothingLength);
         transformDensities(fluid, smoothingLength, particleMass);
         //transferAcceleration(fluid, smoothingLength, Constantes::presRigidez, Constantes::viscosidad, particleMass);
@@ -173,20 +173,6 @@ std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla) {
     std::cout << "Block size: " << malla.meshx << " x " << malla.meshy << " x " << malla.meshz << "\n";
 
     return std::make_pair(smoothingLength, particleMass);
-}
-
-// Función para inicializar las aceleraciones
-void initAccelerations(Fluid &fluid) {
-    for (int i = 0; i < fluid.numberparticles; ++i) {
-        fluid.particles[i].px = 0.0;  // Inicializa la posición de la partícula
-        fluid.particles[i].py = 0.0;
-        fluid.particles[i].pz = 0.0;
-        // Inicializa la densidad
-        fluid.particles[i].density = 0.0;
-        fluid.particles[i].ax = Constantes::gravedad.x;
-        fluid.particles[i].ay = Constantes::gravedad.y; // Configura la aceleración de gravedad
-        fluid.particles[i].az = Constantes::gravedad.z;
-    }
 }
 
 double calculateDistanceSquared(const Particle &particle1, const Particle &particle2) {
