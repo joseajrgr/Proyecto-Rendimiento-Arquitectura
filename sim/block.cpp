@@ -3,6 +3,7 @@
 
 Particle::Particle() noexcept{
     id = 0;
+    idBloque = 0;
     px = py = pz = 0.0;
     hvx = hvy = hvz = 0.0;
     vx = vy = vz = 0.0;

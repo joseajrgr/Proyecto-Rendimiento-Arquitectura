@@ -28,7 +28,7 @@ void Grid::dividirEnBloques(double smoothingLength) {
 }
 
 
-void Grid::reposicionarParticulas(const Fluid &fluid, std::vector<Block> &bloques) {
+void Grid::reposicionarParticulas(Fluid &fluid, std::vector<Block> &bloques) {
     // Precalculamos valores para optimizar el rendimiento
     double inv_meshx = 1.0 / meshx;
     double inv_meshy = 1.0 / meshy;
@@ -36,13 +36,14 @@ void Grid::reposicionarParticulas(const Fluid &fluid, std::vector<Block> &bloque
     int num_blocksxy = numberblocksx * numberblocksy;
 
     for (int i = 0; i < fluid.numberparticles; ++i) {
-        const Particle &particula = fluid.particles[i];
+        Particle &particula = fluid.particles[i];
 
         int indicex = std::max(0, std::min(static_cast<int>((particula.px - bmin.x) * inv_meshx), static_cast<int>(numberblocksx) - 1));
         int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * inv_meshy), static_cast<int>(numberblocksy) - 1));
         int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * inv_meshz), static_cast<int>(numberblocksz) - 1));
 
         Block &block = bloques[indicex * num_blocksxy + indicey * numberblocksz + indicez];
+        particula.idBloque = block.id;
         block.addParticle(particula);
         // std::cout << "La partícula " << i << " está en el bloque " << block.id << " x: "<< particula.px << " y: "<< particula.py << " z: "<< particula.pz <<'\n';
     }

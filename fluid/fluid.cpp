@@ -21,7 +21,7 @@ void transformDensities(Fluid &fluid, double h, double particleMass);
 void transferAcceleration(Fluid &fluid, double h, double particleMass);
 void transferAccelerationMejorada(Fluid &fluid, double h, double ps, double particleMass, double factor1, double factor2);
 void performSPHCalculations(Fluid &fluid, double smoothingLength, double particleMass, double mu);
-void particleColissions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
+void particleColissions(Fluid &fluid, std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 void particlesMovement(Fluid &fluid);
 void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 
@@ -32,15 +32,25 @@ void readFluid(std::ifstream& in, Fluid& fluid) {
     fluid.particles.resize(fluid.numberparticles);
     for (int i = 0; i < fluid.numberparticles; ++i) {
         fluid.particles[i].id = i;
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].px), sizeof(float));
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].py), sizeof(float));
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].pz), sizeof(float));
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].hvx), sizeof(float));
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].hvy), sizeof(float));
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].hvz), sizeof(float));
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].vx), sizeof(float));
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].vy), sizeof(float));
-        in.read(reinterpret_cast<char*>(&fluid.particles[i].vz), sizeof(float));
+        float temp = 0;
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].px = static_cast<double>(temp);
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].py = static_cast<double>(temp);
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].pz = static_cast<double>(temp);
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].hvx = static_cast<double>(temp);
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].hvy = static_cast<double>(temp);
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].hvz = static_cast<double>(temp);
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].vx = static_cast<double>(temp);
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].vy = static_cast<double>(temp);
+        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+        fluid.particles[i].vz = static_cast<double>(temp);
     }
 }
 
@@ -120,19 +130,18 @@ int main(int argc, char *argv[]) {
         transformDensities(fluid, smoothingLength, particleMass);
         transferAcceleration(fluid, smoothingLength, particleMass);
         //transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
-        for (int i = 0; i < fluid.numberparticles; ++i) {
+        /* for (int i = 0; i < fluid.numberparticles; ++i) {
             std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
-        }
-        particleColissions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
-        for (auto& block : blocks) {
+        } */
+        particleColissions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+        for (auto &particle: fluid.particles) {
             // La aceleracion es la por defecto?
-            for (auto &particle: block.particles) {
-                std::cout << "La partícula " << particle.id << " está en el bloque " << block.id
-                          << " x: " << particle.px << " y: " << particle.py << " z: " << particle.pz << std::endl;
-                std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz << ")" <<
-                          "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az << ")"
-                          << std::endl;
-            }
+            std::cout << "La partícula " << particle.id << " está en el bloque " << particle.idBloque
+                      << " x: " << particle.px << " y: " << particle.py << " z: " << particle.pz << std::endl;
+            std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz << ")" <<
+                      "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az << ")"
+                      << std::endl;
+            std::cout << "Gradiente: (" << particle.hvx << ", " << particle.hvy << ", " << particle.hvz << ")" << std::endl;
         }
         particlesMovement(fluid);
         limitInteractions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
@@ -318,7 +327,7 @@ void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
 
 void handleYCollisions(Particle& particle, int cy, double numberblocksy) {
     double y = particle.py + particle.hvy * Constantes::pasoTiempo;
-    double deltaY;
+    double deltaY = 0;
 
     if (cy == 0) {
         deltaY = Constantes::tamParticula - (y - Constantes::limInferior.y);
@@ -351,27 +360,26 @@ void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
 }
 
 // Funcion para calcular las colisiones de particulas
-void particleColissions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz) {
-    for (auto& block : blocks) {
-        /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las particulas de ese bloque, llamando
-        a handleXCollisions*/
-        if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
-            for (auto& particle : block.particles) {
-                handleXCollisions(particle, block.cx,numberblocksx);
-            }
-        }
-        /* si un bloque tiene cy==0 o cy== numbrblocks-1 se actualiza el ay de todas las particulas de ese bloque, llamando
-        a handleYCollisions*/
-        if (block.cy == 0 || block.cy == static_cast<int>(numberblocksy) - 1) {
-            for (auto& particle : block.particles) {
-                handleYCollisions(particle, block.cy,numberblocksy);
-            }
-        }
-        /* si un bloque tiene cz==0 o cz== numbrblocks-1 se actualiza el az de todas las particulas de ese bloque, llamando
-        a handleZCollisions*/
-        if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
-            for (auto& particle : block.particles) {
-                handleZCollisions(particle, block.cz,numberblocksz);
+void particleColissions(Fluid &fluid, std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz) {
+    for (int blockIndex = 0; blockIndex < numberblocksx * numberblocksy * numberblocksz; ++blockIndex) {
+        Block &block = blocks[blockIndex];
+        for (auto& particula : fluid.particles) {
+            if (particula.idBloque == blockIndex) {
+                /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las particulas de ese bloque, llamando
+                a handleXCollisions*/
+                if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
+                    handleXCollisions(particula, block.cx, numberblocksx);
+                }
+                /* si un bloque tiene cy==0 o cy== numbrblocks-1 se actualiza el ay de todas las particulas de ese bloque, llamando
+                a handleYCollisions*/
+                if (block.cy == 0 || block.cy == static_cast<int>(numberblocksy) - 1) {
+                    handleYCollisions(particula, block.cy, numberblocksy);
+                }
+                /* si un bloque tiene cz==0 o cz== numbrblocks-1 se actualiza el az de todas las particulas de ese bloque, llamando
+                a handleZCollisions*/
+                if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
+                    handleZCollisions(particula, block.cz, numberblocksz);
+                }
             }
         }
     }

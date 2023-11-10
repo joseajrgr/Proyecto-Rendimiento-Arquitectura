@@ -9,11 +9,12 @@ struct Punto {
 
 struct Particle {
     int id;
-    float px, py, pz; // Coordenadas de su posicion
-    float hvx, hvy, hvz; // Coordenadas del gradiente de velocidad
-    float vx, vy, vz; // Coordenadas de la velocidad
-    float ax, ay, az; // Coordenadas de la aceleración
-    float density;
+    int idBloque;
+    double px, py, pz; // Coordenadas de su posicion
+    double hvx, hvy, hvz; // Coordenadas del gradiente de velocidad
+    double vx, vy, vz; // Coordenadas de la velocidad
+    double ax, ay, az; // Coordenadas de la aceleración
+    double density;
     Particle()noexcept;
 };
 

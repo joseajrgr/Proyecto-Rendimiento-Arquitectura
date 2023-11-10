@@ -22,7 +22,7 @@ class Grid {
 
         Grid(const Punto& bmin, const Punto& bmax);
         void dividirEnBloques(double smoothingLength);
-        void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks);
+        void reposicionarParticulas(Fluid &fluid, std::vector<Block> &blocks);
         const std::vector<Block>& getBlocks() const;
 
     private:

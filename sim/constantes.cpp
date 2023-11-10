@@ -8,7 +8,7 @@ namespace Constantes {
     const double amortiguamiento = 128.0;
     const double viscosidad = 0.4;
     const double tamParticula = 0.0002;
-    const double pasoTiempo = 0.003;
+    const double pasoTiempo = 0.001;
 
     const Gravedad gravedad = {0.0, -9.8, 0.0};
 
