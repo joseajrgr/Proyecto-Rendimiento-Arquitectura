@@ -253,31 +253,37 @@ void transferAcceleration(Fluid &fluid, double h, double particleMass) {
         for (int j = i + 1; j < fluid.numberparticles; ++j) {
             const double distSquared = calculateDistanceSquared(fluid.particles[i], fluid.particles[j]);
 
-            if (distSquared < smoothingLengthSquared) {
-                const double q = std::max(distSquared, smallQ);
-                const double dist = std::sqrt(q);
-                const double distX = fluid.particles[i].px - fluid.particles[j].px;
-                const double distY = fluid.particles[i].py - fluid.particles[j].py;
-                const double distZ = fluid.particles[i].pz - fluid.particles[j].pz;
-
-                const double deltaDensity = (fluid.particles[i].density + fluid.particles[j].density - 2 * Constantes::densFluido);
-                const double deltaAijX = ((distX * factor1 * ((3 * particleMass * Constantes::presRigidez) / 2) * ((std::pow(h - dist, 2)) / dist) * deltaDensity +
-                                          (fluid.particles[j].vx - fluid.particles[i].vx) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
-                const double deltaAijY = ((distY * factor1 * (3.0 * particleMass * Constantes::presRigidez / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
-                                          (fluid.particles[j].vy - fluid.particles[i].vy) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
-                const double deltaAijZ = ((distZ * factor1 * (3.0 * particleMass * Constantes::presRigidez / 2) * (std::pow(h - dist, 2) / dist) * deltaDensity +
-                                          (fluid.particles[j].vz - fluid.particles[i].vz) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
-
-                fluid.particles[i].ax += deltaAijX;
-                fluid.particles[i].ay += deltaAijY;
-                fluid.particles[i].az += deltaAijZ;
-                fluid.particles[j].ax -= deltaAijX;
-                fluid.particles[j].ay -= deltaAijY;
-                fluid.particles[j].az -= deltaAijZ;
+            if (distSquared >= smoothingLengthSquared) {
+                continue;
             }
+
+            const double q = std::max(distSquared, smallQ);
+            const double dist = std::sqrt(q);
+            const double distX = fluid.particles[i].px - fluid.particles[j].px;
+            const double distY = fluid.particles[i].py - fluid.particles[j].py;
+            const double distZ = fluid.particles[i].pz - fluid.particles[j].pz;
+            const double distdiv = 1 / dist;
+
+            const double hMinusDistSquared = std::pow(h - dist, 2);
+            const double deltaDensity = (fluid.particles[i].density + fluid.particles[j].density - 2 * Constantes::densFluido);
+
+            const double deltaAijX = ((distX * factor1 * ((3 * particleMass * Constantes::presRigidez) * 0.5) * (hMinusDistSquared * distdiv) * deltaDensity +
+                                       (fluid.particles[j].vx - fluid.particles[i].vx) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
+            const double deltaAijY = ((distY * factor1 * (3.0 * particleMass * Constantes::presRigidez * 0.5) * (hMinusDistSquared * distdiv) * deltaDensity +
+                                       (fluid.particles[j].vy - fluid.particles[i].vy) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
+            const double deltaAijZ = ((distZ * factor1 * (3.0 * particleMass * Constantes::presRigidez * 0.5) * (hMinusDistSquared * distdiv) * deltaDensity +
+                                       (fluid.particles[j].vz - fluid.particles[i].vz) * factor2) / (fluid.particles[i].density * fluid.particles[j].density));
+
+            fluid.particles[i].ax += deltaAijX;
+            fluid.particles[i].ay += deltaAijY;
+            fluid.particles[i].az += deltaAijZ;
+            fluid.particles[j].ax -= deltaAijX;
+            fluid.particles[j].ay -= deltaAijY;
+            fluid.particles[j].az -= deltaAijZ;
         }
     }
 }
+
 
 // Función para inicializar las aceleraciones
 void initAccelerations(Fluid &fluid) {
