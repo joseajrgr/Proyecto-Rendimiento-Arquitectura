@@ -19,6 +19,7 @@ void print_simulation(int iteraciones, const Fluid &fluid);
 void incrementDensities(Fluid &fluid, double smoothingLength);
 void transformDensities(Fluid &fluid, double h, double particleMass);
 void transferAcceleration(Fluid &fluid, double h, double particleMass);
+void initAccelerations(Fluid &fluid);
 void transferAccelerationMejorada(Fluid &fluid, double h, double ps, double particleMass, double factor1, double factor2);
 void performSPHCalculations(Fluid &fluid, double smoothingLength, double particleMass, double mu);
 void particleColissions(Fluid &fluid, std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
@@ -125,16 +126,8 @@ int main(int argc, char *argv[]) {
     //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     for (int iter = 0; iter < iteraciones; ++iter) {
         std::cout << "Iteración " << iter + 1 << "\n";
+        initAccelerations(fluid);
         malla.reposicionarParticulas(fluid, blocks);
-        for (auto &particle: fluid.particles) {
-            // La aceleracion es la por defecto?
-            std::cout << "La partícula " << particle.id << " está en el bloque " << particle.idBloque
-                      << " x: " << particle.px << " y: " << particle.py << " z: " << particle.pz << std::endl;
-            std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz << ")" <<
-                "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az << ")"
-                      << std::endl;
-            std::cout << "Gradiente: (" << particle.hvx << ", " << particle.hvy << ", " << particle.hvz << ")" << std::endl;
-        }
         incrementDensities(fluid,  smoothingLength);
         transformDensities(fluid, smoothingLength, particleMass);
         transferAcceleration(fluid, smoothingLength, particleMass);
@@ -145,7 +138,20 @@ int main(int argc, char *argv[]) {
         particleColissions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
         particlesMovement(fluid);
         limitInteractions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
-
+        if (iter == iteraciones-1) {
+            for (auto & particle : fluid.particles) {
+              // La aceleracion es la por defecto?
+              std::cout << "La partícula " << particle.id << " está en el bloque "
+                        << particle.idBloque << " x: " << particle.px << " y: " << particle.py
+                        << " z: " << particle.pz << std::endl;
+              std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", "
+                        << particle.vz << ")"
+                        << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
+                        << particle.az << ")" << std::endl;
+              std::cout << "Gradiente: (" << particle.hvx << ", " << particle.hvy << ", "
+                        << particle.hvz << ")" << std::endl;
+            }
+        }
     }
     //print_simulation(iteraciones, fluid);
 
@@ -272,6 +278,16 @@ void transferAcceleration(Fluid &fluid, double h, double particleMass) {
     }
 }
 
+// Función para inicializar las aceleraciones
+void initAccelerations(Fluid &fluid) {
+    for (int i = 0; i < fluid.numberparticles; ++i) {
+        // Inicializa la densidad
+        fluid.particles[i].density = 0.0;
+        fluid.particles[i].ax = Constantes::gravedad.x;
+        fluid.particles[i].ay = Constantes::gravedad.y; // Configura la aceleración de gravedad
+        fluid.particles[i].az = Constantes::gravedad.z;
+    }
+}
 void transferAccelerationMejorada(Fluid &fluid, double h, double ps, double particleMass, double factor1, double factor2) {
     const double smoothingLengthSquared = h * h;
     const double smallQ = 10e-12;
