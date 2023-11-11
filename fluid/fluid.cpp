@@ -23,7 +23,7 @@ void transferAccelerationMejorada(Fluid &fluid, double h, double ps, double part
 void performSPHCalculations(Fluid &fluid, double smoothingLength, double particleMass, double mu);
 void particleColissions(Fluid &fluid, std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 void particlesMovement(Fluid &fluid);
-void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
+void limitInteractions(Fluid &fluid, std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 
 void readFluid(std::ifstream& in, Fluid& fluid) {
     in.read(reinterpret_cast<char*>(&fluid.particlespermeter), sizeof(float));
@@ -126,6 +126,15 @@ int main(int argc, char *argv[]) {
     for (int iter = 0; iter < iteraciones; ++iter) {
         std::cout << "Iteración " << iter + 1 << "\n";
         malla.reposicionarParticulas(fluid, blocks);
+        for (auto &particle: fluid.particles) {
+            // La aceleracion es la por defecto?
+            std::cout << "La partícula " << particle.id << " está en el bloque " << particle.idBloque
+                      << " x: " << particle.px << " y: " << particle.py << " z: " << particle.pz << std::endl;
+            std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz << ")" <<
+                "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az << ")"
+                      << std::endl;
+            std::cout << "Gradiente: (" << particle.hvx << ", " << particle.hvy << ", " << particle.hvz << ")" << std::endl;
+        }
         incrementDensities(fluid,  smoothingLength);
         transformDensities(fluid, smoothingLength, particleMass);
         transferAcceleration(fluid, smoothingLength, particleMass);
@@ -134,17 +143,9 @@ int main(int argc, char *argv[]) {
             std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
         } */
         particleColissions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
-        for (auto &particle: fluid.particles) {
-            // La aceleracion es la por defecto?
-            std::cout << "La partícula " << particle.id << " está en el bloque " << particle.idBloque
-                      << " x: " << particle.px << " y: " << particle.py << " z: " << particle.pz << std::endl;
-            std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz << ")" <<
-                      "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az << ")"
-                      << std::endl;
-            std::cout << "Gradiente: (" << particle.hvx << ", " << particle.hvy << ", " << particle.hvz << ")" << std::endl;
-        }
         particlesMovement(fluid);
-        limitInteractions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+        limitInteractions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+
     }
     //print_simulation(iteraciones, fluid);
 
@@ -466,28 +467,28 @@ void InteractionLimitZ(Particle& particle, int cz, double numberblocksz){
 }
 
 // Funcion para las interacciones con los límites del recinto de una particula
-void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz){
-    for(auto& block : blocks){
-        /* si un bloque tiene cx==0 o cx== numbrblocks-1 se va a comprobar si la partícula está fuera del límite x
-        en InteractionLimitX*/
-        if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
-            for (auto& particle : block.particles) {
-                InteractionLimitX(particle, block.cx,numberblocksx);
+void limitInteractions(Fluid& fluid,std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz) {
+   for (int blockIndex = 0; blockIndex < numberblocksx * numberblocksy * numberblocksz;
+        ++blockIndex) {
+          Block & block = blocks[blockIndex];
+          for (auto & particula : fluid.particles) {
+            if (particula.idBloque == blockIndex) {
+                /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las
+                particulas de ese bloque, llamando a handleXCollisions*/
+                if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
+                    InteractionLimitX(particula, block.cx, numberblocksx);
+                }
+                /* si un bloque tiene cy==0 o cy== numbrblocks-1 se actualiza el ay de todas las
+                particulas de ese bloque, llamando a handleYCollisions*/
+                if (block.cy == 0 || block.cy == static_cast<int>(numberblocksy) - 1) {
+                    InteractionLimitY(particula, block.cy, numberblocksy);
+                }
+                /* si un bloque tiene cz==0 o cz== numbrblocks-1 se actualiza el az de todas las
+                particulas de ese bloque, llamando a handleZCollisions*/
+                if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
+                    InteractionLimitZ(particula, block.cz, numberblocksz);
+                }
             }
-        }
-        /* si un bloque tiene cy==0 o cy== numbrblocks-1 se va a comprobar si la partícula está fuera del límite y
-        en InteractionLimitY*/
-        if (block.cy == 0 || block.cy == static_cast<int>(numberblocksy) - 1) {
-            for (auto& particle : block.particles) {
-                InteractionLimitY(particle, block.cy,numberblocksy);
-            }
-        }
-        /* si un bloque tiene cz==0 o cz== numbrblocks-1 se va a comprobar si la partícula está fuera del límite z
-        en InteractionLimitZ*/
-        if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
-            for (auto& particle : block.particles) {
-                InteractionLimitZ(particle, block.cz,numberblocksz);
-            }
-        }
-    }
+          }
+   }
 }
