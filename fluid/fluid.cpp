@@ -10,6 +10,7 @@
 #include <ctime>
 #include "sim/grid.hpp"
 #include "sim/constantes.hpp"
+#include <iomanip>
 unsigned t0, t1;
 
 std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla);
@@ -135,15 +136,13 @@ int main(int argc, char *argv[]) {
         if (iter == iteraciones-1) {
             for (auto & particle : fluid.particles) {
                 // La aceleracion es la por defecto?
-                std::cout << "La partícula " << particle.id << " está en el bloque "
+                std::cout << std::setprecision(17) <<"La partícula " << particle.id << " está en el bloque "
                           << particle.idBloque << " x: " << particle.px << " y: " << particle.py
-                          << " z: " << particle.pz << std::endl;
-                std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", "
+                          << " z: " << particle.pz << " " << "Velocidad: (" << particle.vx << ", " << particle.vy << ", "
                           << particle.vz << ")"
                           << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
                           << particle.az << ")" << std::endl;
-                std::cout << "Gradiente: (" << particle.hvx << ", " << particle.hvy << ", "
-                          << particle.hvz << ")" << "Densidad: " << particle.density<< std::endl;
+
             }
         }
         //transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
