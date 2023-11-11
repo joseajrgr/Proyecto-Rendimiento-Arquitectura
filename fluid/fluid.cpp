@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <numbers>
 #include <span>
 #include <cstring>  // Para std::memcpy
 #include <array>
@@ -131,6 +132,20 @@ int main(int argc, char *argv[]) {
         incrementDensities(fluid,  smoothingLength);
         transformDensities(fluid, smoothingLength, particleMass);
         transferAcceleration(fluid, smoothingLength, particleMass);
+        if (iter == iteraciones-1) {
+            for (auto & particle : fluid.particles) {
+                // La aceleracion es la por defecto?
+                std::cout << "La partícula " << particle.id << " está en el bloque "
+                          << particle.idBloque << " x: " << particle.px << " y: " << particle.py
+                          << " z: " << particle.pz << std::endl;
+                std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", "
+                          << particle.vz << ")"
+                          << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
+                          << particle.az << ")" << std::endl;
+                std::cout << "Gradiente: (" << particle.hvx << ", " << particle.hvy << ", "
+                          << particle.hvz << ")" << "Densidad: " << particle.density<< std::endl;
+            }
+        }
         //transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
         /* for (int i = 0; i < fluid.numberparticles; ++i) {
             std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
@@ -138,20 +153,7 @@ int main(int argc, char *argv[]) {
         particleColissions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
         particlesMovement(fluid);
         limitInteractions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
-        if (iter == iteraciones-1) {
-            for (auto & particle : fluid.particles) {
-              // La aceleracion es la por defecto?
-              std::cout << "La partícula " << particle.id << " está en el bloque "
-                        << particle.idBloque << " x: " << particle.px << " y: " << particle.py
-                        << " z: " << particle.pz << std::endl;
-              std::cout << "Velocidad: (" << particle.vx << ", " << particle.vy << ", "
-                        << particle.vz << ")"
-                        << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-                        << particle.az << ")" << std::endl;
-              std::cout << "Gradiente: (" << particle.hvx << ", " << particle.hvy << ", "
-                        << particle.hvz << ")" << std::endl;
-            }
-        }
+
     }
     //print_simulation(iteraciones, fluid);
 
@@ -235,7 +237,7 @@ void incrementDensities(Fluid &fluid, double h) {
 
 
 void transformDensities(Fluid &fluid, double h, double particleMass) {
-    const double factor = (315.0 / (64.0 * M_PI * std::pow(h, 9))) * particleMass;
+    const double factor = (315.0 / (64.0 * std::numbers::pi * std::pow(h, 9))) * particleMass;
 
     for (int i = 0; i < fluid.numberparticles; ++i) {
         fluid.particles[i].density = (fluid.particles[i].density + std::pow(h, 6)) * factor;
@@ -245,8 +247,8 @@ void transformDensities(Fluid &fluid, double h, double particleMass) {
 void transferAcceleration(Fluid &fluid, double h, double particleMass) {
     const double smoothingLengthSquared = h * h;
     const double smallQ = 10e-12;
-    const double factor1 = 15 / (M_PI * std::pow(h, 6));
-    const double factor2 = (45 / (M_PI * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
+    const double factor1 = 15 / (std::numbers::pi * std::pow(h, 6));
+    const double factor2 = (45 / (std::numbers::pi * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
 
     for (int i = 0; i < fluid.numberparticles; ++i) {
         for (int j = i + 1; j < fluid.numberparticles; ++j) {
