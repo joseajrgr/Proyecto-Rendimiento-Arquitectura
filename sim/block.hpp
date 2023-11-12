@@ -15,7 +15,7 @@ struct Particle {
     double vx, vy, vz; // Coordenadas de la velocidad
     double ax, ay, az; // Coordenadas de la aceleración
     double density;
-    Particle()noexcept;
+
 };
 
 class Block {

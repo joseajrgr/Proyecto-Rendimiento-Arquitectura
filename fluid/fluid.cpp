@@ -16,23 +16,18 @@ unsigned t0, t1;
 
 std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla);
 
-void print_simulation(int iteraciones, const Fluid &fluid);
-// void reposicionarParticulas(const Fluid &fluid, std::vector<Block> &blocks);
-
 void incrementDensities(Fluid &fluid, double smoothingLength);
 void transformDensities(Fluid &fluid, double h, double particleMass);
 void transferAcceleration(Fluid &fluid, double h, double particleMass);
 void initAccelerations(Fluid &fluid);
-void transferAccelerationMejorada(Fluid &fluid, double h, double ps, double particleMass, double factor1, double factor2);
-void performSPHCalculations(Fluid &fluid, double smoothingLength, double particleMass, double mu);
 void particleColissions(Fluid &fluid, std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 void particlesMovement(Fluid &fluid);
 void limitInteractions(Fluid &fluid, std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 
+//NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
 void readFluid(std::ifstream& in, Fluid& fluid) {
     in.read(reinterpret_cast<char*>(&fluid.particlespermeter), sizeof(float));
     in.read(reinterpret_cast<char*>(&fluid.numberparticles), sizeof(int));
-
     fluid.particles.resize(fluid.numberparticles);
     for (int i = 0; i < fluid.numberparticles; ++i) {
         fluid.particles[i].id = i;
@@ -57,7 +52,7 @@ void readFluid(std::ifstream& in, Fluid& fluid) {
         fluid.particles[i].vz = static_cast<double>(temp);
     }
 }
-
+// NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
 void writeFluid(std::ofstream &out, const Fluid &fluid) {
     std::array<char, sizeof(fluid.particlespermeter)> ppmBuffer = {0};
@@ -121,8 +116,8 @@ int main(int argc, char *argv[]) {
     // Calcula los valores utilizando la función calculateValues
     Grid malla(Constantes::limInferior, Constantes::limSuperior);
     auto result = mesh_simulation(fluid, malla);
-    double smoothingLength = result.first;
-    double particleMass = result.second;
+    double const smoothingLength = result.first;
+    double const particleMass = result.second;
 
     std::vector<Block> blocks = malla.getBlocks();
     //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
@@ -136,6 +131,12 @@ int main(int argc, char *argv[]) {
         transformDensities(fluid, smoothingLength, particleMass);
 
         transferAcceleration(fluid, smoothingLength, particleMass);
+
+        //transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
+        /* for (int i = 0; i < fluid.numberparticles; ++i) {
+            std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
+        } */
+        particleColissions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
         if (iter == iteraciones-1) {
             for (auto & particle : fluid.particles) {
                 // La aceleracion es la por defecto?
@@ -144,15 +145,10 @@ int main(int argc, char *argv[]) {
                           << " z: " << particle.pz << " " << "Velocidad: (" << particle.vx << ", " << particle.vy << ", "
                           << particle.vz << ")"
                           << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-                          << particle.az << ")" << std::endl;
+                          << particle.az << ")\n";
 
             }
         }
-        //transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
-        /* for (int i = 0; i < fluid.numberparticles; ++i) {
-            std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
-        } */
-        particleColissions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
         particlesMovement(fluid);
         limitInteractions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
 
@@ -170,23 +166,11 @@ int main(int argc, char *argv[]) {
     output.close();
     std::cout << "Simulación completada. Estado final del fluido guardado en: " << archivoSalida << "\n";
     t1 = clock();
-    double time = (double(t1-t0)/CLOCKS_PER_SEC);
+    double const time = (double(t1-t0)/CLOCKS_PER_SEC);
     std::cout << "Execution Time: " << time;
     return 0;
 }
 
-void print_simulation(const int iteraciones, const Fluid &fluid) {// Realizar la simulación
-    for (int iter = 0; iter < iteraciones; ++iter) {
-        std::cout << "Iteración " << iter + 1 << ":\n";
-        for (int i = 0; i < fluid.numberparticles; ++i) {
-            const Particle &particula = fluid.particles[i];
-            // Aquí se puede hacer la simulación para la partícula actual
-            std::cout << "Partícula " << i + 1 << ": px=" << particula.px << " py=" << particula.py << " pz="
-                      << particula.pz << "\n";
-        }
-        std::cout << "\n";
-    }
-}
 
 // Funcion que simula la malla
 std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla) {
@@ -206,6 +190,17 @@ std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla) {
     std::cout << "Block size: " << malla.meshx << " x " << malla.meshy << " x " << malla.meshz << "\n";
 
     return std::make_pair(smoothingLength, particleMass);
+}
+
+// Función para inicializar las aceleraciones
+void initAccelerations(Fluid &fluid) {
+    for (int i = 0; i < fluid.numberparticles; ++i) {
+        // Inicializa la densidad
+        fluid.particles[i].density = 0.0;
+        fluid.particles[i].ax = Constantes::gravedad.x;
+        fluid.particles[i].ay = Constantes::gravedad.y; // Configura la aceleración de gravedad
+        fluid.particles[i].az = Constantes::gravedad.z;
+    }
 }
 
 double calculateDistanceSquared(const Particle &particle1, const Particle &particle2) {
@@ -252,32 +247,26 @@ void transferAcceleration(Fluid &fluid, double h, double particleMass) {
     const double factor1 = 15 / (std::numbers::pi * std::pow(h, 6));
     const double factor2 = (45 / (std::numbers::pi * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
     const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * 0.5);
-
     for (int i = 0; i < fluid.numberparticles; ++i) {
         for (int j = i + 1; j < fluid.numberparticles; ++j) {
             const double distSquared = calculateDistanceSquared(fluid.particles[i], fluid.particles[j]);
-
             if (distSquared >= smoothingLengthSquared) {
                 continue;
             }
-
             const double q = std::max(distSquared, smallQ);
             const double dist = std::sqrt(q);
             const double distX = fluid.particles[i].px - fluid.particles[j].px;
             const double distY = fluid.particles[i].py - fluid.particles[j].py;
             const double distZ = fluid.particles[i].pz - fluid.particles[j].pz;
             const double distdiv = 1 / dist;
-
             const double hMinusDistSquared = std::pow(h - dist, 2);
             const double deltaDensity = (fluid.particles[i].density + fluid.particles[j].density - 2 * Constantes::densFluido);
-
             const double deltaAijX = std::fma(distX * commonFactor * hMinusDistSquared * distdiv, deltaDensity,
                                               (fluid.particles[j].vx - fluid.particles[i].vx) * factor2) / (fluid.particles[i].density * fluid.particles[j].density);
             const double deltaAijY = std::fma(distY * commonFactor * hMinusDistSquared * distdiv, deltaDensity,
                                               (fluid.particles[j].vy - fluid.particles[i].vy) * factor2) / (fluid.particles[i].density * fluid.particles[j].density);
             const double deltaAijZ = std::fma(distZ * commonFactor * hMinusDistSquared * distdiv, deltaDensity,
                                               (fluid.particles[j].vz - fluid.particles[i].vz) * factor2) / (fluid.particles[i].density * fluid.particles[j].density);
-
             fluid.particles[i].ax += deltaAijX;
             fluid.particles[i].ay += deltaAijY;
             fluid.particles[i].az += deltaAijZ;
@@ -290,26 +279,17 @@ void transferAcceleration(Fluid &fluid, double h, double particleMass) {
 
 
 
-// Función para inicializar las aceleraciones
-void initAccelerations(Fluid &fluid) {
-    for (int i = 0; i < fluid.numberparticles; ++i) {
-        // Inicializa la densidad
-        fluid.particles[i].density = 0.0;
-        fluid.particles[i].ax = Constantes::gravedad.x;
-        fluid.particles[i].ay = Constantes::gravedad.y; // Configura la aceleración de gravedad
-        fluid.particles[i].az = Constantes::gravedad.z;
-    }
-}
 
 
 void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
-    double x = particle.px + particle.hvx * Constantes::pasoTiempo;
-    double deltaX;
+    double const x = particle.px + particle.hvx * Constantes::pasoTiempo;
+    double deltaX = NAN;
 
     if (cx == 0) {
         deltaX = Constantes::tamParticula - (x - Constantes::limInferior.x);
         if (deltaX > 1e-10) {
             particle.ax += Constantes::colisRigidez * deltaX - Constantes::amortiguamiento * particle.vx;
+            std::cout<<particle.id;
         }
     } else if (cx == static_cast<int>(numberblocksx - 1) ){
         deltaX = Constantes::tamParticula - (Constantes::limSuperior.x - x);
@@ -319,36 +299,37 @@ void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
     }
 }
 
+
 void handleYCollisions(Particle& particle, int cy, double numberblocksy) {
-    double y = particle.py + particle.hvy * Constantes::pasoTiempo;
-    double deltaY = 0;
+    double const y = particle.py + particle.hvy * Constantes::pasoTiempo;
+    double deltaY = NAN;
 
     if (cy == 0) {
         deltaY = Constantes::tamParticula - (y - Constantes::limInferior.y);
         if (deltaY > 1e-10) {
-            particle.ay += Constantes::colisRigidez * deltaY - Constantes::amortiguamiento * particle.vy;
+            particle.ay += std::fma(Constantes::colisRigidez, deltaY, -Constantes::amortiguamiento * particle.vy);
         }
     } else if (cy == static_cast<int>(numberblocksy - 1)) {
         deltaY = Constantes::tamParticula - (Constantes::limSuperior.y - y);
         if (deltaY > 1e-10) {
-            particle.ay -= Constantes::colisRigidez * deltaY + Constantes::amortiguamiento * particle.vy;
+            particle.ay -= std::fma(Constantes::colisRigidez, deltaY, Constantes::amortiguamiento * particle.vy);
         }
     }
 }
 
 void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
-    double z = particle.pz + particle.hvz * Constantes::pasoTiempo;
-    double deltaZ;
+    double const z = particle.pz + particle.hvz * Constantes::pasoTiempo;
+    double deltaZ = NAN;
 
     if (cz == 0) {
         deltaZ = Constantes::tamParticula - (z - Constantes::limInferior.z);
         if (deltaZ > 1e-10) {
-            particle.az += Constantes::colisRigidez * deltaZ - Constantes::amortiguamiento * particle.vz;
+            particle.az += std::fma(Constantes::colisRigidez, deltaZ, -Constantes::amortiguamiento * particle.vz);
         }
     } else if (cz == static_cast<int>(numberblocksz - 1)) {
         deltaZ = Constantes::tamParticula - (Constantes::limSuperior.z - z);
         if (deltaZ > 1e-10) {
-            particle.az -= Constantes::colisRigidez * deltaZ + Constantes::amortiguamiento * particle.vz;
+            particle.az -= std::fma(Constantes::colisRigidez, deltaZ, Constantes::amortiguamiento * particle.vz);
         }
     }
 }
@@ -356,7 +337,7 @@ void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
 // Funcion para calcular las colisiones de particulas
 void particleColissions(Fluid &fluid, std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz) {
     for (int blockIndex = 0; blockIndex < numberblocksx * numberblocksy * numberblocksz; ++blockIndex) {
-        Block &block = blocks[blockIndex];
+        Block  const&block = blocks[blockIndex];
         for (auto& particula : fluid.particles) {
             if (particula.idBloque == blockIndex) {
                 /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las particulas de ese bloque, llamando
@@ -379,6 +360,7 @@ void particleColissions(Fluid &fluid, std::vector<Block>& blocks, double numberb
     }
 }
 
+
 // Funcion para realizar el movimiento de particulas
 void particlesMovement(Fluid &fluid){
     for (Particle& particle : fluid.particles) {
@@ -398,7 +380,7 @@ void particlesMovement(Fluid &fluid){
 
 // Funcion que hace la interaccion con el borde del recinto respecto a la X (si hay interaccion)
 void InteractionLimitX(Particle& particle, int cx, double numberblocksx){
-    double dx;
+    double dx = NAN;
     if (cx == 0){
         dx = particle.px - Constantes::limInferior.x;
         if (dx < 0){
@@ -419,7 +401,7 @@ void InteractionLimitX(Particle& particle, int cx, double numberblocksx){
 
 // Funcion que hace la interaccion con el borde del recinto respecto a la Y (si hay interaccion)
 void InteractionLimitY(Particle& particle, int cy, double numberblocksy){
-   double dy;
+   double dy = NAN;
    if (cy == 0){
           dy = particle.py - Constantes::limInferior.y;
           if (dy < 0){
@@ -440,7 +422,7 @@ void InteractionLimitY(Particle& particle, int cy, double numberblocksy){
 
 // Funcion que hace la interaccion con el borde del recinto respecto a la Z (si hay interaccion)
 void InteractionLimitZ(Particle& particle, int cz, double numberblocksz){
-   double dz;
+   double dz = NAN;
    if (cz == 0){
           dz = particle.pz - Constantes::limInferior.z;
           if (dz < 0){
@@ -463,7 +445,7 @@ void InteractionLimitZ(Particle& particle, int cz, double numberblocksz){
 void limitInteractions(Fluid& fluid,std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz) {
    for (int blockIndex = 0; blockIndex < numberblocksx * numberblocksy * numberblocksz;
         ++blockIndex) {
-          Block & block = blocks[blockIndex];
+          Block  const& block = blocks[blockIndex];
           for (auto & particula : fluid.particles) {
             if (particula.idBloque == blockIndex) {
                 /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las
