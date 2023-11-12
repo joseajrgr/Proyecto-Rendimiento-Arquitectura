@@ -137,16 +137,14 @@ int main(int argc, char *argv[]) {
             std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
         } */
         particleColissions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+        std::ofstream outFile("salida.txt");
         if (iter == iteraciones-1) {
             for (auto & particle : fluid.particles) {
-                // La aceleracion es la por defecto?
-                std::cout << std::setprecision(15) <<"La partícula " << particle.id << " "<< particle.density<< " está en el bloque "
-                          << particle.idBloque << " x: " << particle.px << " y: " << particle.py
-                          << " z: " << particle.pz << " " << "Velocidad: (" << particle.vx << ", " << particle.vy << ", "
-                          << particle.vz << ")"
-                          << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-                          << particle.az << ")\n";
-
+                outFile<<std::setprecision(15) << "La partícula " << particle.id << " " <<particle.density << " está en el bloque "
+                       << particle.idBloque << " x: " << particle.px << " y: " << particle.py
+                       << " z: " << particle.pz << " "
+                       << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
+                       << particle.az << ")" << std::endl;
             }
         }
         particlesMovement(fluid);
@@ -289,7 +287,6 @@ void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
         deltaX = Constantes::tamParticula - (x - Constantes::limInferior.x);
         if (deltaX > 1e-10) {
             particle.ax += Constantes::colisRigidez * deltaX - Constantes::amortiguamiento * particle.vx;
-            std::cout<<particle.id;
         }
     } else if (cx == static_cast<int>(numberblocksx - 1) ){
         deltaX = Constantes::tamParticula - (Constantes::limSuperior.x - x);

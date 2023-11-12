@@ -15,13 +15,14 @@ void Grid::dividirEnBloques(double smoothingLength) {
 
     // Generar los bloques y almacenarlos en el vector de blocks
     blocks.clear();
-    for (int i = 0; i < numberblocksx; ++i) {
+    for (int i = 0; i < numberblocksz; ++i) {
         for (int j = 0; j < numberblocksy; ++j) {
-            for (int k = 0; k < numberblocksz; ++k) {
+            for (int k = 0; k < numberblocksx; ++k) {
                 Punto blockBmin = {bmin.x + i * smoothingLength, bmin.y + j * smoothingLength, bmin.z + k * smoothingLength};
                 Punto blockBmax = {blockBmin.x + smoothingLength, blockBmin.y + smoothingLength, blockBmin.z + smoothingLength};
                 int blockId = i + j * numberblocksx + k * numberblocksx * numberblocksy;
-                blocks.emplace_back(blockId, blockBmin, blockBmax , i ,j, k);
+                blocks.emplace_back(blockId, blockBmin, blockBmax , k ,j, i);
+                // std::cout << "El bloque " << blockId << " x: "<< i << " y: " << j << " z: "<< k << '\n';
             }
         }
     }
@@ -45,7 +46,7 @@ void Grid::reposicionarParticulas(Fluid &fluid, std::vector<Block> &bloques) {
         Block &block = bloques[indicex * num_blocksxy + indicey * numberblocksz + indicez];
         particula.idBloque = block.id;
         block.addParticle(particula);
-        // std::cout << "La partícula " << i << " está en el bloque " << block.id << " x: "<< particula.px << " y: "<< particula.py << " z: "<< particula.pz <<'\n';
+        // std::cout << "La partícula " << i << " está en el bloque " << block.id << " x: "<< block.cx << " y: "<< block.cy << " z: "<< block.cz <<'\n';
     }
 }
 
