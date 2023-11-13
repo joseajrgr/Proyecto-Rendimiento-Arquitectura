@@ -24,6 +24,12 @@ namespace Constantes {
 
     extern const Punto limInferior;
     extern const Punto limSuperior;
+
+    // Definir constantes para los códigos de error
+    extern const int ERROR_INVALID_PARTICLE_COUNT;
+
+    extern const double factor05;
+    extern const double factor1e10;
 }
 
 #endif //PROYECTO_RENDIMIENTO_ARQUITECTURA_CONSTANTES_HPP

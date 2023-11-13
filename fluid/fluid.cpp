@@ -56,13 +56,6 @@ void writeFluid(std::ofstream& out, const Fluid& fluid) {
 }
 // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
-// Definir constantes para los códigos de error
-const int ERROR_INVALID_PARTICLE_COUNT = -5;
-
-const double factor05 = 0.5;
-
-const double factor1e10 = 1e-10;
-
 int main(int argc, char *argv[]) {
     unsigned const tiempo0=clock();
     std::span const args_view{argv, static_cast<std::size_t>(argc)};
@@ -100,7 +93,7 @@ int main(int argc, char *argv[]) {
     if (fluid.particles.size() != static_cast<std::vector<Particle>::size_type>(fluid.numberparticles)) {
         std::cerr << "Error: El número de partículas leídas (" << fluid.particles.size()
                   << ") no coincide con numberparticles (" << fluid.numberparticles << ").\n";
-        return ERROR_INVALID_PARTICLE_COUNT;
+        return Constantes::ERROR_INVALID_PARTICLE_COUNT;
     }
 
     // Calcula los valores utilizando la función calculateValues
@@ -228,7 +221,7 @@ void transferAcceleration(Fluid &fluid, double h, double particleMass) {
     const double smallQ = 10e-12;
     const double factor1 = 15 / (std::numbers::pi * std::pow(h, 6));
     const double factor2 = (45 / (std::numbers::pi * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
-    const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * factor05);
+    const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
     for (int i = 0; i < fluid.numberparticles; ++i) {
         for (int j = i + 1; j < fluid.numberparticles; ++j) {
             const double distSquared = calculateDistanceSquared(fluid.particles[i], fluid.particles[j]);
@@ -269,12 +262,12 @@ void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
 
     if (cx == 0) {
         deltaX = Constantes::tamParticula - (newPositionX - Constantes::limInferior.x);
-        if (deltaX > factor1e10) {
+        if (deltaX > Constantes::factor1e10) {
             particle.ax += Constantes::colisRigidez * deltaX - Constantes::amortiguamiento * particle.vx;
         }
     } else if (cx == static_cast<int>(numberblocksx - 1) ){
         deltaX = Constantes::tamParticula - (Constantes::limSuperior.x - newPositionX);
-        if (deltaX > factor1e10) {
+        if (deltaX > Constantes::factor1e10) {
             particle.ax -= Constantes::colisRigidez * deltaX + Constantes::amortiguamiento * particle.vx;
         }
     }
@@ -287,12 +280,12 @@ void handleYCollisions(Particle& particle, int cy, double numberblocksy) {
 
     if (cy == 0) {
         deltaY = Constantes::tamParticula - (newPositionY - Constantes::limInferior.y);
-        if (deltaY > factor1e10) {
+        if (deltaY > Constantes::factor1e10) {
             particle.ay += std::fma(Constantes::colisRigidez, deltaY, -Constantes::amortiguamiento * particle.vy);
         }
     } else if (cy == static_cast<int>(numberblocksy - 1)) {
         deltaY = Constantes::tamParticula - (Constantes::limSuperior.y - newPositionY);
-        if (deltaY > factor1e10) {
+        if (deltaY > Constantes::factor1e10) {
             particle.ay -= std::fma(Constantes::colisRigidez, deltaY, Constantes::amortiguamiento * particle.vy);
         }
     }
@@ -304,12 +297,12 @@ void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
 
     if (cz == 0) {
         deltaZ = Constantes::tamParticula - (newPositionZ - Constantes::limInferior.z);
-        if (deltaZ > factor1e10) {
+        if (deltaZ > Constantes::factor1e10) {
             particle.az += std::fma(Constantes::colisRigidez, deltaZ, -Constantes::amortiguamiento * particle.vz);
         }
     } else if (cz == static_cast<int>(numberblocksz - 1)) {
         deltaZ = Constantes::tamParticula - (Constantes::limSuperior.z - newPositionZ);
-        if (deltaZ > factor1e10) {
+        if (deltaZ > Constantes::factor1e10) {
             particle.az -= std::fma(Constantes::colisRigidez, deltaZ, Constantes::amortiguamiento * particle.vz);
         }
     }
@@ -349,9 +342,9 @@ void particlesMovement(Fluid &fluid){
         particle.py = particle.py + particle.hvy * Constantes::pasoTiempo + particle.ay * std::pow(Constantes::pasoTiempo,2);
         particle.pz = particle.pz + particle.hvz * Constantes::pasoTiempo + particle.az * std::pow(Constantes::pasoTiempo,2);
 
-        particle.vx = particle.hvx + (particle.ax * Constantes::pasoTiempo) * factor05;
-        particle.vy = particle.hvy + (particle.ay * Constantes::pasoTiempo) * factor05;
-        particle.vz = particle.hvz + (particle.az * Constantes::pasoTiempo) * factor05;
+        particle.vx = particle.hvx + (particle.ax * Constantes::pasoTiempo) * Constantes::factor05;
+        particle.vy = particle.hvy + (particle.ay * Constantes::pasoTiempo) * Constantes::factor05;
+        particle.vz = particle.hvz + (particle.az * Constantes::pasoTiempo) * Constantes::factor05;
 
         particle.hvx = particle.hvx + particle.ax * Constantes::pasoTiempo;
         particle.hvy = particle.hvy + particle.ay * Constantes::pasoTiempo;
