@@ -5,14 +5,13 @@
 #include <cmath>
 #include <numbers>
 #include <span>
-#include <cstring>  // Para std::memcpy
 #include <array>
 #include <ctime>
 #include "sim/grid.hpp"
 #include "sim/constantes.hpp"
 #include <iomanip>
 #include <limits>
-unsigned t0, t1;
+
 
 std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla);
 
@@ -60,8 +59,12 @@ void writeFluid(std::ofstream& out, const Fluid& fluid) {
 // Definir constantes para los códigos de error
 const int ERROR_INVALID_PARTICLE_COUNT = -5;
 
+const double factor05 = 0.5;
+
+const double factor1e10 = 1e-10;
+
 int main(int argc, char *argv[]) {
-    t0=clock();
+    unsigned const tiempo0=clock();
     std::span const args_view{argv, static_cast<std::size_t>(argc)};
     std::vector<std::string> const arguments{args_view.begin() + 1, args_view.end()};
     if (argc != 4) {
@@ -121,14 +124,14 @@ int main(int argc, char *argv[]) {
         particlesMovement(fluid);
         limitInteractions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
 
-        std::ofstream outFile("salida.txt");
+        std::ofstream const outFile("salida.txt");
         if (iter == iteraciones-1) {
             for (auto & particle : fluid.particles) {
                 std::cout<<std::setprecision(15) << "La partícula " << particle.id << " " <<particle.density << " está en el bloque "
                          << particle.idBloque << " x: " << particle.px << " y: " << particle.py
                          << " z: " << particle.pz << " "
                          << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-                         << particle.az << ")" << std::endl;
+                         << particle.az << ")" << '\n';
             }
         }
     }
@@ -143,8 +146,8 @@ int main(int argc, char *argv[]) {
 
     output.close();
     std::cout << "Simulación completada. Estado final del fluido guardado en: " << archivoSalida << "\n";
-    t1 = clock();
-    double const time = (double(t1-t0)/CLOCKS_PER_SEC);
+    unsigned const tiempo1= clock();
+    double const time = (double(tiempo1-tiempo0)/CLOCKS_PER_SEC);
     std::cout << "Execution Time: " << time;
     return 0;
 }
@@ -182,11 +185,12 @@ void initAccelerations(Fluid &fluid) {
 }
 
 double calculateDistanceSquared(const Particle &particle1, const Particle &particle2) {
-    double const dx = particle1.px - particle2.px;
-    double const dy = particle1.py - particle2.py;
-    double const dz = particle1.pz - particle2.pz;
-    return dx * dx + dy * dy + dz * dz;
+    double const deltaX = particle1.px - particle2.px;
+    double const deltaY = particle1.py - particle2.py;
+    double const deltaZ = particle1.pz - particle2.pz;
+    return deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 }
+
 
 double calculateDeltaDensity(double h, double distSquared) {
     if (distSquared < h * h) {
@@ -224,15 +228,15 @@ void transferAcceleration(Fluid &fluid, double h, double particleMass) {
     const double smallQ = 10e-12;
     const double factor1 = 15 / (std::numbers::pi * std::pow(h, 6));
     const double factor2 = (45 / (std::numbers::pi * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
-    const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * 0.5);
+    const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * factor05);
     for (int i = 0; i < fluid.numberparticles; ++i) {
         for (int j = i + 1; j < fluid.numberparticles; ++j) {
             const double distSquared = calculateDistanceSquared(fluid.particles[i], fluid.particles[j]);
             if (distSquared >= smoothingLengthSquared) {
                 continue;
             }
-            const double q = std::max(distSquared, smallQ);
-            const double dist = std::sqrt(q);
+            const double maxDistanceSquared = std::max(distSquared, smallQ);
+            const double dist = std::sqrt(maxDistanceSquared);
             const double distX = fluid.particles[i].px - fluid.particles[j].px;
             const double distY = fluid.particles[i].py - fluid.particles[j].py;
             const double distZ = fluid.particles[i].pz - fluid.particles[j].pz;
@@ -260,17 +264,17 @@ void transferAcceleration(Fluid &fluid, double h, double particleMass) {
 
 
 void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
-    double const x = particle.px + particle.hvx * Constantes::pasoTiempo;
+    double const newPositionX = particle.px + particle.hvx * Constantes::pasoTiempo;
     double deltaX = NAN;
 
     if (cx == 0) {
-        deltaX = Constantes::tamParticula - (x - Constantes::limInferior.x);
-        if (deltaX > 1e-10) {
+        deltaX = Constantes::tamParticula - (newPositionX - Constantes::limInferior.x);
+        if (deltaX > factor1e10) {
             particle.ax += Constantes::colisRigidez * deltaX - Constantes::amortiguamiento * particle.vx;
         }
     } else if (cx == static_cast<int>(numberblocksx - 1) ){
-        deltaX = Constantes::tamParticula - (Constantes::limSuperior.x - x);
-        if (deltaX > 1e-10) {
+        deltaX = Constantes::tamParticula - (Constantes::limSuperior.x - newPositionX);
+        if (deltaX > factor1e10) {
             particle.ax -= Constantes::colisRigidez * deltaX + Constantes::amortiguamiento * particle.vx;
         }
     }
@@ -278,34 +282,34 @@ void handleXCollisions(Particle& particle, int cx, double numberblocksx) {
 
 
 void handleYCollisions(Particle& particle, int cy, double numberblocksy) {
-    double const y = particle.py + particle.hvy * Constantes::pasoTiempo;
+    double const newPositionY = particle.py + particle.hvy * Constantes::pasoTiempo;
     double deltaY = NAN;
 
     if (cy == 0) {
-        deltaY = Constantes::tamParticula - (y - Constantes::limInferior.y);
-        if (deltaY > 1e-10) {
+        deltaY = Constantes::tamParticula - (newPositionY - Constantes::limInferior.y);
+        if (deltaY > factor1e10) {
             particle.ay += std::fma(Constantes::colisRigidez, deltaY, -Constantes::amortiguamiento * particle.vy);
         }
     } else if (cy == static_cast<int>(numberblocksy - 1)) {
-        deltaY = Constantes::tamParticula - (Constantes::limSuperior.y - y);
-        if (deltaY > 1e-10) {
+        deltaY = Constantes::tamParticula - (Constantes::limSuperior.y - newPositionY);
+        if (deltaY > factor1e10) {
             particle.ay -= std::fma(Constantes::colisRigidez, deltaY, Constantes::amortiguamiento * particle.vy);
         }
     }
 }
 
 void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
-    double const z = particle.pz + particle.hvz * Constantes::pasoTiempo;
+    double const newPositionZ = particle.pz + particle.hvz * Constantes::pasoTiempo;
     double deltaZ = NAN;
 
     if (cz == 0) {
-        deltaZ = Constantes::tamParticula - (z - Constantes::limInferior.z);
-        if (deltaZ > 1e-10) {
+        deltaZ = Constantes::tamParticula - (newPositionZ - Constantes::limInferior.z);
+        if (deltaZ > factor1e10) {
             particle.az += std::fma(Constantes::colisRigidez, deltaZ, -Constantes::amortiguamiento * particle.vz);
         }
     } else if (cz == static_cast<int>(numberblocksz - 1)) {
-        deltaZ = Constantes::tamParticula - (Constantes::limSuperior.z - z);
-        if (deltaZ > 1e-10) {
+        deltaZ = Constantes::tamParticula - (Constantes::limSuperior.z - newPositionZ);
+        if (deltaZ > factor1e10) {
             particle.az -= std::fma(Constantes::colisRigidez, deltaZ, Constantes::amortiguamiento * particle.vz);
         }
     }
@@ -345,9 +349,9 @@ void particlesMovement(Fluid &fluid){
         particle.py = particle.py + particle.hvy * Constantes::pasoTiempo + particle.ay * std::pow(Constantes::pasoTiempo,2);
         particle.pz = particle.pz + particle.hvz * Constantes::pasoTiempo + particle.az * std::pow(Constantes::pasoTiempo,2);
 
-        particle.vx = particle.hvx + (particle.ax * Constantes::pasoTiempo) * 0.5;
-        particle.vy = particle.hvy + (particle.ay * Constantes::pasoTiempo) * 0.5;
-        particle.vz = particle.hvz + (particle.az * Constantes::pasoTiempo) * 0.5;
+        particle.vx = particle.hvx + (particle.ax * Constantes::pasoTiempo) * factor05;
+        particle.vy = particle.hvy + (particle.ay * Constantes::pasoTiempo) * factor05;
+        particle.vz = particle.hvz + (particle.az * Constantes::pasoTiempo) * factor05;
 
         particle.hvx = particle.hvx + particle.ax * Constantes::pasoTiempo;
         particle.hvy = particle.hvy + particle.ay * Constantes::pasoTiempo;
@@ -357,19 +361,18 @@ void particlesMovement(Fluid &fluid){
 
 // Funcion que hace la interaccion con el borde del recinto respecto a la X (si hay interaccion)
 void InteractionLimitX(Particle& particle, int cx, double numberblocksx){
-    double dx = NAN;
     if (cx == 0){
-        dx = particle.px - Constantes::limInferior.x;
-        if (dx < 0){
-            particle.px = Constantes::limInferior.x - dx;
+        double const deltax = particle.px - Constantes::limInferior.x;
+        if (deltax < 0){
+            particle.px = Constantes::limInferior.x - deltax;
             particle.vx = -particle.vx;
             particle.hvx = -particle.hvx;
         }
     }
     else if(cx == static_cast<int>(numberblocksx - 1)){
-        dx = Constantes::limSuperior.x - particle.px;
-        if (dx < 0){
-            particle.px = Constantes::limSuperior.x + dx;
+        double const deltax = Constantes::limSuperior.x - particle.px;
+        if (deltax < 0){
+            particle.px = Constantes::limSuperior.x + deltax;
             particle.vx = -particle.vx;
             particle.hvx = -particle.hvx;
         }
@@ -378,19 +381,18 @@ void InteractionLimitX(Particle& particle, int cx, double numberblocksx){
 
 // Funcion que hace la interaccion con el borde del recinto respecto a la Y (si hay interaccion)
 void InteractionLimitY(Particle& particle, int cy, double numberblocksy){
-   double dy = NAN;
    if (cy == 0){
-          dy = particle.py - Constantes::limInferior.y;
-          if (dy < 0){
-              particle.py = Constantes::limInferior.y - dy;
+          double const deltay = particle.py - Constantes::limInferior.y;
+          if (deltay < 0){
+              particle.py = Constantes::limInferior.y - deltay;
               particle.vy = -particle.vy;
               particle.hvy = -particle.hvy;
           }
    }
    else if(cy == static_cast<int>(numberblocksy - 1)){
-          dy = Constantes::limSuperior.y - particle.py;
-          if (dy < 0){
-              particle.py = Constantes::limSuperior.y + dy;
+          double const deltay = Constantes::limSuperior.y - particle.py;
+          if (deltay < 0){
+              particle.py = Constantes::limSuperior.y + deltay;
               particle.vy = -particle.vy;
               particle.hvy = -particle.hvy;
           }
@@ -399,19 +401,18 @@ void InteractionLimitY(Particle& particle, int cy, double numberblocksy){
 
 // Funcion que hace la interaccion con el borde del recinto respecto a la Z (si hay interaccion)
 void InteractionLimitZ(Particle& particle, int cz, double numberblocksz){
-   double dz = NAN;
    if (cz == 0){
-          dz = particle.pz - Constantes::limInferior.z;
-          if (dz < 0){
-            particle.pz = Constantes::limInferior.z - dz;
+       double const deltaz = particle.pz - Constantes::limInferior.z;
+          if (deltaz < 0){
+            particle.pz = Constantes::limInferior.z - deltaz;
             particle.vz = -particle.vz;
             particle.hvz = -particle.hvz;
           }
    }
    else if(cz == static_cast<int>(numberblocksz - 1)){
-          dz = Constantes::limSuperior.z - particle.pz;
-          if (dz < 0){
-            particle.pz = Constantes::limSuperior.z + dz;
+       double const deltaz = Constantes::limSuperior.z - particle.pz;
+          if (deltaz < 0){
+            particle.pz = Constantes::limSuperior.z + deltaz;
             particle.vz = -particle.vz;
             particle.hvz = -particle.hvz;
           }
@@ -420,23 +421,19 @@ void InteractionLimitZ(Particle& particle, int cz, double numberblocksz){
 
 // Funcion para las interacciones con los límites del recinto de una particula
 void limitInteractions(Fluid& fluid,std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz) {
-   for (int blockIndex = 0; blockIndex < numberblocksx * numberblocksy * numberblocksz;
-        ++blockIndex) {
+   for (int blockIndex = 0; blockIndex < numberblocksx * numberblocksy * numberblocksz; ++blockIndex) {
           Block  const& block = blocks[blockIndex];
           for (auto & particula : fluid.particles) {
             if (particula.idBloque == blockIndex) {
-                /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las
-                particulas de ese bloque, llamando a handleXCollisions*/
+                /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las particulas de ese bloque, llamando a handleXCollisions*/
                 if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
                     InteractionLimitX(particula, block.cx, numberblocksx);
                 }
-                /* si un bloque tiene cy==0 o cy== numbrblocks-1 se actualiza el ay de todas las
-                particulas de ese bloque, llamando a handleYCollisions*/
+                /* si un bloque tiene cy==0 o cy== numbrblocks-1 se actualiza el ay de todas las particulas de ese bloque, llamando a handleYCollisions*/
                 if (block.cy == 0 || block.cy == static_cast<int>(numberblocksy) - 1) {
                     InteractionLimitY(particula, block.cy, numberblocksy);
                 }
-                /* si un bloque tiene cz==0 o cz== numbrblocks-1 se actualiza el az de todas las
-                particulas de ese bloque, llamando a handleZCollisions*/
+                /* si un bloque tiene cz==0 o cz== numbrblocks-1 se actualiza el az de todas las particulas de ese bloque, llamando a handleZCollisions*/
                 if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
                     InteractionLimitZ(particula, block.cz, numberblocksz);
                 }
