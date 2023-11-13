@@ -31,44 +31,31 @@ void readFluid(std::ifstream& in, Fluid& fluid) {
     fluid.particles.resize(fluid.numberparticles);
     for (int i = 0; i < fluid.numberparticles; ++i) {
         fluid.particles[i].id = i;
-        float temp = 0;
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].px = static_cast<double>(temp);
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].py = static_cast<double>(temp);
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].pz = static_cast<double>(temp);
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].hvx = static_cast<double>(temp);
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].hvy = static_cast<double>(temp);
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].hvz = static_cast<double>(temp);
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].vx = static_cast<double>(temp);
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].vy = static_cast<double>(temp);
-        in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-        fluid.particles[i].vz = static_cast<double>(temp);
+        for (double* attr : {&fluid.particles[i].px, &fluid.particles[i].py, &fluid.particles[i].pz,
+                             &fluid.particles[i].hvx, &fluid.particles[i].hvy, &fluid.particles[i].hvz,
+                             &fluid.particles[i].vx, &fluid.particles[i].vy, &fluid.particles[i].vz}) {
+            float temp = 0;
+            in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+            *attr = static_cast<double>(temp);
+        }
     }
 }
 // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
-void writeFluid(std::ofstream &out, const Fluid &fluid) {
-    std::array<char, sizeof(fluid.particlespermeter)> ppmBuffer = {0};
-    std::memcpy(ppmBuffer.data(), &fluid.particlespermeter, sizeof(fluid.particlespermeter));
-    out.write(ppmBuffer.data(), sizeof(fluid.particlespermeter));
-
-    std::array<char, sizeof(fluid.numberparticles)> npBuffer = {0};
-    std::memcpy(npBuffer.data(), &fluid.numberparticles, sizeof(fluid.numberparticles));
-    out.write(npBuffer.data(), sizeof(fluid.numberparticles));
-
-    for (const auto &particle: fluid.particles) {
-        std::array<char, sizeof(Particle)> particleBuffer = {0};
-        std::memcpy(particleBuffer.data(), &particle, sizeof(Particle));
-        out.write(particleBuffer.data(), sizeof(Particle));
+//NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+void writeFluid(std::ofstream& out, const Fluid& fluid) {
+    out.write(reinterpret_cast<const char*>(&fluid.particlespermeter), sizeof(float));
+    out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
+    for (const auto& particle : fluid.particles) {
+        for (const double* attr : {&particle.px, &particle.py, &particle.pz,
+                                   &particle.hvx, &particle.hvy, &particle.hvz,
+                                   &particle.vx, &particle.vy, &particle.vz}) {
+            auto temp = static_cast<float>(*attr);
+            out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        }
     }
 }
+// NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
 // Definir constantes para los códigos de error
 const int ERROR_INVALID_PARTICLE_COUNT = -5;
@@ -140,7 +127,7 @@ int main(int argc, char *argv[]) {
         std::ofstream outFile("salida.txt");
         if (iter == iteraciones-1) {
             for (auto & particle : fluid.particles) {
-                outFile<<std::setprecision(15) << "La partícula " << particle.id << " " <<particle.density << " está en el bloque "
+                std::cout<<std::setprecision(15) << "La partícula " << particle.id << " " <<particle.density << " está en el bloque "
                        << particle.idBloque << " x: " << particle.px << " y: " << particle.py
                        << " z: " << particle.pz << " "
                        << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
