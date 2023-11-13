@@ -111,34 +111,27 @@ int main(int argc, char *argv[]) {
     //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     for (int iter = 0; iter < iteraciones; ++iter) {
         std::cout << "Iteración " << iter + 1 << "\n";
+
         initAccelerations(fluid);
         malla.reposicionarParticulas(fluid, blocks);
         incrementDensities(fluid,  smoothingLength);
-
         transformDensities(fluid, smoothingLength, particleMass);
-
         transferAcceleration(fluid, smoothingLength, particleMass);
-
-        //transferAccelerationMejorada(fluid, smoothingLength, Constantes::presRigidez,  particleMass, factor1,factor2);
-        /* for (int i = 0; i < fluid.numberparticles; ++i) {
-            std::cout << "La partícula " << fluid.particles[i].id << " x: " << fluid.particles[i].ax <<  " y: " << fluid.particles[i].ay<<  " z: " << fluid.particles[i].az<< std::endl;
-        } */
         particleColissions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+        particlesMovement(fluid);
+        limitInteractions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+
         std::ofstream outFile("salida.txt");
         if (iter == iteraciones-1) {
             for (auto & particle : fluid.particles) {
                 std::cout<<std::setprecision(15) << "La partícula " << particle.id << " " <<particle.density << " está en el bloque "
-                       << particle.idBloque << " x: " << particle.px << " y: " << particle.py
-                       << " z: " << particle.pz << " "
-                       << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-                       << particle.az << ")" << std::endl;
+                         << particle.idBloque << " x: " << particle.px << " y: " << particle.py
+                         << " z: " << particle.pz << " "
+                         << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
+                         << particle.az << ")" << std::endl;
             }
         }
-        particlesMovement(fluid);
-        limitInteractions(fluid, blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
-
     }
-    //print_simulation(iteraciones, fluid);
 
     // Escribir el estado final del fluido en el archivo de salida
     std::ofstream output(archivoSalida, std::ios::binary);
