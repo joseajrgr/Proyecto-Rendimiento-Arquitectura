@@ -21,12 +21,10 @@ struct Particle {
 class Block {
     public:
         int id;
-        Punto minPoint;
-        Punto maxPoint;
         int cx, cy, cz; // Indice del bloque en cada coordenada
         std::vector<Particle> particles;
 
-        Block(int id, const Punto& minPoint, const Punto& maxPoint, int cx, int cy, int cz);
+        Block(int id, int cx, int cy, int cz);
         void addParticle(const Particle& particle);
         const std::vector<Particle>& getParticles() const;
 };

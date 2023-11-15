@@ -20,4 +20,7 @@ namespace Constantes {
 
     const double factor05 = 0.5;
     const double factor1e10 = 1e-10;
+
+    // Para la transferencia de la aceleracion
+    const double smallQ = 10e-12;
 }

@@ -30,6 +30,9 @@ namespace Constantes {
 
     extern const double factor05;
     extern const double factor1e10;
+
+    // Para la transferencia de la aceleracion
+    extern const double smallQ;
 }
 
 #endif //PROYECTO_RENDIMIENTO_ARQUITECTURA_CONSTANTES_HPP
