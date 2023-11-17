@@ -19,7 +19,7 @@ void initAccelerations(std::vector<Block>& blocks);
 //void incrementarDensities(Fluid &fluid, double h);
 void incrementDensities(std::vector<Block>& blocks, double h, double numberblocksx, double numberblocksy, double numberblocksz);
 void transformDensities(std::vector<Block>& blocks, double h, double particleMass);
-void transferAcceleration(std::vector<Block>& blocks, double h, double particleMass, double numberblocksx, double numberblocksy, double numberblocksz);
+void transferAcceleration(std::vector<Block>& blocks, double h, double numberblocksx, double numberblocksy, double numberblocksz,double smoothingLengthSquared, double smallQ, double factor2, double commonFactor);
 void particleColissions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 void particlesMovement(std::vector<Block>& blocks);
 void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
@@ -102,7 +102,11 @@ int main(int argc, char *argv[]) {
     auto result = mesh_simulation(fluid, malla);
     double const smoothingLength = result.first;
     double const particleMass = result.second;
-
+    const double smoothingLengthSquared = smoothingLength * smoothingLength;
+    const double smallQ = 10e-12;
+    const double factor1 = 15 / (std::numbers::pi * std::pow(smoothingLength, 6));
+    const double factor2 = (45 / (std::numbers::pi * std::pow(smoothingLength, 6)) * Constantes::viscosidad * particleMass);
+    const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
     std::vector<Block> blocks = malla.getBlocks();
     //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
     //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
@@ -119,17 +123,16 @@ int main(int argc, char *argv[]) {
         //incrementarDensities(fluid, smoothingLength);
         incrementDensities(blocks, smoothingLength, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
         transformDensities(blocks, smoothingLength, particleMass);
-        transferAcceleration(blocks, smoothingLength, particleMass, malla.numberblocksx, malla.numberblocksy,
-                             malla.numberblocksz);
+        transferAcceleration(blocks, smoothingLength, malla.numberblocksx, malla.numberblocksy,
+                             malla.numberblocksz, smoothingLengthSquared, smallQ,  factor2, commonFactor);
         particleColissions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
         particlesMovement(blocks);
         limitInteractions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
-        std::ofstream outFile("salida.txt");
         if (iter == iteraciones - 1) {
-            for (Block &block: blocks) {
+            for (const Block &block: blocks) {
                 // Itera sobre las partículas en el bloque actual
-                for (Particle &particle: block.particles) {
-                    outFile << std::setprecision(15) << "La partícula " << particle.id << " " << particle.density
+                for (const Particle &particle: block.particles) {
+                    std::cout << "La partícula " << particle.id << " " << particle.density
                             << " está en el bloque "
                             << particle.idBloque << " x: " << particle.px << " y: " << particle.py
                             << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", " << particle.vy << ", "
@@ -223,17 +226,17 @@ void incrementarDensities(Fluid &fluid, double h) {
 }
 
 
+
 void incrementDensities(std::vector<Block>& blocks, double h, double numberblocksx, double numberblocksy, double numberblocksz) {
-    for (int i = 0; static_cast<std::vector<Particle>::size_type>(i) < blocks.size(); i++) {
-        Block& block1 = blocks[i];
-        for (auto& particle1 : block1.particles) {
+    for (auto& block : blocks) {
+        for (auto& particle1 : block.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
             for (int dx = -2; dx <= 2; ++dx) {
                 for (int dy = -2; dy <= 2; ++dy) {
                     for (int dz = -2; dz <= 2; ++dz) {
-                        int neighbor_cx = block1.cx + dx;
-                        int neighbor_cy = block1.cy + dy;
-                        int neighbor_cz = block1.cz + dz;
+                        int neighbor_cx = block.cx + dx;
+                        int neighbor_cy = block.cy + dy;
+                        int neighbor_cz = block.cz + dz;
 
                         // Asegúrate de que las coordenadas del vecino estén dentro de los límites de la cuadrícula
                         if (neighbor_cx >= 0 && neighbor_cx < numberblocksx &&
@@ -266,7 +269,6 @@ void incrementDensities(std::vector<Block>& blocks, double h, double numberblock
 
 
 
-
 void transformDensities(std::vector<Block>& blocks, double h, double particleMass) {
     const double factor = (315.0 / (64.0 * std::numbers::pi * std::pow(h, 9))) * particleMass;
 
@@ -277,14 +279,11 @@ void transformDensities(std::vector<Block>& blocks, double h, double particleMas
     }
 }
 
-void transferAcceleration(std::vector<Block>& blocks, double h, double particleMass, double numberblocksx, double numberblocksy, double numberblocksz) {
-    const double smoothingLengthSquared = h * h;
-    const double smallQ = 10e-12;
-    const double factor1 = 15 / (std::numbers::pi * std::pow(h, 6));
-    const double factor2 = (45 / (std::numbers::pi * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
-    const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
-    for (int i = 0; static_cast<std::vector<Particle>::size_type>(i) < blocks.size(); i++) {
-        Block& block1 = blocks[i];
+
+
+void transferAcceleration(std::vector<Block>& blocks, double h, double numberblocksx, double numberblocksy, double numberblocksz,
+                          double smoothingLengthSquared, double smallQ, double factor2, double commonFactor) {
+    for (auto& block1 : blocks) {
         for (auto& particle1 : block1.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
             for (int dx = -2; dx <= 2; ++dx) {
@@ -303,8 +302,8 @@ void transferAcceleration(std::vector<Block>& blocks, double h, double particleM
                             int neighborIndex = neighbor_cz + neighbor_cy * numberblocksz +
                                                 neighbor_cx * numberblocksz * numberblocksy;
 
-                            Block &block2 = blocks[neighborIndex];
-                            for (auto &particle2: block2.particles) {
+                            Block& block2 = blocks[neighborIndex];
+                            for (auto& particle2 : block2.particles) {
                                 if (particle1.id < particle2.id) {
                                     const double distSquared = calculateDistanceSquared(particle1, particle2);
                                     if (distSquared >= smoothingLengthSquared) {
@@ -348,8 +347,6 @@ void transferAcceleration(std::vector<Block>& blocks, double h, double particleM
         }
     }
 }
-
-
 
 
 
