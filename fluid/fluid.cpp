@@ -302,16 +302,18 @@ void transferAcceleration(std::vector<Block>& blocks, double h, double particleM
                                     const double deltaDensity = (particle1.density + particle2.density -
                                                                  2 * Constantes::densFluido);
                                     const double deltaAijX =
-                                            std::fma(distX * commonFactor * hMinusDistSquared * distdiv, deltaDensity,
-                                                     (particle2.vx - particle1.vx) * factor2) /
+                                            (distX * commonFactor * hMinusDistSquared * distdiv * deltaDensity +
+                                             (particle2.vx - particle1.vx) * factor2) /
                                             (particle1.density * particle2.density);
+
                                     const double deltaAijY =
-                                            std::fma(distY * commonFactor * hMinusDistSquared * distdiv, deltaDensity,
-                                                     (particle2.vy - particle1.vy) * factor2) /
+                                            (distY * commonFactor * hMinusDistSquared * distdiv * deltaDensity +
+                                             (particle2.vy - particle1.vy) * factor2) /
                                             (particle1.density * particle2.density);
+
                                     const double deltaAijZ =
-                                            std::fma(distZ * commonFactor * hMinusDistSquared * distdiv, deltaDensity,
-                                                     (particle2.vz - particle1.vz) * factor2) /
+                                            (distZ * commonFactor * hMinusDistSquared * distdiv * deltaDensity +
+                                             (particle2.vz - particle1.vz) * factor2) /
                                             (particle1.density * particle2.density);
 
                                     particle1.ax += deltaAijX;
@@ -359,12 +361,12 @@ void handleYCollisions(Particle& particle, int cy, double numberblocksy) {
     if (cy == 0) {
         deltaY = Constantes::tamParticula - (newPositionY - Constantes::limInferior.y);
         if (deltaY > Constantes::factor1e10) {
-            particle.ay += std::fma(Constantes::colisRigidez, deltaY, -Constantes::amortiguamiento * particle.vy);
+            particle.ay += Constantes::colisRigidez * deltaY - Constantes::amortiguamiento * particle.vy;
         }
     } else if (cy == static_cast<int>(numberblocksy - 1)) {
         deltaY = Constantes::tamParticula - (Constantes::limSuperior.y - newPositionY);
         if (deltaY > Constantes::factor1e10) {
-            particle.ay -= std::fma(Constantes::colisRigidez, deltaY, Constantes::amortiguamiento * particle.vy);
+            particle.ay -= Constantes::colisRigidez * deltaY + Constantes::amortiguamiento * particle.vy;
         }
     }
 }
@@ -376,12 +378,12 @@ void handleZCollisions(Particle& particle, int cz, double numberblocksz) {
     if (cz == 0) {
         deltaZ = Constantes::tamParticula - (newPositionZ - Constantes::limInferior.z);
         if (deltaZ > Constantes::factor1e10) {
-            particle.az += std::fma(Constantes::colisRigidez, deltaZ, -Constantes::amortiguamiento * particle.vz);
+            particle.az += Constantes::colisRigidez * deltaZ - Constantes::amortiguamiento * particle.vz;
         }
     } else if (cz == static_cast<int>(numberblocksz - 1)) {
         deltaZ = Constantes::tamParticula - (Constantes::limSuperior.z - newPositionZ);
         if (deltaZ > Constantes::factor1e10) {
-            particle.az -= std::fma(Constantes::colisRigidez, deltaZ, Constantes::amortiguamiento * particle.vz);
+            particle.az -= Constantes::colisRigidez * deltaZ + Constantes::amortiguamiento * particle.vz;
         }
     }
 }
