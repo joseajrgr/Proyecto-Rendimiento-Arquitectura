@@ -23,6 +23,7 @@ void particleColissions(std::vector<Block>& blocks, double numberblocksx, double
 void particlesMovement(std::vector<Block>& blocks);
 void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 
+
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
 void readFluid(std::ifstream& in, Fluid& fluid) {
     in.read(reinterpret_cast<char*>(&fluid.particlespermeter), sizeof(float));
