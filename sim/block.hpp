@@ -16,6 +16,17 @@ struct Particle {
     double vx, vy, vz; // Coordenadas de la velocidad
     double ax, ay, az; // Coordenadas de la aceleración
     double density;
+
+    //metodo para comparar que dos partículas son iguales. Este método se usará en los tests
+    bool operator==(const Particle& other) const {
+        return id == other.id &&
+               idBloque == other.idBloque &&
+               px == other.px && py == other.py && pz == other.pz &&
+               hvx == other.hvx && hvy == other.hvy && hvz == other.hvz &&
+               vx == other.vx && vy == other.vy && vz == other.vz &&
+               ax == other.ax && ay == other.ay && az == other.az &&
+               density == other.density;
+    }
 };
 
 class Block {

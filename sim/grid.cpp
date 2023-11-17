@@ -40,6 +40,10 @@ double Grid::getMeshz() const {
 
 // Funcion quue divide la malla en bloques
 void Grid::dividirEnBloques(double smoothingLength) {
+    if (smoothingLength <= 0.0) {
+        //excepción si smoothinglength es menor o igual que 0
+        throw std::invalid_argument("Smoothing length must be a positive value.");
+    }
     numberblocksx = floor(((bmax.x - bmin.x)) / smoothingLength);
     numberblocksy = floor(((bmax.y - bmin.y)) / smoothingLength);
     numberblocksz = floor(((bmax.z - bmin.z)) / smoothingLength);
