@@ -118,11 +118,11 @@ int main(int argc, char *argv[]) {
         incrementDensities(blocks, smoothingLength, malla);
         transformDensities(blocks, smoothingLength, particleMass);
         transferAcceleration(blocks, smoothingLength, particleMass, malla);
-        particleColissions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+        particleColissions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
         particlesMovement(blocks);
-        limitInteractions(blocks, malla.numberblocksx, malla.numberblocksy, malla.numberblocksz);
+        limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
 
-        std::ofstream outFile("salida.txt");
+        const std::ofstream outFile("salida.txt");
         if (iter == iteraciones - 1) {
             for (const Block &block: blocks) {
                 // Itera sobre las partículas en el bloque actual
@@ -169,9 +169,9 @@ std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla) {
     std::cout << "Particles per meter: " << fluid.particlespermeter << "\n";
     std::cout << "Smoothing length: " << smoothingLength << "\n";
     std::cout << "Particle mass: " << particleMass << "\n";
-    std::cout << "Grid size: " << malla.numberblocksx << " x " << malla.numberblocksy << " x " << malla.numberblocksz << "\n";
-    std::cout << "Number of blocks: " << malla.numBlocks << "\n";
-    std::cout << "Block size: " << malla.meshx << " x " << malla.meshy << " x " << malla.meshz << "\n";
+    std::cout << "Grid size: " << malla.getNumberblocksx() << " x " << malla.getNumberblocksy() << " x " << malla.getNumberblocksz() << "\n";
+    std::cout << "Number of blocks: " << malla.getNumBlocks() << "\n";
+    std::cout << "Block size: " << malla.getMeshx() << " x " << malla.getMeshy() << " x " << malla.getMeshz() << "\n";
 
     return std::make_pair(smoothingLength, particleMass);
 }
@@ -217,12 +217,13 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
                         const int neighbor_cz = block1.cz + dz;
 
                         // Asegúrate de que las coordenadas del vecino estén dentro de los límites de la cuadrícula
-                        if (neighbor_cx >= 0 && neighbor_cx < malla.numberblocksx &&
-                            neighbor_cy >= 0 && neighbor_cy < malla.numberblocksy &&
-                            neighbor_cz >= 0 && neighbor_cz < malla.numberblocksz) {
+                        if (neighbor_cx >= 0 && neighbor_cx < malla.getNumberblocksx() &&
+                            neighbor_cy >= 0 && neighbor_cy < malla.getNumberblocksy() &&
+                            neighbor_cz >= 0 && neighbor_cz < malla.getNumberblocksz()) {
 
                             // Calcula el índice del bloque vecino
-                            const int neighborIndex = neighbor_cz + neighbor_cy * malla.numberblocksz + neighbor_cx * malla.numberblocksz * malla.numberblocksy;
+                            const int neighborIndex = neighbor_cz + neighbor_cy * malla.getNumberblocksz()
+                                    + neighbor_cx * malla.getNumberblocksz() * malla.getNumberblocksy();
 
                             Block& block2 = blocks[neighborIndex];
                             for (auto& particle2 : block2.particles) {
@@ -276,13 +277,13 @@ void transferAcceleration(std::vector<Block>& blocks, double h, double particleM
                         const int neighbor_cz = block1.cz + dz;
 
                         // Asegúrate de que las coordenadas del vecino estén dentro de los límites de la cuadrícula
-                        if (neighbor_cx >= 0 && neighbor_cx < malla.numberblocksx &&
-                            neighbor_cy >= 0 && neighbor_cy < malla.numberblocksy &&
-                            neighbor_cz >= 0 && neighbor_cz < malla.numberblocksz) {
+                        if (neighbor_cx >= 0 && neighbor_cx < malla.getNumberblocksx() &&
+                            neighbor_cy >= 0 && neighbor_cy < malla.getNumberblocksy() &&
+                            neighbor_cz >= 0 && neighbor_cz < malla.getNumberblocksz()) {
 
                             // Calcula el índice del bloque vecino
-                            const int neighborIndex = neighbor_cz + neighbor_cy * malla.numberblocksz +
-                                                neighbor_cx * malla.numberblocksz * malla.numberblocksy;
+                            const int neighborIndex = neighbor_cz + neighbor_cy * malla.getNumberblocksz()
+                                    + neighbor_cx * malla.getNumberblocksz() * malla.getNumberblocksy();
 
                             Block &block2 = blocks[neighborIndex];
                             for (auto &particle2: block2.particles) {

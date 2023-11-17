@@ -1,9 +1,44 @@
 #include <iostream>
-#include <algorithm>
 #include <cmath>
 #include "grid.hpp"
-Grid::Grid(const Punto& bmin, const Punto& bmax) : bmin(bmin), bmax(bmax) {}
 
+// Inicializar los valores para el constructor
+Grid::Grid(const Punto& bmin, const Punto& bmax) : numberblocksx(0.0), numberblocksy(0.0),
+    numberblocksz(0.0), numBlocks(0.0), meshx(0.0), meshy(0.0), meshz(0.0), bmin(bmin), bmax(bmax) {}
+
+
+// Getters para los valores privados
+double Grid::getNumberblocksx() const {
+    return numberblocksx;
+}
+
+double Grid::getNumberblocksy() const {
+    return numberblocksy;
+}
+
+double Grid::getNumberblocksz() const {
+    return numberblocksz;
+}
+
+double Grid::getNumBlocks() const {
+    return numBlocks;
+}
+
+double Grid::getMeshx() const {
+    return meshx;
+}
+
+double Grid::getMeshy() const {
+    return meshy;
+}
+
+double Grid::getMeshz() const {
+    return meshz;
+}
+
+
+
+// Funcion quue divide la malla en bloques
 void Grid::dividirEnBloques(double smoothingLength) {
     numberblocksx = floor(((bmax.x - bmin.x)) / smoothingLength);
     numberblocksy = floor(((bmax.y - bmin.y)) / smoothingLength);
@@ -21,7 +56,7 @@ void Grid::dividirEnBloques(double smoothingLength) {
             for (int i = 0; i < numberblocksz; ++i) {
 
                 // Añade el bloque al final del vector
-                const int blockId = i + j * numberblocksx + k * numberblocksx * numberblocksy;
+                const int blockId = static_cast<int>(i + j * numberblocksx + k * numberblocksx * numberblocksy);
                 blocks.emplace_back(blockId, k ,j, i);
             }
         }
@@ -29,8 +64,8 @@ void Grid::dividirEnBloques(double smoothingLength) {
 }
 
 
-
-void Grid::reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &bloques) {
+// Funcion que reposiciona las particulas en la primera iteracion, a partir del fluido
+void Grid::reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &bloques) const {
     // Precalculamos valores para optimizar el rendimiento
     const double inv_meshx = 1.0 / meshx;
     const double inv_meshy = 1.0 / meshy;
@@ -43,15 +78,16 @@ void Grid::reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &bloques
         const int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * inv_meshy), static_cast<int>(numberblocksy) - 1));
         const int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * inv_meshz), static_cast<int>(numberblocksz) - 1));
 
-        const int blockId = indicex + indicey * numberblocksx + indicez * numberblocksx * numberblocksy;
+        const int blockId = static_cast<int>(indicex + indicey * numberblocksx + indicez * numberblocksx * numberblocksy);
         Block &block = bloques[blockId];
         particula.idBloque = block.id;
         block.addParticle(particula);
-        // std::cout << "La partícula " << i << " está en el bloque " << block.id << " x: "<< block.cx << " y: "<< block.cy << " z: "<< block.cz <<'\n';
     }
 }
 
-void Grid::reposicionarParticulasBloque(std::vector<Block> &bloques) {
+
+// Funcion que reposiciona las particulas almacenadas en los bloques
+void Grid::reposicionarParticulasBloque(std::vector<Block> &bloques) const {
     // Precalculamos valores para optimizar el rendimiento
     const double inv_meshx = 1.0 / meshx;
     const double inv_meshy = 1.0 / meshy;
@@ -66,18 +102,24 @@ void Grid::reposicionarParticulasBloque(std::vector<Block> &bloques) {
             const int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * inv_meshy), static_cast<int>(numberblocksy) - 1));
             const int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * inv_meshz), static_cast<int>(numberblocksz) - 1));
 
-            const int blockId = indicex + indicey * numberblocksx + indicez * numberblocksx * numberblocksy;
+            const int blockId = static_cast<int>(indicex + indicey * numberblocksx + indicez * numberblocksx * numberblocksy);
             Block &newBlock = bloques[blockId];
-            if (newBlock.id != block.id) {
-                particula.idBloque = newBlock.id;
-                newBlock.addParticle(particula);
-                iterador = block.particles.erase(iterador);  // Elimina la partícula del bloque antiguo
-            } else {
-                ++iterador;
-            }
+            iterador = comprobarBloque(block, particula, newBlock, iterador);
         }
     }
 }
+
+
+// Funcion que comprueba si el nuevo id del bloque es igual al bloque actual y mueve la particula si es necesario
+std::vector<Particle>::iterator Grid::comprobarBloque(Block &block, Particle &particula, Block &newBlock, std::vector<Particle>::iterator iterador) {
+    if (newBlock.id != block.id) {
+        particula.idBloque = newBlock.id;
+        newBlock.addParticle(particula);
+        return block.particles.erase(iterador);  // Elimina la partícula del bloque antiguo
+    }
+    return ++iterador;
+}
+
 
 const std::vector<Block>& Grid::getBlocks() const {
     return blocks;
