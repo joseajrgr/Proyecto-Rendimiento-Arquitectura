@@ -22,7 +22,6 @@ TEST(GridTests, dividirEnBloques_correcto) {
 
 //test para comprobar que se lanza una excepción si el smoothinglength es 0
 TEST(GridTests, dividirEnBloques_smoothinglength0) {
-    // Arrange
     const Punto bmin{0.0, 0.0, 0.0};
     const Punto bmax{10.0, 10.0, 10.0};
     Grid grid(bmin, bmax);
@@ -33,7 +32,6 @@ TEST(GridTests, dividirEnBloques_smoothinglength0) {
 
 //test para comprobar que se lanza una excepción si el smoothinglength es negativo
 TEST(GridTests, dividirEnBloques_smoothinglength_negative) {
-    // Arrange
     const Punto bmin{0.0, 0.0, 0.0};
     const Punto bmax{10.0, 10.0, 10.0};
     Grid grid(bmin, bmax);
