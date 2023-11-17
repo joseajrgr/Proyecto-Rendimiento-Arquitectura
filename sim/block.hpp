@@ -3,6 +3,7 @@
 
 #include <vector>
 
+
 struct Punto {
     double x, y, z;
 };
@@ -25,7 +26,6 @@ class Block {
 
         Block(int id, int cx, int cy, int cz);
         void addParticle(const Particle& particle);
-        const std::vector<Particle>& getParticles() const;
 };
 
 
