@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
             for (const Block &block: blocks) {
                 // Itera sobre las partículas en el bloque actual
                 for (const Particle &particle: block.particles) {
-                    outFile << std::setprecision(15) << "La partícula " << particle.id << " " << particle.density
+                    std::cout << std::setprecision(15) << "La partícula " << particle.id << " " << particle.density
                             << " está en el bloque "
                             << particle.idBloque << " x: " << particle.px << " y: " << particle.py
                             << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", " << particle.vy << ", "
@@ -206,8 +206,7 @@ double calculateDeltaDensity(double h, double distSquared) {
 
 
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
-    for (int i = 0; static_cast<std::vector<Particle>::size_type>(i) < blocks.size(); i++) {
-        Block& block1 = blocks[i];
+    for (auto& block1 : blocks) {
         for (auto& particle1 : block1.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
             for (int dx = -2; dx <= 2; ++dx) {
@@ -266,8 +265,7 @@ void transferAcceleration(std::vector<Block>& blocks, double h, double particleM
     const double factor2 = (45 / (std::numbers::pi * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
     const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
 
-    for (int i = 0; static_cast<std::vector<Particle>::size_type>(i) < blocks.size(); i++) {
-        Block& block1 = blocks[i];
+    for (auto& block1 : blocks) {
         for (auto& particle1 : block1.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
             for (int dx = -2; dx <= 2; ++dx) {
