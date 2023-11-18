@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
         particlesMovement(blocks);
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
 
-        const std::ofstream outFile("salida.txt");
+        /* const std::ofstream outFile("salida.txt");
         if (iter == iteraciones - 1) {
             for (const Block &block: blocks) {
                 // Itera sobre las partículas en el bloque actual
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
                             << particle.az << ")" << '\n';
                 }
             }
-        }
+        } */
     }
 
     // Escribir el estado final del fluido en el archivo de salida
@@ -268,9 +268,9 @@ void transferAcceleration(std::vector<Block>& blocks, double h, Constantes::Cons
     for (auto& block1 : blocks) {
         for (auto& particle1 : block1.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
-            for (int dx = -2; dx <= 2; ++dx) {
-                for (int dy = -2; dy <= 2; ++dy) {
-                    for (int dz = -2; dz <= 2; ++dz) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                for (int dy = -1; dy <= 1; ++dy) {
+                    for (int dz = -1; dz <= 1; ++dz) {
                         const int neighbor_cx = block1.cx + dx;
                         const int neighbor_cy = block1.cy + dy;
                         const int neighbor_cz = block1.cz + dz;
