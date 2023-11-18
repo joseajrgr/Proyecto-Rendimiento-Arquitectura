@@ -39,6 +39,11 @@ namespace Constantes {
     extern const double factor1e10;
 
     // Para la transferencia de la aceleracion
+    struct ConstAccTransf {
+        double hSquared;
+        double factor2;
+        double commonFactor;
+    };
     extern const double smallQ;
 }
 

@@ -17,8 +17,8 @@ std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla);
 
 void initAccelerations(std::vector<Block>& blocks);
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla);
-void transformDensities(std::vector<Block>& blocks, double h, double particleMass);
-void transferAcceleration(std::vector<Block>& blocks, double h, double particleMass, Grid& malla);
+void transformDensities(std::vector<Block>& blocks, double h, double factorDensTransf);
+void transferAcceleration(std::vector<Block>& blocks, double h, Constantes::ConstAccTransf& constAccTransf, Grid& malla);
 void particleColissions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 void particlesMovement(std::vector<Block>& blocks);
 void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
@@ -107,11 +107,20 @@ int main(int argc, char *argv[]) {
     double const smoothingLength = result.first;
     double const particleMass = result.second;
 
+    // Para la transferencia de densidades
+    const double factorDensTransf = (315.0 / (64.0 * std::numbers::pi * std::pow(smoothingLength, 9))) * particleMass;
+
+    // Para la transferencia de aceleraciones
+    Constantes::ConstAccTransf constAccTransf;
+    constAccTransf.hSquared = smoothingLength * smoothingLength;
+    constAccTransf.factor2 = (45 / (std::numbers::pi * std::pow(smoothingLength, 6)) * Constantes::viscosidad * particleMass);
+    constAccTransf.commonFactor = (15 / (std::numbers::pi * std::pow(smoothingLength, 6))) * ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
+
     std::vector<Block> blocks = malla.getBlocks();
     //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
     //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     for (int iter = 0; iter < iteraciones; ++iter) {
-        std::cout << "Iteración " << iter + 1 << "\n";
+        // std::cout << "Iteración " << iter + 1 << "\n";
 
         if (iter == 0) {
             malla.reposicionarParticulasFluid(fluid, blocks);
@@ -121,8 +130,8 @@ int main(int argc, char *argv[]) {
 
         initAccelerations(blocks);
         incrementDensities(blocks, smoothingLength, malla);
-        transformDensities(blocks, smoothingLength, particleMass);
-        transferAcceleration(blocks, smoothingLength, particleMass, malla);
+        transformDensities(blocks, smoothingLength, factorDensTransf);
+        transferAcceleration(blocks, smoothingLength, constAccTransf, malla);
         particleColissions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
         particlesMovement(blocks);
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
@@ -247,23 +256,15 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
 
 
 
-void transformDensities(std::vector<Block>& blocks, double h, double particleMass) {
-    const double factor = (315.0 / (64.0 * std::numbers::pi * std::pow(h, 9))) * particleMass;
-
+void transformDensities(std::vector<Block>& blocks, double h, double factorDensTransf) {
     for (auto& block : blocks) {
         for (auto& particle : block.particles) {
-            particle.density = (particle.density + std::pow(h, 6)) * factor;
+            particle.density = (particle.density + std::pow(h, 6)) * factorDensTransf;
         }
     }
 }
 
-void transferAcceleration(std::vector<Block>& blocks, double h, double particleMass, Grid& malla) {
-    // Creo que se pueden sacar las constantes de la funcion, lo malo es que habria que pasarlas como parametro
-    const double smoothingLengthSquared = h * h;
-    const double factor1 = 15 / (std::numbers::pi * std::pow(h, 6));
-    const double factor2 = (45 / (std::numbers::pi * std::pow(h, 6)) * Constantes::viscosidad * particleMass);
-    const double commonFactor = factor1 * ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
-
+void transferAcceleration(std::vector<Block>& blocks, double h, Constantes::ConstAccTransf& constAccTransf, Grid& malla) {
     for (auto& block1 : blocks) {
         for (auto& particle1 : block1.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
@@ -287,7 +288,7 @@ void transferAcceleration(std::vector<Block>& blocks, double h, double particleM
                             for (auto &particle2: block2.particles) {
                                 if (particle1.id < particle2.id) {
                                     const double distSquared = calculateDistanceSquared(particle1, particle2);
-                                    if (distSquared >= smoothingLengthSquared) {
+                                    if (distSquared >= constAccTransf.hSquared) {
                                         continue;
                                     }
                                     const double maxDistanceSquared = std::max(distSquared, Constantes::smallQ);
@@ -301,18 +302,18 @@ void transferAcceleration(std::vector<Block>& blocks, double h, double particleM
                                     const double deltaDensity = (particle1.density + particle2.density -
                                                                  2 * Constantes::densFluido);
                                     const double deltaAijX =
-                                            (distX * commonFactor * hMinusDistSquared * distdiv * deltaDensity +
-                                             (particle2.vx - particle1.vx) * factor2) /
+                                            (distX * constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity +
+                                             (particle2.vx - particle1.vx) * constAccTransf.factor2) /
                                             (particle1.density * particle2.density);
 
                                     const double deltaAijY =
-                                            (distY * commonFactor * hMinusDistSquared * distdiv * deltaDensity +
-                                             (particle2.vy - particle1.vy) * factor2) /
+                                            (distY * constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity +
+                                             (particle2.vy - particle1.vy) * constAccTransf.factor2) /
                                             (particle1.density * particle2.density);
 
                                     const double deltaAijZ =
-                                            (distZ * commonFactor * hMinusDistSquared * distdiv * deltaDensity +
-                                             (particle2.vz - particle1.vz) * factor2) /
+                                            (distZ * constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity +
+                                             (particle2.vz - particle1.vz) * constAccTransf.factor2) /
                                             (particle1.density * particle2.density);
 
                                     particle1.ax += deltaAijX;
