@@ -7,10 +7,11 @@
 #include <span>
 #include <array>
 #include <ctime>
-#include "sim/grid.hpp"
-#include "sim/constantes.hpp"
 #include <iomanip>
 #include <limits>
+#include "sim/grid.hpp"
+#include "sim/constantes.hpp"
+#include "sim/progargs.hpp"
 
 
 std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla);
@@ -24,23 +25,7 @@ void particlesMovement(std::vector<Block>& blocks);
 void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double numberblocksy, double numberblocksz);
 
 
-//NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-void readFluid(std::ifstream& in, Fluid& fluid) {
-    in.read(reinterpret_cast<char*>(&fluid.particlespermeter), sizeof(float));
-    in.read(reinterpret_cast<char*>(&fluid.numberparticles), sizeof(int));
-    fluid.particles.resize(fluid.numberparticles);
-    for (int i = 0; i < fluid.numberparticles; ++i) {
-        fluid.particles[i].id = i;
-        for (double* attr : {&fluid.particles[i].px, &fluid.particles[i].py, &fluid.particles[i].pz,
-                             &fluid.particles[i].hvx, &fluid.particles[i].hvy, &fluid.particles[i].hvz,
-                             &fluid.particles[i].vx, &fluid.particles[i].vy, &fluid.particles[i].vz}) {
-            float temp = 0;
-            in.read(reinterpret_cast<char*>(&temp), sizeof(float));
-            *attr = static_cast<double>(temp);
-        }
-    }
-}
-// NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
+
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
 void writeFluid(std::ofstream& out, const Fluid& fluid) {
@@ -61,49 +46,18 @@ int main(int argc, char *argv[]) {
     unsigned const tiempo0=clock();
     std::span const args_view{argv, static_cast<std::size_t>(argc)};
     std::vector<std::string> const arguments{args_view.begin() + 1, args_view.end()};
-    if (argc != 4) {
-        std::cerr << "Error: Invalid number of arguments. Usage: " << arguments.size()
-                  << " <nts> <inputfile> <outputfile>\n";
-        return Constantes::ErrorCode::INVALID_ARGUMENTS;
-    }
-    const int iteraciones = std::stoi(arguments[0]);
-    try {
-        if (iteraciones < 0) {
-            std::cerr << "Error: Invalid number of time steps.\n";
-            return Constantes::ErrorCode::INVALID_TIME_STEPS;
-        }
-    } catch (const std::invalid_argument &e) {
-        std::cerr << "Error: time steps must be numeric.\n";
-        return Constantes::ErrorCode::INVALID_NUMERIC_FORMAT;
-    }
 
-    const std::string &archivoEntrada = arguments[1];
-    const std::string &archivoSalida = arguments[2];
 
-    // Leer el archivo de entrada
-    std::ifstream input(archivoEntrada, std::ios::binary);
-    if (!input) {
-        std::cerr << "Error: Cannot open " << archivoEntrada << " for reading\n";
-        return Constantes::ErrorCode::CANNOT_OPEN_FILE_READING;
-    }
+    Argumentos argumentos;
 
-    Fluid fluid;
-    readFluid(input, fluid);
-
-    if (fluid.particles.size() <= 0) {
-        std::cerr << "Error: Invalid number of particles: 0.\n";
-        return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
-    }
-    // Verificar si el número de partículas leídas coincide con numberparticles OPCIONAL
-    if (fluid.particles.size() != static_cast<std::vector<Particle>::size_type>(fluid.numberparticles)) {
-        std::cerr << "Error: Number of particles mismatch. Header: "
-                  << fluid.numberparticles << ", Found: " << fluid.particles.size() << ".\n";
-        return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
+    const Constantes::ErrorCode errorCode = comprobarArgs(argc, arguments, argumentos);
+    if (errorCode != 0) {
+        return errorCode;
     }
 
     // Calcula los valores utilizando la función calculateValues
     Grid malla(Constantes::limInferior, Constantes::limSuperior);
-    auto result = mesh_simulation(fluid, malla);
+    auto result = mesh_simulation(argumentos.fluid, malla);
     double const smoothingLength = result.first;
     double const particleMass = result.second;
 
@@ -119,11 +73,11 @@ int main(int argc, char *argv[]) {
     std::vector<Block> blocks = malla.getBlocks();
     //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
     //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
-    for (int iter = 0; iter < iteraciones; ++iter) {
+    for (int iter = 0; iter < argumentos.iteraciones; ++iter) {
         // std::cout << "Iteración " << iter + 1 << "\n";
 
         if (iter == 0) {
-            malla.reposicionarParticulasFluid(fluid, blocks);
+            malla.reposicionarParticulasFluid(argumentos.fluid, blocks);
         } else {
             malla.reposicionarParticulasBloque(blocks);
         }
@@ -137,7 +91,7 @@ int main(int argc, char *argv[]) {
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
 
 
-        /*if (iter == iteraciones - 1) {
+        /* if (iter == argumentos.iteraciones - 1) {
             for (const Block &block: blocks) {
                 // Itera sobre las partículas en el bloque actual
                 for (const Particle &particle: block.particles) {
@@ -150,19 +104,19 @@ int main(int argc, char *argv[]) {
                             << particle.az << ")" << '\n';
                 }
             }
-        }*/
+        } */
     }
 
     // Escribir el estado final del fluido en el archivo de salida
-    std::ofstream output(archivoSalida, std::ios::binary);
+    std::ofstream output(arguments[2], std::ios::binary);
     if (!output) {
-        std::cerr << "Error: Cannot open " << archivoSalida << " for writing\n";
+        std::cerr << "Error: Cannot open " << arguments[2] << " for writing\n";
         return Constantes::ErrorCode::CANNOT_OPEN_FILE_WRITING;
     }
-    writeFluid(output, fluid);
+    writeFluid(output, argumentos.fluid);
 
     output.close();
-    std::cout << "Simulación completada. Estado final del fluido guardado en: " << archivoSalida << "\n";
+    std::cout << "Simulación completada. Estado final del fluido guardado en: " << arguments[2] << "\n";
     unsigned const tiempo1= clock();
     double const time = (double(tiempo1-tiempo0)/CLOCKS_PER_SEC);
     std::cout << "Execution Time: " << time;

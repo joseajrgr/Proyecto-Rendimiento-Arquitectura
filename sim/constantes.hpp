@@ -27,6 +27,7 @@ namespace Constantes {
 
     // Definir constantes para los códigos de error
     enum ErrorCode {
+        NO_ERROR = 0,
         INVALID_ARGUMENTS = -1,
         INVALID_TIME_STEPS = -2,
         INVALID_NUMERIC_FORMAT = -1,
