@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
         }
     } catch (const std::invalid_argument &e) {
         std::cerr << "Error: time steps must be numeric.\n";
-        return Constantes::ErrorCode::INVALID_ARGUMENTS;
+        return Constantes::ErrorCode::INVALID_NUMERIC_FORMAT;
     }
 
     const std::string &archivoEntrada = arguments[1];
@@ -84,16 +84,20 @@ int main(int argc, char *argv[]) {
     std::ifstream input(archivoEntrada, std::ios::binary);
     if (!input) {
         std::cerr << "Error: Cannot open " << archivoEntrada << " for reading\n";
-        return Constantes::ErrorCode::INVALID_NUMERIC_FORMAT;
+        return Constantes::ErrorCode::CANNOT_OPEN_FILE_READING;
     }
 
     Fluid fluid;
     readFluid(input, fluid);
 
+    if (fluid.particles.size() <= 0) {
+        std::cerr << "Error: Invalid number of particles: 0.\n";
+        return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
+    }
     // Verificar si el número de partículas leídas coincide con numberparticles OPCIONAL
     if (fluid.particles.size() != static_cast<std::vector<Particle>::size_type>(fluid.numberparticles)) {
-        std::cerr << "Error: El número de partículas leídas (" << fluid.particles.size()
-                  << ") no coincide con numberparticles (" << fluid.numberparticles << ").\n";
+        std::cerr << "Error: Number of particles mismatch. Header: "
+                  << fluid.numberparticles << ", Found: " << fluid.particles.size() << ".\n";
         return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
 
@@ -144,7 +148,7 @@ int main(int argc, char *argv[]) {
     std::ofstream output(archivoSalida, std::ios::binary);
     if (!output) {
         std::cerr << "Error: Cannot open " << archivoSalida << " for writing\n";
-        return -4;
+        return Constantes::ErrorCode::CANNOT_OPEN_FILE_WRITING;
     }
     writeFluid(output, fluid);
 

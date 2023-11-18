@@ -29,8 +29,9 @@ namespace Constantes {
     enum ErrorCode {
         INVALID_ARGUMENTS = -1,
         INVALID_TIME_STEPS = -2,
-        INVALID_NUMERIC_FORMAT = -3,
-        CANNOT_OPEN_FILE = -4,
+        INVALID_NUMERIC_FORMAT = -1,
+        CANNOT_OPEN_FILE_READING = -3,
+        CANNOT_OPEN_FILE_WRITING = -4,
         INVALID_PARTICLE_COUNT = -5
     };
 
