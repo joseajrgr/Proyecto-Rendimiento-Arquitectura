@@ -64,17 +64,17 @@ int main(int argc, char *argv[]) {
     if (argc != 4) {
         std::cerr << "Error: Invalid number of arguments. Usage: " << arguments.size()
                   << " <nts> <inputfile> <outputfile>\n";
-        return -1;
+        return Constantes::ErrorCode::INVALID_ARGUMENTS;
     }
     const int iteraciones = std::stoi(arguments[0]);
     try {
         if (iteraciones < 0) {
             std::cerr << "Error: Invalid number of time steps.\n";
-            return -2;
+            return Constantes::ErrorCode::INVALID_TIME_STEPS;
         }
     } catch (const std::invalid_argument &e) {
         std::cerr << "Error: time steps must be numeric.\n";
-        return -1;
+        return Constantes::ErrorCode::INVALID_ARGUMENTS;
     }
 
     const std::string &archivoEntrada = arguments[1];
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     std::ifstream input(archivoEntrada, std::ios::binary);
     if (!input) {
         std::cerr << "Error: Cannot open " << archivoEntrada << " for reading\n";
-        return -3;
+        return Constantes::ErrorCode::INVALID_NUMERIC_FORMAT;
     }
 
     Fluid fluid;
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     if (fluid.particles.size() != static_cast<std::vector<Particle>::size_type>(fluid.numberparticles)) {
         std::cerr << "Error: El número de partículas leídas (" << fluid.particles.size()
                   << ") no coincide con numberparticles (" << fluid.numberparticles << ").\n";
-        return Constantes::ERROR_INVALID_PARTICLE_COUNT;
+        return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
 
     // Calcula los valores utilizando la función calculateValues
