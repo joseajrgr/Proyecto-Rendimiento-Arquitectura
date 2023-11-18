@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "sim/grid.cpp"
+#include "fluid/fluid.cpp"
 
 TEST(Fluid_Tests, El_Nano777) {
     // Arrange

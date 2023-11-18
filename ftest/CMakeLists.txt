@@ -6,6 +6,7 @@ add_executable(ftest
 target_link_libraries (ftest
         PRIVATE
         sim
+        fluid_h
         GTest::gtest_main
         Microsoft.GSL::GSL)
 # Discover all tests and add them to the test driver
