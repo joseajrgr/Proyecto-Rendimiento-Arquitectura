@@ -1,13 +1,12 @@
 #include <iostream>
 #include <cmath>
+#include "constantes.hpp"
 #include "grid.hpp"
+
 
 // Inicializar los valores para el constructor
 Grid::Grid(const Punto& bmin, const Punto& bmax) : numberblocksx(0.0), numberblocksy(0.0),
                                                    numberblocksz(0.0), numBlocks(0.0), meshx(0.0), meshy(0.0), meshz(0.0), bmin(bmin), bmax(bmax) {}
-
-
-// Getters para los valores privados
 
 
 // Funcion quue divide la malla en bloques
@@ -36,6 +35,26 @@ void Grid::dividirEnBloques(double smoothingLength) {
             }
         }
     }
+}
+
+
+// Funcion que simula la malla
+std::pair<double, double> Grid::simular_malla(const Fluid &fluid) {
+    const double smoothingLength = Constantes::multRadio / fluid.particlespermeter;
+    const double particleMass = std::pow(10.0, 3.0) / std::pow(fluid.particlespermeter, 3.0);
+
+    dividirEnBloques(smoothingLength);
+
+    // Mostrar los valores por pantalla en el formato requerido
+    std::cout << "Number of particles: " << fluid.numberparticles << "\n";
+    std::cout << "Particles per meter: " << fluid.particlespermeter << "\n";
+    std::cout << "Smoothing length: " << smoothingLength << "\n";
+    std::cout << "Particle mass: " << particleMass << "\n";
+    std::cout << "Grid size: " << numberblocksx << " x " << numberblocksy << " x " << numberblocksz << "\n";
+    std::cout << "Number of blocks: " << numBlocks << "\n";
+    std::cout << "Block size: " << meshx << " x " << meshy << " x " << meshz << "\n";
+
+    return std::make_pair(smoothingLength, particleMass);
 }
 
 

@@ -36,8 +36,8 @@ Constantes::ErrorCode comprobarArgs(int argc, std::vector<std::string> arguments
     }
 
     // Comprueba el numero de iteraciones
-    argumentos.iteraciones = std::stoi(arguments[0]);
     try {
+        argumentos.iteraciones = std::stoi(arguments[0]);
         if (argumentos.iteraciones < 0) {
             std::cerr << "Error: Invalid number of time steps.\n";
             return Constantes::ErrorCode::INVALID_TIME_STEPS;

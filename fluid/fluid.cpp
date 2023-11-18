@@ -14,8 +14,6 @@
 #include "sim/progargs.hpp"
 
 
-std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla);
-
 void initAccelerations(std::vector<Block>& blocks);
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla);
 void transformDensities(std::vector<Block>& blocks, double h, double factorDensTransf);
@@ -47,17 +45,17 @@ int main(int argc, char *argv[]) {
     std::span const args_view{argv, static_cast<std::size_t>(argc)};
     std::vector<std::string> const arguments{args_view.begin() + 1, args_view.end()};
 
-
     Argumentos argumentos;
 
-    const Constantes::ErrorCode errorCode = comprobarArgs(argc, arguments, argumentos);
+    Constantes::ErrorCode errorCode = Constantes::NO_ERROR;
+    errorCode = comprobarArgs(argc, arguments, argumentos);
     if (errorCode != 0) {
         return errorCode;
     }
 
     // Calcula los valores utilizando la función calculateValues
     Grid malla(Constantes::limInferior, Constantes::limSuperior);
-    auto result = mesh_simulation(argumentos.fluid, malla);
+    auto result = malla.simular_malla(argumentos.fluid);
     double const smoothingLength = result.first;
     double const particleMass = result.second;
 
@@ -123,26 +121,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-
-// Funcion que simula la malla
-std::pair<double, double> mesh_simulation(const Fluid &fluid, Grid &malla) {
-    const double smoothingLength = Constantes::multRadio / fluid.particlespermeter;
-    const double particleMass = std::pow(10.0, 3.0) / std::pow(fluid.particlespermeter, 3.0);
-
-
-    malla.dividirEnBloques(smoothingLength);
-
-    // Mostrar los valores por pantalla en el formato requerido
-    std::cout << "Number of particles: " << fluid.numberparticles << "\n";
-    std::cout << "Particles per meter: " << fluid.particlespermeter << "\n";
-    std::cout << "Smoothing length: " << smoothingLength << "\n";
-    std::cout << "Particle mass: " << particleMass << "\n";
-    std::cout << "Grid size: " << malla.getNumberblocksx() << " x " << malla.getNumberblocksy() << " x " << malla.getNumberblocksz() << "\n";
-    std::cout << "Number of blocks: " << malla.getNumBlocks() << "\n";
-    std::cout << "Block size: " << malla.getMeshx() << " x " << malla.getMeshy() << " x " << malla.getMeshz() << "\n";
-
-    return std::make_pair(smoothingLength, particleMass);
-}
 
 // Función para inicializar las aceleraciones
 void initAccelerations(std::vector<Block>& blocks) {
