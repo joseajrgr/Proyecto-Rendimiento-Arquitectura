@@ -136,8 +136,8 @@ int main(int argc, char *argv[]) {
         particlesMovement(blocks);
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
 
-        /* const std::ofstream outFile("salida.txt");
-        if (iter == iteraciones - 1) {
+
+        /*if (iter == iteraciones - 1) {
             for (const Block &block: blocks) {
                 // Itera sobre las partículas en el bloque actual
                 for (const Particle &particle: block.particles) {
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
                             << particle.az << ")" << '\n';
                 }
             }
-        } */
+        }*/
     }
 
     // Escribir el estado final del fluido en el archivo de salida
@@ -301,20 +301,21 @@ void transferAcceleration(std::vector<Block>& blocks, double h, Constantes::Cons
                                     const double hMinusDistSquared = std::pow(h - dist, 2);
                                     const double deltaDensity = (particle1.density + particle2.density -
                                                                  2 * Constantes::densFluido);
+
+                                    const double densitydivmul = 1 /
+                                                                 (particle1.density * particle2.density);
+                                    const double factorcomun = constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity;
                                     const double deltaAijX =
-                                            (distX * constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity +
-                                             (particle2.vx - particle1.vx) * constAccTransf.factor2) /
-                                            (particle1.density * particle2.density);
+                                            ((distX * (factorcomun) +
+                                              (particle2.vx - particle1.vx) * constAccTransf.factor2)) * densitydivmul ;
 
                                     const double deltaAijY =
-                                            (distY * constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity +
-                                             (particle2.vy - particle1.vy) * constAccTransf.factor2) /
-                                            (particle1.density * particle2.density);
+                                            ((distY * (factorcomun) +
+                                              (particle2.vy - particle1.vy) * constAccTransf.factor2)) * densitydivmul;
 
                                     const double deltaAijZ =
-                                            (distZ * constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity +
-                                             (particle2.vz - particle1.vz) * constAccTransf.factor2) /
-                                            (particle1.density * particle2.density);
+                                            ((distZ * (factorcomun) +
+                                              (particle2.vz - particle1.vz) * constAccTransf.factor2)) * densitydivmul;
 
                                     particle1.ax += deltaAijX;
                                     particle1.ay += deltaAijY;
