@@ -4,7 +4,7 @@
 
 // Inicializar los valores para el constructor
 Grid::Grid(const Punto& bmin, const Punto& bmax) : numberblocksx(0.0), numberblocksy(0.0),
-    numberblocksz(0.0), numBlocks(0.0), meshx(0.0), meshy(0.0), meshz(0.0), bmin(bmin), bmax(bmax) {}
+                                                   numberblocksz(0.0), numBlocks(0.0), meshx(0.0), meshy(0.0), meshz(0.0), bmin(bmin), bmax(bmax) {}
 
 
 // Getters para los valores privados
