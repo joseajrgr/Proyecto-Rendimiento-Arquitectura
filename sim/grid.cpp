@@ -23,7 +23,6 @@ void Grid::dividirEnBloques(double smoothingLength) {
     meshx = (bmax.x - bmin.x) / numberblocksx;
     meshy = (bmax.y - bmin.y) / numberblocksy;
     meshz = (bmax.z - bmin.z) / numberblocksz;
-
     // Limpia el vector de blocks
     blocks.clear();
 
