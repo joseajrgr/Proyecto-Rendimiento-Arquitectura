@@ -26,7 +26,14 @@ namespace Constantes {
     extern const Punto limSuperior;
 
     // Definir constantes para los códigos de error
-    extern const int ERROR_INVALID_PARTICLE_COUNT;
+    enum ErrorCode {
+        INVALID_ARGUMENTS = -1,
+        INVALID_TIME_STEPS = -2,
+        INVALID_NUMERIC_FORMAT = -1,
+        CANNOT_OPEN_FILE_READING = -3,
+        CANNOT_OPEN_FILE_WRITING = -4,
+        INVALID_PARTICLE_COUNT = -5
+    };
 
     extern const double factor05;
     extern const double factor1e10;

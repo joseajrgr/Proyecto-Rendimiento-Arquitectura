@@ -8,34 +8,6 @@ Grid::Grid(const Punto& bmin, const Punto& bmax) : numberblocksx(0.0), numberblo
 
 
 // Getters para los valores privados
-double Grid::getNumberblocksx() const {
-    return numberblocksx;
-}
-
-double Grid::getNumberblocksy() const {
-    return numberblocksy;
-}
-
-double Grid::getNumberblocksz() const {
-    return numberblocksz;
-}
-
-double Grid::getNumBlocks() const {
-    return numBlocks;
-}
-
-double Grid::getMeshx() const {
-    return meshx;
-}
-
-double Grid::getMeshy() const {
-    return meshy;
-}
-
-double Grid::getMeshz() const {
-    return meshz;
-}
-
 
 
 // Funcion quue divide la malla en bloques
@@ -123,7 +95,3 @@ std::vector<Particle>::iterator Grid::comprobarBloque(Block &block, Particle &pa
     return ++iterador;
 }
 
-
-const std::vector<Block>& Grid::getBlocks() const {
-    return blocks;
-}

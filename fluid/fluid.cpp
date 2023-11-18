@@ -64,17 +64,17 @@ int main(int argc, char *argv[]) {
     if (argc != 4) {
         std::cerr << "Error: Invalid number of arguments. Usage: " << arguments.size()
                   << " <nts> <inputfile> <outputfile>\n";
-        return -1;
+        return Constantes::ErrorCode::INVALID_ARGUMENTS;
     }
     const int iteraciones = std::stoi(arguments[0]);
     try {
         if (iteraciones < 0) {
             std::cerr << "Error: Invalid number of time steps.\n";
-            return -2;
+            return Constantes::ErrorCode::INVALID_TIME_STEPS;
         }
     } catch (const std::invalid_argument &e) {
         std::cerr << "Error: time steps must be numeric.\n";
-        return -1;
+        return Constantes::ErrorCode::INVALID_NUMERIC_FORMAT;
     }
 
     const std::string &archivoEntrada = arguments[1];
@@ -84,17 +84,21 @@ int main(int argc, char *argv[]) {
     std::ifstream input(archivoEntrada, std::ios::binary);
     if (!input) {
         std::cerr << "Error: Cannot open " << archivoEntrada << " for reading\n";
-        return -3;
+        return Constantes::ErrorCode::CANNOT_OPEN_FILE_READING;
     }
 
     Fluid fluid;
     readFluid(input, fluid);
 
+    if (fluid.particles.size() <= 0) {
+        std::cerr << "Error: Invalid number of particles: 0.\n";
+        return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
+    }
     // Verificar si el número de partículas leídas coincide con numberparticles OPCIONAL
     if (fluid.particles.size() != static_cast<std::vector<Particle>::size_type>(fluid.numberparticles)) {
-        std::cerr << "Error: El número de partículas leídas (" << fluid.particles.size()
-                  << ") no coincide con numberparticles (" << fluid.numberparticles << ").\n";
-        return Constantes::ERROR_INVALID_PARTICLE_COUNT;
+        std::cerr << "Error: Number of particles mismatch. Header: "
+                  << fluid.numberparticles << ", Found: " << fluid.particles.size() << ".\n";
+        return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
 
     // Calcula los valores utilizando la función calculateValues
@@ -144,7 +148,7 @@ int main(int argc, char *argv[]) {
     std::ofstream output(archivoSalida, std::ios::binary);
     if (!output) {
         std::cerr << "Error: Cannot open " << archivoSalida << " for writing\n";
-        return -4;
+        return Constantes::ErrorCode::CANNOT_OPEN_FILE_WRITING;
     }
     writeFluid(output, fluid);
 
@@ -198,13 +202,6 @@ double calculateDistanceSquared(const Particle &particle1, const Particle &parti
 }
 
 
-double calculateDeltaDensity(double h, double distSquared) {
-    if (distSquared < h * h) {
-        return std::pow(((h * h) - distSquared), 3);
-    }
-    return 0.0;
-}
-
 
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
     for (auto& block1 : blocks) {
@@ -230,13 +227,13 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
                             for (auto& particle2 : block2.particles) {
                                 if (particle1.id < particle2.id) {
                                     double const distSquared = calculateDistanceSquared(particle1, particle2);
-
-                                    // Calcula el incremento de densidad ∆ρij
-                                    double const deltaDensity = calculateDeltaDensity(h, distSquared);
-
-                                    // Incrementa la densidad de ambas partículas
-                                    particle1.density += deltaDensity;
-                                    particle2.density += deltaDensity;
+                                    if (distSquared < h * h) {
+                                        // Calcula el incremento de densidad ∆ρij
+                                        double const deltaDensity= std::pow(((h * h) - distSquared), 3);
+                                        // Incrementa la densidad de ambas partículas
+                                        particle1.density += deltaDensity;
+                                        particle2.density += deltaDensity;
+                                    }
                                 }
                             }
                         }
