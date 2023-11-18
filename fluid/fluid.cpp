@@ -198,13 +198,6 @@ double calculateDistanceSquared(const Particle &particle1, const Particle &parti
 }
 
 
-double calculateDeltaDensity(double h, double distSquared) {
-    if (distSquared < h * h) {
-        return std::pow(((h * h) - distSquared), 3);
-    }
-    return 0.0;
-}
-
 
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
     for (auto& block1 : blocks) {
@@ -230,13 +223,13 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
                             for (auto& particle2 : block2.particles) {
                                 if (particle1.id < particle2.id) {
                                     double const distSquared = calculateDistanceSquared(particle1, particle2);
-
-                                    // Calcula el incremento de densidad ∆ρij
-                                    double const deltaDensity = calculateDeltaDensity(h, distSquared);
-
-                                    // Incrementa la densidad de ambas partículas
-                                    particle1.density += deltaDensity;
-                                    particle2.density += deltaDensity;
+                                    if (distSquared < h * h) {
+                                        // Calcula el incremento de densidad ∆ρij
+                                        double const deltaDensity= std::pow(((h * h) - distSquared), 3);
+                                        // Incrementa la densidad de ambas partículas
+                                        particle1.density += deltaDensity;
+                                        particle2.density += deltaDensity;
+                                    }
                                 }
                             }
                         }
