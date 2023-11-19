@@ -36,6 +36,9 @@ private:
     double meshx;
     double meshy;
     double meshz;
+    double invmeshx;
+    double invmeshy;
+    double invmeshz;
     Punto bmin; // Limite inferior del recinto
     Punto bmax; // Limite superior del recinto
     std::vector<Block> blocks;

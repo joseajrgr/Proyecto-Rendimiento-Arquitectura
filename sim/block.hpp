@@ -30,13 +30,14 @@ struct Particle {
 };
 
 class Block {
-    public:
-        int id;
-        int cx, cy, cz; // Indice del bloque en cada coordenada
-        std::vector<Particle> particles;
+public:
+    Block();
+    int id;
+    int cx, cy, cz; // Indice del bloque en cada coordenada
+    std::vector<Particle> particles;
 
-        Block(int id, int cx, int cy, int cz);
-        void addParticle(const Particle& particle);
+    Block(int id, int cx, int cy, int cz);
+    void addParticle(const Particle& particle);
 };
 
 

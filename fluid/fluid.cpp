@@ -72,13 +72,12 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
     std::vector<Block> blocks = malla.getBlocks();
     //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
     //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
+    malla.reposicionarParticulasFluid(argumentos.fluid, blocks);
     for (int iter = 0; iter < argumentos.iteraciones; ++iter) {
         // std::cout << "Iteración " << iter + 1 << "\n";
-        if (iter == 0) {
-            malla.reposicionarParticulasFluid(argumentos.fluid, blocks);
-        } else {
-            malla.reposicionarParticulasBloque(blocks);
-        }
+
+        malla.reposicionarParticulasBloque(blocks);
+
 
         initAccelerations(blocks);
         incrementDensities(blocks, smoothingLength, malla);
@@ -93,10 +92,10 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
             for (const Block &block: blocks) {
                 // Itera sobre las partículas en el bloque actual
                 for (const Particle &particle: block.particles) {
-                    std::cout << std::setprecision(15) << "La partícula " << particle.id << " " << particle.density
+                    std::cout <<  "La partícula " << particle.id << " " << particle.density
                             << " está en el bloque "
                             << particle.idBloque << " x: " << particle.px << " y: " << particle.py
-                            << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", " << particle.vy << ", "
+                            << " z: " << particle.pz << " Velocidad: (" << particle.vx << ", " << particle.vy << ", "
                             << particle.vz << ")"
                             << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
                             << particle.az << ")" << '\n';
