@@ -8,6 +8,8 @@ add_library(sim
             block.hpp
             constantes.cpp
             constantes.hpp
+            simulacion.cpp
+            simulacion.hpp
 )
 
 # Use this line only if you have dependencies from stim to GSL

@@ -1,12 +1,14 @@
-//
-// Created by quinc on 03/10/2023.
-//
-
 #ifndef PROYECTO_RENDIMIENTO_ARQUITECTURA_PROGARGS_HPP
 #define PROYECTO_RENDIMIENTO_ARQUITECTURA_PROGARGS_HPP
 
-#include "constantes.hpp"
-#include "grid.hpp"
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <span>
+#include "progargs.hpp"
+#include "sim/constantes.hpp"
+#include "sim/grid.hpp"
 
 
 struct Argumentos {

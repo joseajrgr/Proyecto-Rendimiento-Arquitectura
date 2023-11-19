@@ -20,6 +20,7 @@ public:
     [[nodiscard]] inline double getMeshy() const { return meshy; }
     [[nodiscard]] inline double getMeshz() const { return meshz; }
 
+    // Relativo a dividir la malla
     Grid(const Punto& bmin, const Punto& bmax);
     void dividirEnBloques(double smoothingLength);
     std::pair<double, double> simular_malla(const Fluid &fluid);

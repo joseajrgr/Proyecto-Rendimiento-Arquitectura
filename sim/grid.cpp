@@ -120,4 +120,3 @@ std::vector<Particle>::iterator Grid::comprobarBloque(Block &block, Particle &pa
     }
     return ++iterador;
 }
-
