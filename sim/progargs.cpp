@@ -9,7 +9,7 @@
 
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-void readFluid(std::ifstream& in, Fluid& fluid) {
+void leerFluido(std::ifstream& in, Fluid& fluid) {
     in.read(reinterpret_cast<char*>(&fluid.particlespermeter), sizeof(float));
     in.read(reinterpret_cast<char*>(&fluid.numberparticles), sizeof(int));
     fluid.particles.resize(fluid.numberparticles);
@@ -28,7 +28,7 @@ void readFluid(std::ifstream& in, Fluid& fluid) {
 
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-void writeFluid(std::ofstream& out, const Fluid& fluid) {
+void escribirFluido(std::ofstream& out, const Fluid& fluid) {
     out.write(reinterpret_cast<const char*>(&fluid.particlespermeter), sizeof(float));
     out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
     for (const auto& particle : fluid.particles) {
@@ -47,12 +47,11 @@ Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> ar
     // Comprueba el numero de argumentos
     if (argc != 4) {
         std::cerr << "Error: Invalid number of arguments. Usage: " << arguments.size()
-                  << " <nts> <inputfile> <outputfile>\n";
+            << " <nts> <inputfile> <outputfile>\n";
         return Constantes::ErrorCode::INVALID_ARGUMENTS;
     }
 
-    // Comprueba el numero de iteraciones
-    try {
+    try { // Comprueba el numero de iteraciones
         argumentos.iteraciones = std::stoi(arguments[0]);
         if (argumentos.iteraciones < 0) {
             std::cerr << "Error: Invalid number of time steps.\n";
@@ -63,6 +62,16 @@ Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> ar
         return Constantes::ErrorCode::INVALID_NUMERIC_FORMAT;
     }
 
+    // Por ultimo, revisamos el fichero de entrada y sus particulas (si tampoco da error, devuelve NO_ERROR)
+    const Constantes::ErrorCode errorCode = comprobarParticulas(arguments, argumentos);
+    if (errorCode != 0) {
+        return errorCode;
+    }
+    return Constantes::ErrorCode::NO_ERROR;
+}
+
+
+Constantes::ErrorCode comprobarParticulas(std::vector<std::string> arguments, Argumentos& argumentos) {
     // Comprueba si se puede leer el archivo de entrada
     argumentos.archivoEntrada = arguments[1];
     std::ifstream input(argumentos.archivoEntrada, std::ios::binary);
@@ -73,8 +82,8 @@ Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> ar
     }
 
     // Comprueba el numero de particulas del archivo de entrada
-    readFluid(input, argumentos.fluid);
-    if (argumentos.fluid.particles.size() <= 0) {
+    leerFluido(input, argumentos.fluid);
+    if (argumentos.fluid.particles.empty()) {
         std::cerr << "Error: Invalid number of particles: 0.\n";
         return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
@@ -86,8 +95,8 @@ Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> ar
         return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
 
-    return Constantes::ErrorCode::NO_ERROR;
-};
+    return Constantes::NO_ERROR;
+}
 
 
 Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Argumentos& argumentos) {
@@ -99,8 +108,8 @@ Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Ar
     }
 
     // Escribir el estado final del fluido en el archivo de salida
-    writeFluid(output, argumentos.fluid);
+    escribirFluido(output, argumentos.fluid);
     output.close();
     std::cout << "Simulación completada. Estado final del fluido guardado en: " << arguments[2] << "\n";
     return Constantes::ErrorCode::NO_ERROR;
-};
+}
