@@ -96,7 +96,6 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
     //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     for (int iter = 0; iter < argumentos.iteraciones; ++iter) {
         // std::cout << "Iteración " << iter + 1 << "\n";
-
         if (iter == 0) {
             malla.reposicionarParticulasFluid(argumentos.fluid, blocks);
         } else {
