@@ -1,14 +1,15 @@
 #include <gtest/gtest.h>
-#include "sim/grid.cpp"
-#include "fluid/fluid.cpp"
+#include "./trazas.cpp"
 
 TEST(Fluid_Tests, El_Nano777) {
     // Arrange
-    int result;
+    const char* script = "./ftest/scripts/test1.sh";
     // Act
-    result = 33;
+    int result = std::system(script);
+    const std::string filename = "out.fld";
+    readTraceFile(filename);
     // Assert
-    ASSERT_EQ(result, 33);
+    ASSERT_EQ(result, 0);
 }
 
 TEST(Fluid_Tests, Not_El_Nano777) {
@@ -16,7 +17,6 @@ TEST(Fluid_Tests, Not_El_Nano777) {
     int result;
     // Act
     result = 32;
-
     // Assert
     ASSERT_NE(result, 33);
 }
