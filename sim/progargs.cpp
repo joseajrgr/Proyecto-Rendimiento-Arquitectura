@@ -28,18 +28,38 @@ void leerFluido(std::ifstream& in, Fluid& fluid) {
 
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-void escribirFluido(std::ofstream& out, const Fluid& fluid) {
+void escribirFluido(std::ofstream& out, const Fluid& fluid, const std::vector<Block>& blocks) {
     out.write(reinterpret_cast<const char*>(&fluid.particlespermeter), sizeof(float));
     out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
-    for (const auto& particle : fluid.particles) {
-        for (const double* attr : {&particle.px, &particle.py, &particle.pz,
-                                   &particle.hvx, &particle.hvy, &particle.hvz,
-                                   &particle.vx, &particle.vy, &particle.vz}) {
-            auto temp = static_cast<float>(*attr);
-            out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+
+    // Write particle information from blocks
+    for (const auto& block : blocks) {
+        // Create a copy of the particles to sort
+        std::vector<Particle> sortedParticles = block.particles;
+
+        // Sort the particles based on id
+        std::sort(sortedParticles.begin(), sortedParticles.end(), [](const Particle& p1, const Particle& p2) {
+            return p1.id < p2.id;
+        });
+
+        // Write sorted particles to the output file
+        for (const auto& particle : sortedParticles) {
+            out.write(reinterpret_cast<const char*>(&particle.px), sizeof(float));
+            out.write(reinterpret_cast<const char*>(&particle.py), sizeof(float));
+            out.write(reinterpret_cast<const char*>(&particle.pz), sizeof(float));
+            out.write(reinterpret_cast<const char*>(&particle.hvx), sizeof(float));
+            out.write(reinterpret_cast<const char*>(&particle.hvy), sizeof(float));
+            out.write(reinterpret_cast<const char*>(&particle.hvz), sizeof(float));
+            out.write(reinterpret_cast<const char*>(&particle.vx), sizeof(float));
+            out.write(reinterpret_cast<const char*>(&particle.vy), sizeof(float));
+            out.write(reinterpret_cast<const char*>(&particle.vz), sizeof(float));
+            // Print particle information
+            std::cout << "Particle ID: " << particle.id << ", Position: (" << particle.px << ", " << particle.py << ", " << particle.pz << ")\n";
         }
     }
 }
+
+
 // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
 
@@ -108,7 +128,7 @@ Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Ar
     }
 
     // Escribir el estado final del fluido en el archivo de salida
-    escribirFluido(output, argumentos.fluid);
+    escribirFluido(output, argumentos.fluid, argumentos.blocks);
     output.close();
     std::cout << "Simulación completada. Estado final del fluido guardado en: " << arguments[2] << "\n";
     return Constantes::ErrorCode::NO_ERROR;

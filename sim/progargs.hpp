@@ -16,6 +16,7 @@ struct Argumentos {
     std::string archivoEntrada;
     std::string archivoSalida;
     Fluid fluid;
+    std::vector<Block> blocks;
 };
 
 

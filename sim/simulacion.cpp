@@ -27,11 +27,8 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
     malla.reposicionarParticulasFluid(argumentos.fluid, blocks);
     for (int iter = 0; iter < argumentos.iteraciones; ++iter) {
         // std::cout << "Iteración " << iter + 1 << "\n";
-
-        malla.reposicionarParticulasBloque(blocks);
-
-
         initAccelerations(blocks);
+        malla.reposicionarParticulasBloque(blocks);
         incrementDensities(blocks, smoothingLength, malla);
         transformDensities(blocks, smoothingLength, factorDensTransf);
         transferAcceleration(blocks, smoothingLength, constAccTransf, malla);
@@ -40,21 +37,9 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
 
 
-        if (iter == argumentos.iteraciones - 1) {
-            for (const Block &block: blocks) {
-                // Itera sobre las partículas en el bloque actual
-                for (const Particle &particle: block.particles) {
-                    std::cout <<  "La partícula " << particle.id << " " << particle.density
-                            << " está en el bloque "
-                            << particle.idBloque << " x: " << particle.px << " y: " << particle.py
-                            << " z: " << particle.pz << " Velocidad: (" << particle.vx << ", " << particle.vy << ", "
-                            << particle.vz << ")"
-                            << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-                            << particle.az << ")" << '\n';
-                }
-            }
-        }
+
     }
+
 }
 
 
@@ -81,6 +66,7 @@ double calculateDistanceSquared(const Particle &particle1, const Particle &parti
 
 
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
+    double const hsq = h*h;
     for (auto& block1 : blocks) {
         for (auto& particle1 : block1.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
@@ -104,9 +90,9 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
                             for (auto& particle2 : block2.particles) {
                                 if (particle1.id < particle2.id) {
                                     double const distSquared = calculateDistanceSquared(particle1, particle2);
-                                    if (distSquared < h * h) {
+                                    if (distSquared < hsq) {
                                         // Calcula el incremento de densidad ∆ρij
-                                        double const deltaDensity= std::pow(((h * h) - distSquared), 3);
+                                        double const deltaDensity= std::pow(((hsq) - distSquared), 3);
                                         // Incrementa la densidad de ambas partículas
                                         particle1.density += deltaDensity;
                                         particle2.density += deltaDensity;
