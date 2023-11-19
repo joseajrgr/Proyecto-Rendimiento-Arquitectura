@@ -14,6 +14,7 @@
 #include "sim/progargs.hpp"
 
 
+void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLength, double particleMass);
 void initAccelerations(std::vector<Block>& blocks);
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla);
 void transformDensities(std::vector<Block>& blocks, double h, double factorDensTransf);
@@ -59,14 +60,36 @@ int main(int argc, char *argv[]) {
     double const smoothingLength = result.first;
     double const particleMass = result.second;
 
+    ejecutarIteraciones(malla, argumentos, smoothingLength, particleMass);
+
+    // Escribir el estado final del fluido en el archivo de salida
+    std::ofstream output(arguments[2], std::ios::binary);
+    if (!output) {
+        std::cerr << "Error: Cannot open " << arguments[2] << " for writing\n";
+        return Constantes::ErrorCode::CANNOT_OPEN_FILE_WRITING;
+    }
+    writeFluid(output, argumentos.fluid);
+
+    output.close();
+    std::cout << "Simulación completada. Estado final del fluido guardado en: " << arguments[2] << "\n";
+    unsigned const tiempo1= clock();
+    double const time = (double(tiempo1-tiempo0)/CLOCKS_PER_SEC);
+    std::cout << "Execution Time: " << time;
+    return 0;
+}
+
+
+void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLength, double particleMass) {
     // Para la transferencia de densidades
     const double factorDensTransf = (315.0 / (64.0 * std::numbers::pi * std::pow(smoothingLength, 9))) * particleMass;
 
     // Para la transferencia de aceleraciones
     Constantes::ConstAccTransf constAccTransf;
     constAccTransf.hSquared = smoothingLength * smoothingLength;
-    constAccTransf.factor2 = (45 / (std::numbers::pi * std::pow(smoothingLength, 6)) * Constantes::viscosidad * particleMass);
-    constAccTransf.commonFactor = (15 / (std::numbers::pi * std::pow(smoothingLength, 6))) * ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
+    constAccTransf.factor2 = (45 / (std::numbers::pi * std::pow(smoothingLength, 6)) * Constantes::viscosidad *
+                              particleMass);
+    constAccTransf.commonFactor = (15 / (std::numbers::pi * std::pow(smoothingLength, 6))) *
+                                  ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
 
     std::vector<Block> blocks = malla.getBlocks();
     //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
@@ -104,21 +127,6 @@ int main(int argc, char *argv[]) {
             }
         } */
     }
-
-    // Escribir el estado final del fluido en el archivo de salida
-    std::ofstream output(arguments[2], std::ios::binary);
-    if (!output) {
-        std::cerr << "Error: Cannot open " << arguments[2] << " for writing\n";
-        return Constantes::ErrorCode::CANNOT_OPEN_FILE_WRITING;
-    }
-    writeFluid(output, argumentos.fluid);
-
-    output.close();
-    std::cout << "Simulación completada. Estado final del fluido guardado en: " << arguments[2] << "\n";
-    unsigned const tiempo1= clock();
-    double const time = (double(tiempo1-tiempo0)/CLOCKS_PER_SEC);
-    std::cout << "Execution Time: " << time;
-    return 0;
 }
 
 
