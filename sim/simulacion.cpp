@@ -9,7 +9,7 @@
 #include "sim/progargs.hpp"
 #include "simulacion.hpp"
 
-void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLength, double particleMass) {
+std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLength, double particleMass) {
     // Para la transferencia de densidades
     const double factorDensTransf = (315.0 / (64.0 * std::numbers::pi * std::pow(smoothingLength, 9))) * particleMass;
 
@@ -39,6 +39,7 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
 
 
     }
+    return blocks;
 
 }
 

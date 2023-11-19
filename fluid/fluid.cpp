@@ -34,9 +34,9 @@ int main(int argc, char *argv[]) {
     double const smoothingLength = result.first;
     double const particleMass = result.second;
 
-    ejecutarIteraciones(malla, argumentos, smoothingLength, particleMass);
+    std::vector<Block> blocks = ejecutarIteraciones(malla, argumentos, smoothingLength, particleMass);
 
-    errorCode = comprobarArgsSalida(arguments, argumentos);
+    errorCode = comprobarArgsSalida(arguments, argumentos, blocks);
     if (errorCode != 0) {
         return errorCode;
     }

@@ -17,7 +17,7 @@
 #include "sim/progargs.hpp"
 
 // Relativo a la simulacion
-void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLength, double particleMass);
+std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLength, double particleMass);
 void initAccelerations(std::vector<Block>& blocks);
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla);
 void transformDensities(std::vector<Block>& blocks, double h, double factorDensTransf);

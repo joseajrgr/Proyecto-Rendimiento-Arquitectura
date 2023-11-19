@@ -119,7 +119,7 @@ Constantes::ErrorCode comprobarParticulas(std::vector<std::string> arguments, Ar
 }
 
 
-Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Argumentos& argumentos) {
+Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Argumentos& argumentos, std::vector<Block>& blocks) {
     // Comprobar si se puede abrir el fichero de salida
     std::ofstream output(arguments[2], std::ios::binary);
     if (!output) {
@@ -128,7 +128,7 @@ Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Ar
     }
 
     // Escribir el estado final del fluido en el archivo de salida
-    escribirFluido(output, argumentos.fluid, argumentos.blocks);
+    escribirFluido(output, argumentos.fluid, blocks);
     output.close();
     std::cout << "Simulación completada. Estado final del fluido guardado en: " << arguments[2] << "\n";
     return Constantes::ErrorCode::NO_ERROR;
