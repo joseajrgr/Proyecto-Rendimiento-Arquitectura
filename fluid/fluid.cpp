@@ -26,21 +26,6 @@ void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double 
 
 
 
-//NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-void writeFluid(std::ofstream& out, const Fluid& fluid) {
-    out.write(reinterpret_cast<const char*>(&fluid.particlespermeter), sizeof(float));
-    out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
-    for (const auto& particle : fluid.particles) {
-        for (const double* attr : {&particle.px, &particle.py, &particle.pz,
-                                   &particle.hvx, &particle.hvy, &particle.hvz,
-                                   &particle.vx, &particle.vy, &particle.vz}) {
-            auto temp = static_cast<float>(*attr);
-            out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        }
-    }
-}
-// NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
-
 int main(int argc, char *argv[]) {
     unsigned const tiempo0=clock();
     std::span const args_view{argv, static_cast<std::size_t>(argc)};
@@ -49,7 +34,7 @@ int main(int argc, char *argv[]) {
     Argumentos argumentos;
 
     Constantes::ErrorCode errorCode = Constantes::NO_ERROR;
-    errorCode = comprobarArgs(argc, arguments, argumentos);
+    errorCode = comprobarArgsEntrada(argc, arguments, argumentos);
     if (errorCode != 0) {
         return errorCode;
     }
@@ -62,20 +47,13 @@ int main(int argc, char *argv[]) {
 
     ejecutarIteraciones(malla, argumentos, smoothingLength, particleMass);
 
-    // Escribir el estado final del fluido en el archivo de salida
-    std::ofstream output(arguments[2], std::ios::binary);
-    if (!output) {
-        std::cerr << "Error: Cannot open " << arguments[2] << " for writing\n";
-        return Constantes::ErrorCode::CANNOT_OPEN_FILE_WRITING;
+    errorCode = comprobarArgsSalida(arguments, argumentos);
+    if (errorCode != 0) {
+        return errorCode;
     }
-    writeFluid(output, argumentos.fluid);
-
-    output.close();
-    std::cout << "Simulación completada. Estado final del fluido guardado en: " << arguments[2] << "\n";
     unsigned const tiempo1= clock();
     double const time = (double(tiempo1-tiempo0)/CLOCKS_PER_SEC);
     std::cout << "Execution Time: " << time;
-    return 0;
 }
 
 
@@ -111,7 +89,7 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
 
 
-        /* if (iter == argumentos.iteraciones - 1) {
+        if (iter == argumentos.iteraciones - 1) {
             for (const Block &block: blocks) {
                 // Itera sobre las partículas en el bloque actual
                 for (const Particle &particle: block.particles) {
@@ -124,7 +102,7 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
                             << particle.az << ")" << '\n';
                 }
             }
-        } */
+        }
     }
 }
 

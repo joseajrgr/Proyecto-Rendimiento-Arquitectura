@@ -27,7 +27,23 @@ void readFluid(std::ifstream& in, Fluid& fluid) {
 // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
 
-Constantes::ErrorCode comprobarArgs(int argc, std::vector<std::string> arguments, Argumentos& argumentos) {
+//NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+void writeFluid(std::ofstream& out, const Fluid& fluid) {
+    out.write(reinterpret_cast<const char*>(&fluid.particlespermeter), sizeof(float));
+    out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
+    for (const auto& particle : fluid.particles) {
+        for (const double* attr : {&particle.px, &particle.py, &particle.pz,
+                                   &particle.hvx, &particle.hvy, &particle.hvz,
+                                   &particle.vx, &particle.vy, &particle.vz}) {
+            auto temp = static_cast<float>(*attr);
+            out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        }
+    }
+}
+// NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
+
+
+Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> arguments, Argumentos& argumentos) {
     // Comprueba el numero de argumentos
     if (argc != 4) {
         std::cerr << "Error: Invalid number of arguments. Usage: " << arguments.size()
@@ -70,5 +86,21 @@ Constantes::ErrorCode comprobarArgs(int argc, std::vector<std::string> arguments
         return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
 
+    return Constantes::ErrorCode::NO_ERROR;
+};
+
+
+Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Argumentos& argumentos) {
+    // Comprobar si se puede abrir el fichero de salida
+    std::ofstream output(arguments[2], std::ios::binary);
+    if (!output) {
+        std::cerr << "Error: Cannot open " << arguments[2] << " for writing\n";
+        return Constantes::ErrorCode::CANNOT_OPEN_FILE_WRITING;
+    }
+
+    // Escribir el estado final del fluido en el archivo de salida
+    writeFluid(output, argumentos.fluid);
+    output.close();
+    std::cout << "Simulación completada. Estado final del fluido guardado en: " << arguments[2] << "\n";
     return Constantes::ErrorCode::NO_ERROR;
 };
