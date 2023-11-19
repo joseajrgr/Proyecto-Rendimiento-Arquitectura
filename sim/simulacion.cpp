@@ -16,14 +16,14 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
     // Para la transferencia de aceleraciones
     Constantes::ConstAccTransf constAccTransf;
     constAccTransf.hSquared = smoothingLength * smoothingLength;
-    constAccTransf.hpowSix = std::pow(smoothingLength, 6);
-    constAccTransf.factor2 = (45 / (std::numbers::pi * constAccTransf.hpowSix) * Constantes::viscosidad *
+    constAccTransf.factor2 = (45 / (std::numbers::pi * std::pow(smoothingLength, 6)) * Constantes::viscosidad *
                               particleMass);
-    constAccTransf.commonFactor = (15 / (std::numbers::pi * constAccTransf.hpowSix)) *
+    constAccTransf.commonFactor = (15 / (std::numbers::pi * std::pow(smoothingLength, 6))) *
                                   ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
 
     std::vector<Block> blocks = malla.getBlocks();
-
+    //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
+    //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     malla.reposicionarParticulasFluid(argumentos.fluid, blocks);
     for (int iter = 0; iter < argumentos.iteraciones; ++iter) {
         // std::cout << "Iteración " << iter + 1 << "\n";
@@ -33,14 +33,27 @@ void ejecutarIteraciones(Grid& malla, Argumentos& argumentos, double smoothingLe
 
         initAccelerations(blocks);
         incrementDensities(blocks, smoothingLength, malla);
-        transformDensities(blocks, constAccTransf.hpowSix, factorDensTransf);
+        transformDensities(blocks, smoothingLength, factorDensTransf);
         transferAcceleration(blocks, smoothingLength, constAccTransf, malla);
         particleColissions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
         particlesMovement(blocks);
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
 
 
-
+        if (iter == argumentos.iteraciones - 1) {
+            for (const Block &block: blocks) {
+                // Itera sobre las partículas en el bloque actual
+                for (const Particle &particle: block.particles) {
+                    std::cout <<  "La partícula " << particle.id << " " << particle.density
+                            << " está en el bloque "
+                            << particle.idBloque << " x: " << particle.px << " y: " << particle.py
+                            << " z: " << particle.pz << " Velocidad: (" << particle.vx << ", " << particle.vy << ", "
+                            << particle.vz << ")"
+                            << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
+                            << particle.az << ")" << '\n';
+                }
+            }
+        }
     }
 }
 
@@ -111,10 +124,10 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
 
 
 
-void transformDensities(std::vector<Block>& blocks, double hpowSix, double factorDensTransf) {
+void transformDensities(std::vector<Block>& blocks, double h, double factorDensTransf) {
     for (auto& block : blocks) {
         for (auto& particle : block.particles) {
-            particle.density = (particle.density + hpowSix) * factorDensTransf;
+            particle.density = (particle.density + std::pow(h, 6)) * factorDensTransf;
         }
     }
 }

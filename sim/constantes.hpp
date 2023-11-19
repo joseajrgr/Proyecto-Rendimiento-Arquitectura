@@ -42,7 +42,6 @@ namespace Constantes {
     // Para la transferencia de la aceleracion
     struct ConstAccTransf {
         double hSquared;
-        double hpowSix;
         double factor2;
         double commonFactor;
     };
