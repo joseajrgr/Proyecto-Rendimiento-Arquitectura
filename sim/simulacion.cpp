@@ -38,7 +38,7 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
                 for (auto &particle: block.particles) {
                     std::cout << std::setprecision(32) << "La partícula " << particle.id << " " << particle.density
                               << " está en el bloque "
-                              << particle.idBloque << " x: " << particle.px << " y: " << particle.py << " z: "
+                              << particle.idBloque << " " << block.id << " x: " << particle.px << " y: " << particle.py << " z: "
                               << particle.pz
                               << "    Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz
                               << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az
