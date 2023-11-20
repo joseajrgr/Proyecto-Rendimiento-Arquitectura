@@ -115,3 +115,14 @@ TEST(SimulationTests, ParticlesCollisionsz) {
     ASSERT_EQ(1,blocks_vector[0].particles[0].ax);
     ASSERT_NEAR(-240,blocks_vector[0].particles[0].az,1e-5);
 }
+TEST(SimulationTests, ParticlesCollisionsxyz) {
+    Block block(0,0,0,0);
+    const Particle particle{0, 1, -0.0652, -0.08, -0.0652, -0.1, -0.2, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    std::vector<Block> blocks_vector;
+    block.addParticle(particle);
+    blocks_vector.push_back(block);
+    particleColissions(blocks_vector,4.0,4.0,4.0);
+    ASSERT_NEAR(-112.0,blocks_vector[0].particles[0].ax,1e-5);
+    ASSERT_NEAR(-242.99999,blocks_vector[0].particles[0].ay,1e-5);
+    ASSERT_NEAR(-240,blocks_vector[0].particles[0].az,1e-5);
+}

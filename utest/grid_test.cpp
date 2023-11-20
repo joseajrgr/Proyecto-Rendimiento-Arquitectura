@@ -11,7 +11,7 @@ TEST(GridTests, dividirEnBloques_correcto) {
     ASSERT_EQ(3.0, grid.getNumberblocksx());
     ASSERT_EQ(3.0, grid.getNumberblocksy());
     ASSERT_EQ(3.0, grid.getNumberblocksz());
-    ASSERT_EQ(27.0, grid.getNumBlocks());
+    ASSERT_EQ(27.0, grid.getNumberblocksx()*grid.getNumberblocksy()*grid.getNumberblocksz());
     ASSERT_EQ(1.0, grid.getMeshx());
     ASSERT_EQ(1.0, grid.getMeshy());
     ASSERT_EQ(1.0, grid.getMeshz());
@@ -30,7 +30,7 @@ TEST(GridTests, dividirEnBloques_bneg) {
     ASSERT_EQ(3.0, grid.getNumberblocksx());
     ASSERT_EQ(3.0, grid.getNumberblocksy());
     ASSERT_EQ(3.0, grid.getNumberblocksz());
-    ASSERT_EQ(27.0, grid.getNumBlocks());
+    ASSERT_EQ(27.0, grid.getNumberblocksx()*grid.getNumberblocksy()*grid.getNumberblocksz());
     ASSERT_EQ(1.0, grid.getMeshx());
     ASSERT_EQ(1.0, grid.getMeshy());
     ASSERT_EQ(1.0, grid.getMeshz());
@@ -63,7 +63,7 @@ TEST(GridTests, dividirEnBloques_sucesivo) {
     ASSERT_EQ(10.0, grid.getNumberblocksx());
     ASSERT_EQ(10.0, grid.getNumberblocksy());
     ASSERT_EQ(10.0, grid.getNumberblocksz());
-    ASSERT_EQ(1000.0, grid.getNumBlocks());
+    ASSERT_EQ(1000.0, grid.getNumberblocksx()*grid.getNumberblocksy()*grid.getNumberblocksz());
     ASSERT_EQ(1.0, grid.getMeshx());
     ASSERT_EQ(1.0, grid.getMeshy());
     ASSERT_EQ(1.0, grid.getMeshz());
@@ -73,7 +73,7 @@ TEST(GridTests, dividirEnBloques_sucesivo) {
     ASSERT_EQ(5.0, grid.getNumberblocksx());
     ASSERT_EQ(5.0, grid.getNumberblocksy());
     ASSERT_EQ(5.0, grid.getNumberblocksz());
-    ASSERT_EQ(125.0, grid.getNumBlocks());
+    ASSERT_EQ(125.0,grid.getNumberblocksx()*grid.getNumberblocksy()*grid.getNumberblocksz());
     ASSERT_EQ(2.0, grid.getMeshx());
     ASSERT_EQ(2.0, grid.getMeshy());
     ASSERT_EQ(2.0, grid.getMeshz());
