@@ -35,10 +35,10 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
         particleColissions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
         particlesMovement(blocks);
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
-        if (iter == argumentos.iteraciones - 1) {
+        /* if (iter == argumentos.iteraciones - 1) {
             for (auto &block: blocks) {
                 for (auto &particle: block.particles) {
-                    std::cout << std::setprecision(32) << "La partícula " << particle.id << " " << particle.density
+                    std::cout << std::setprecision(sizeof(float)) << "La partícula " << particle.id << " " << particle.density
                               << " está en el bloque "
                               << particle.idBloque << " " << block.id << " x: " << particle.px << " y: " << particle.py << " z: "
                               << particle.pz
@@ -47,7 +47,7 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
                               << ")" << std::endl;
                 }
             }
-        }
+        } */
     }
 
     return blocks;
