@@ -6,7 +6,6 @@
 #include <vector>
 #include <string>
 #include <span>
-#include "progargs.hpp"
 #include "sim/constantes.hpp"
 #include "sim/grid.hpp"
 
@@ -25,4 +24,4 @@ Constantes::ErrorCode comprobarParticulas(std::vector<std::string> arguments, Ar
 Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Argumentos& argumentos, std::vector<Block>& blocks);
 
 
-#endif //PROYECTO_RENDIMIENTO_ARQUITECTURA_PROGARGS_HPP
+#endif  // PROYECTO_RENDIMIENTO_ARQUITECTURA_PROGARGS_HPP

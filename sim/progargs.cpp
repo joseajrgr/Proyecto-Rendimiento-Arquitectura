@@ -2,8 +2,6 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <iomanip>
-#include <span>
 #include "progargs.hpp"
 #include "sim/constantes.hpp"
 #include "sim/grid.hpp"
@@ -34,8 +32,7 @@ bool compareParticlesByID(const Particle& a, const Particle& b) {
 }
 
 void escribirFluido(std::ofstream& out, Fluid& fluid, const std::vector<Block>& blocks) {
-    float temp;
-    temp = static_cast<float>(fluid.particlespermeter);
+    auto temp = static_cast<float>(fluid.particlespermeter);
     out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
     out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
 
@@ -52,32 +49,12 @@ void escribirFluido(std::ofstream& out, Fluid& fluid, const std::vector<Block>& 
 
     // Write sorted particles to the output file
     for (auto& particle : allParticles) {
-        // Print particle information
-//        std::cout << "La partícula " << " " << particle.density << " está en el bloque " << particle.idBloque << " x: "
-//                  << particle.px << " y: " << particle.py << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", "
-//                  << particle.vy << ", " << particle.vz << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-//                  << particle.az << ")" << std::endl;
-
-        temp = static_cast<float>(particle.px);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        temp = static_cast<float>(particle.py);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        temp = static_cast<float>(particle.pz);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        temp = static_cast<float>(particle.hvx);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        temp = static_cast<float>(particle.hvy);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        temp = static_cast<float>(particle.hvz);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        temp = static_cast<float>(particle.vx);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        temp = static_cast<float>(particle.vy);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-        temp = static_cast<float>(particle.vz);
-        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-
-
+        for (double* attr : {&particle.px, &particle.py, &particle.pz,
+                             &particle.hvx, &particle.hvy, &particle.hvz,
+                             &particle.vx, &particle.vy, &particle.vz}) {
+            temp = static_cast<float>(*attr);
+            out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        }
     }
 }
 

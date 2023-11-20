@@ -25,7 +25,6 @@ public:
     std::pair<double, double> simular_malla(const Fluid &fluid);
     void reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &blocks) const;
     void reposicionarParticulasBloque(std::vector<Block> &blocks) const;
-    static std::vector<Particle>::iterator comprobarBloque(Block &block, Particle &particula, Block &newBlock, std::vector<Particle>::iterator iterador);
     [[nodiscard]] inline const std::vector<Block>& getBlocks() const { return blocks; }
 
 private:
@@ -42,6 +41,8 @@ private:
     Punto bmin; // Limite inferior del recinto
     Punto bmax; // Limite superior del recinto
     std::vector<Block> blocks;
+
+    void dividirVectorBloques(std::vector<Block> &nuevosBloques) const;
 };
 
 
