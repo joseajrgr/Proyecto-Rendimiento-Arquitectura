@@ -37,8 +37,7 @@ void escribirFluido(std::ofstream& out, Fluid& fluid, const std::vector<Block>& 
     float temp;
     temp = static_cast<float>(fluid.particlespermeter);
     out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-    temp = static_cast<float>(fluid.numberparticles);
-    out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+    out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
 
     // Vector to store all particles for sorting
     std::vector<Particle> allParticles;
@@ -54,10 +53,10 @@ void escribirFluido(std::ofstream& out, Fluid& fluid, const std::vector<Block>& 
     // Write sorted particles to the output file
     for (auto& particle : allParticles) {
         // Print particle information
-        std::cout << "La partícula " << " " << particle.density << " está en el bloque " << particle.idBloque << " x: "
-                  << particle.px << " y: " << particle.py << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", "
-                  << particle.vy << ", " << particle.vz << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-                  << particle.az << ")" << std::endl;
+//        std::cout << "La partícula " << " " << particle.density << " está en el bloque " << particle.idBloque << " x: "
+//                  << particle.px << " y: " << particle.py << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", "
+//                  << particle.vy << ", " << particle.vz << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
+//                  << particle.az << ")" << std::endl;
 
         temp = static_cast<float>(particle.px);
         out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
