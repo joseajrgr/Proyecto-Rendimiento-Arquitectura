@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <iomanip>
 #include <span>
 #include "progargs.hpp"
 #include "sim/constantes.hpp"
@@ -28,34 +29,41 @@ void leerFluido(std::ifstream& in, Fluid& fluid) {
 
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+bool compareParticlesByID(const Particle& a, const Particle& b) {
+    return a.id < b.id;
+}
+
 void escribirFluido(std::ofstream& out, const Fluid& fluid, const std::vector<Block>& blocks) {
     out.write(reinterpret_cast<const char*>(&fluid.particlespermeter), sizeof(float));
-    out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
+    out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(float));
 
-    // Write particle information from blocks
+    // Vector to store all particles for sorting
+    std::vector<Particle> allParticles;
+
+    // Collect all particles from blocks into a single vector
     for (const auto& block : blocks) {
-        // Create a copy of the particles to sort
-        std::vector<Particle> sortedParticles = block.particles;
+        allParticles.insert(allParticles.end(), block.particles.begin(), block.particles.end());
+    }
 
-        // Sort the particles based on id
-        std::sort(sortedParticles.begin(), sortedParticles.end(), [](const Particle& p1, const Particle& p2) {
-            return p1.id < p2.id;
-        });
+    // Sort particles by ID
+    std::sort(allParticles.begin(), allParticles.end(), compareParticlesByID);
 
-        // Write sorted particles to the output file
-        for (const auto& particle : sortedParticles) {
-            out.write(reinterpret_cast<const char*>(&particle.px), sizeof(float));
-            out.write(reinterpret_cast<const char*>(&particle.py), sizeof(float));
-            out.write(reinterpret_cast<const char*>(&particle.pz), sizeof(float));
-            out.write(reinterpret_cast<const char*>(&particle.hvx), sizeof(float));
-            out.write(reinterpret_cast<const char*>(&particle.hvy), sizeof(float));
-            out.write(reinterpret_cast<const char*>(&particle.hvz), sizeof(float));
-            out.write(reinterpret_cast<const char*>(&particle.vx), sizeof(float));
-            out.write(reinterpret_cast<const char*>(&particle.vy), sizeof(float));
-            out.write(reinterpret_cast<const char*>(&particle.vz), sizeof(float));
-            // Print particle information
-            std::cout << "Particle ID: " << particle.id << ", Position: (" << particle.px << ", " << particle.py << ", " << particle.pz << ")\n";
-        }
+    // Write sorted particles to the output file
+    for (const auto& particle : allParticles) {
+        out.write(reinterpret_cast<const char*>(&particle.px), sizeof(float));
+        out.write(reinterpret_cast<const char*>(&particle.py), sizeof(float));
+        out.write(reinterpret_cast<const char*>(&particle.pz), sizeof(float));
+        out.write(reinterpret_cast<const char*>(&particle.hvx), sizeof(float));
+        out.write(reinterpret_cast<const char*>(&particle.hvy), sizeof(float));
+        out.write(reinterpret_cast<const char*>(&particle.hvz), sizeof(float));
+        out.write(reinterpret_cast<const char*>(&particle.vx), sizeof(float));
+        out.write(reinterpret_cast<const char*>(&particle.vy), sizeof(float));
+        out.write(reinterpret_cast<const char*>(&particle.vz), sizeof(float));
+        // Print particle information
+        /* std::cout << "La partícula " << " " << particle.density << " está en el bloque " << particle.idBloque << " x: "
+            << particle.px << " y: " << particle.py << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", "
+            << particle.vy << ", " << particle.vz << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
+            << particle.az << ")" << std::endl; */
     }
 }
 

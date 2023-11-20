@@ -15,10 +15,6 @@ public:
     [[nodiscard]] inline double getNumberblocksx() const { return numberblocksx; }
     [[nodiscard]] inline double getNumberblocksy() const { return numberblocksy; }
     [[nodiscard]] inline double getNumberblocksz() const { return numberblocksz; }
-    [[nodiscard]] inline double getNumBlocks() const { return numBlocks; }
-    [[nodiscard]] inline double getMeshx() const { return meshx; }
-    [[nodiscard]] inline double getMeshy() const { return meshy; }
-    [[nodiscard]] inline double getMeshz() const { return meshz; }
 
     // Relativo a dividir la malla
     Grid(const Punto& bmin, const Punto& bmax);

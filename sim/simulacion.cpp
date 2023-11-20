@@ -33,14 +33,24 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
         transformDensities(blocks, smoothingLength, factorDensTransf);
         transferAcceleration(blocks, smoothingLength, constAccTransf, malla);
         particleColissions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
+        if (iter == argumentos.iteraciones - 1) {
+            for (auto &block: blocks) {
+                for (auto &particle: block.particles) {
+                    std::cout << std::setprecision(32) << "La partícula " << particle.id << " " << particle.density
+                              << " está en el bloque "
+                              << particle.idBloque << " x: " << particle.px << " y: " << particle.py << " z: "
+                              << particle.pz
+                              << "    Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz
+                              << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az
+                              << ")" << std::endl;
+                }
+            }
+        }
         particlesMovement(blocks);
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
-
-
-
     }
-    return blocks;
 
+    return blocks;
 }
 
 
@@ -97,6 +107,13 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
                                         // Incrementa la densidad de ambas partículas
                                         particle1.density += deltaDensity;
                                         particle2.density += deltaDensity;
+                                        /* if ((particle1.id == 622 || particle2.id == 622)) {
+                                            std::cout << "Interaction " << particle1.id << " (" << particle1.idBloque << ") " << particle2.id << "\n";
+                                            std::cout << std::setprecision(32) << "squared distance = " << distSquared << "\n";
+                                            std::cout << std::setprecision(32) << "delta density = " << deltaDensity << "\n";
+                                            std::cout << std::setprecision(32) << "density particle " << particle1.id << " -> " << particle1.density << std::endl;
+                                            std::cout << std::setprecision(32) <<"density particle " << particle2.id << " -> " << particle2.density << std::endl  << "\n";
+                                        } */
                                     }
                                 }
                             }
