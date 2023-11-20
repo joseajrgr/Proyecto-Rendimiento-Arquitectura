@@ -72,7 +72,7 @@ void Grid::reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &bloques
         const int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * invmeshy), static_cast<int>(numberblocksy) - 1));
         const int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * invmeshz), static_cast<int>(numberblocksz) - 1));
 
-        const int blockId = static_cast<int>(indicex + indicey * numberblocksx + indicez * numberblocksx * numberblocksy);
+        const int blockId = static_cast<int>(indicez + indicey * numberblocksz + indicex * numberblocksz * numberblocksy);
         Block &block = bloques[blockId];
         particula.idBloque = block.id;
         block.addParticle(particula);
@@ -102,7 +102,7 @@ void Grid::reposicionarParticulasBloque(std::vector<Block> &bloques) const {
             const int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * invmeshy), static_cast<int>(numberblocksy) - 1));
             const int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * invmeshz), static_cast<int>(numberblocksz) - 1));
 
-            const int blockId = static_cast<int>(indicex + indicey * numberblocksx + indicez * numberblocksx * numberblocksy);
+            const int blockId = static_cast<int>(indicez + indicey * numberblocksz + indicex * numberblocksz * numberblocksy);
             Block &newBlock = nuevosBloques[blockId];
             // std::cout << blockId << " " << newBlock.id << "\n";
             particula.idBloque = newBlock.id;

@@ -33,6 +33,8 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
         transformDensities(blocks, smoothingLength, factorDensTransf);
         transferAcceleration(blocks, smoothingLength, constAccTransf, malla);
         particleColissions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
+        particlesMovement(blocks);
+        limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
         if (iter == argumentos.iteraciones - 1) {
             for (auto &block: blocks) {
                 for (auto &particle: block.particles) {
@@ -46,8 +48,6 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
                 }
             }
         }
-        particlesMovement(blocks);
-        limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
     }
 
     return blocks;
@@ -81,9 +81,9 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
     for (auto& block1 : blocks) {
         for (auto& particle1 : block1.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
-            for (int dx = -1; dx <= 1; ++dx) {
+            for (int dz = -1; dz <= 1; ++dz) {
                 for (int dy = -1; dy <= 1; ++dy) {
-                    for (int dz = -1; dz <= 1; ++dz) {
+                    for (int dx = -1; dx <= 1; ++dx) {
                         const int neighbor_cx = block1.cx + dx;
                         const int neighbor_cy = block1.cy + dy;
                         const int neighbor_cz = block1.cz + dz;
@@ -268,7 +268,7 @@ void particleColissions(std::vector<Block>& blocks, double numberblocksx, double
             /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las particulas de ese bloque, llamando
             a handleXCollisions*/
             if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
-                handleZCollisions(particula, block.cx, numberblocksx);
+                handleXCollisions(particula, block.cx, numberblocksx);
             }
             /* si un bloque tiene cy==0 o cy== numbrblocks-1 se actualiza el ay de todas las particulas de ese bloque, llamando
             a handleYCollisions*/
@@ -278,7 +278,7 @@ void particleColissions(std::vector<Block>& blocks, double numberblocksx, double
             /* si un bloque tiene cz==0 o cz== numbrblocks-1 se actualiza el az de todas las particulas de ese bloque, llamando
             a handleZCollisions*/
             if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
-                handleXCollisions(particula, block.cz, numberblocksz);
+                handleZCollisions(particula, block.cz, numberblocksz);
             }
         }
     }
@@ -373,7 +373,7 @@ void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double 
         for (auto& particula : block.particles) {
             /* si un bloque tiene cx==0 o cx== numbrblocks-1 se actualiza el ax de todas las particulas de ese bloque, llamando a handleXCollisions*/
             if (block.cx == 0 || block.cx == static_cast<int>(numberblocksx) - 1) {
-                InteractionLimitZ(particula, block.cx, numberblocksx);
+                InteractionLimitX(particula, block.cx, numberblocksx);
             }
             /* si un bloque tiene cy==0 o cy== numbrblocks-1 se actualiza el ay de todas las particulas de ese bloque, llamando a handleYCollisions*/
             if (block.cy == 0 || block.cy == static_cast<int>(numberblocksy) - 1) {
@@ -381,7 +381,7 @@ void limitInteractions(std::vector<Block>& blocks, double numberblocksx, double 
             }
             /* si un bloque tiene cz==0 o cz== numbrblocks-1 se actualiza el az de todas las particulas de ese bloque, llamando a handleZCollisions*/
             if (block.cz == 0 || block.cz == static_cast<int>(numberblocksz) - 1) {
-                InteractionLimitX(particula, block.cz, numberblocksz);
+                InteractionLimitZ(particula, block.cz, numberblocksz);
             }
         }
     }
