@@ -33,9 +33,12 @@ bool compareParticlesByID(const Particle& a, const Particle& b) {
     return a.id < b.id;
 }
 
-void escribirFluido(std::ofstream& out, const Fluid& fluid, const std::vector<Block>& blocks) {
-    out.write(reinterpret_cast<const char*>(&fluid.particlespermeter), sizeof(float));
-    out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(float));
+void escribirFluido(std::ofstream& out, Fluid& fluid, const std::vector<Block>& blocks) {
+    float temp;
+    temp = static_cast<float>(fluid.particlespermeter);
+    out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+    temp = static_cast<float>(fluid.numberparticles);
+    out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
 
     // Vector to store all particles for sorting
     std::vector<Particle> allParticles;
@@ -49,21 +52,33 @@ void escribirFluido(std::ofstream& out, const Fluid& fluid, const std::vector<Bl
     std::sort(allParticles.begin(), allParticles.end(), compareParticlesByID);
 
     // Write sorted particles to the output file
-    for (const auto& particle : allParticles) {
-        out.write(reinterpret_cast<const char*>(&particle.px), sizeof(float));
-        out.write(reinterpret_cast<const char*>(&particle.py), sizeof(float));
-        out.write(reinterpret_cast<const char*>(&particle.pz), sizeof(float));
-        out.write(reinterpret_cast<const char*>(&particle.hvx), sizeof(float));
-        out.write(reinterpret_cast<const char*>(&particle.hvy), sizeof(float));
-        out.write(reinterpret_cast<const char*>(&particle.hvz), sizeof(float));
-        out.write(reinterpret_cast<const char*>(&particle.vx), sizeof(float));
-        out.write(reinterpret_cast<const char*>(&particle.vy), sizeof(float));
-        out.write(reinterpret_cast<const char*>(&particle.vz), sizeof(float));
+    for (auto& particle : allParticles) {
         // Print particle information
-        /* std::cout << "La partícula " << " " << particle.density << " está en el bloque " << particle.idBloque << " x: "
-            << particle.px << " y: " << particle.py << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", "
-            << particle.vy << ", " << particle.vz << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
-            << particle.az << ")" << std::endl; */
+        std::cout << "La partícula " << " " << particle.density << " está en el bloque " << particle.idBloque << " x: "
+                  << particle.px << " y: " << particle.py << " z: " << particle.pz << "    Velocidad: (" << particle.vx << ", "
+                  << particle.vy << ", " << particle.vz << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", "
+                  << particle.az << ")" << std::endl;
+
+        temp = static_cast<float>(particle.px);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        temp = static_cast<float>(particle.py);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        temp = static_cast<float>(particle.pz);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        temp = static_cast<float>(particle.hvx);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        temp = static_cast<float>(particle.hvy);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        temp = static_cast<float>(particle.hvz);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        temp = static_cast<float>(particle.vx);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        temp = static_cast<float>(particle.vy);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+        temp = static_cast<float>(particle.vz);
+        out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+
+
     }
 }
 
