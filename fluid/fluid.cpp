@@ -1,14 +1,7 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
-#include <cmath>
-#include <numbers>
-#include <span>
-#include <array>
 #include <ctime>
-#include <iomanip>
-#include <limits>
 #include "sim/grid.hpp"
 #include "sim/constantes.hpp"
 #include "sim/progargs.hpp"
@@ -22,8 +15,7 @@ int main(int argc, char *argv[]) {
 
     Argumentos argumentos;
 
-    Constantes::ErrorCode errorCode = Constantes::NO_ERROR;
-    errorCode = comprobarArgsEntrada(argc, arguments, argumentos);
+    Constantes::ErrorCode errorCode = comprobarArgsEntrada(argc, arguments, argumentos);
     if (errorCode != 0) {
         return errorCode;
     }

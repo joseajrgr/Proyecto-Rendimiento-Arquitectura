@@ -1,7 +1,6 @@
 #include <vector>
 #include <cmath>
 #include <numbers>
-#include <span>
 #include <array>
 #include <limits>
 #include "sim/grid.hpp"
@@ -14,7 +13,7 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
     const double factorDensTransf = (315.0 / (64.0 * std::numbers::pi * std::pow(smoothingLength, 9))) * particleMass;
 
     // Para la transferencia de aceleraciones
-    Constantes::ConstAccTransf constAccTransf;
+    Constantes::ConstAccTransf constAccTransf{};
     constAccTransf.hSquared = smoothingLength * smoothingLength;
     constAccTransf.factor2 = (45 / (std::numbers::pi * std::pow(smoothingLength, 6)) * Constantes::viscosidad *
                               particleMass);
@@ -22,11 +21,8 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
                                   ((3 * particleMass * Constantes::presRigidez) * Constantes::factor05);
 
     std::vector<Block> blocks = malla.getBlocks();
-    //const double factor1 = 15.0 / (M_PI * std::pow(smoothingLength, 6));
-    //const double factor2 = 45.0 / (M_PI * std::pow(smoothingLength, 6) * Constantes::viscosidad * particleMass);
     malla.reposicionarParticulasFluid(argumentos.fluid, blocks);
     for (int iter = 0; iter < argumentos.iteraciones; ++iter) {
-        // std::cout << "Iteración " << iter + 1 << "\n";
         initAccelerations(blocks);
         malla.reposicionarParticulasBloque(blocks);
         incrementDensities(blocks, smoothingLength, malla);
