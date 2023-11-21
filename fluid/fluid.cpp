@@ -29,10 +29,8 @@ int main(int argc, char *argv[]) {
     std::vector<Block> blocks = ejecutarIteraciones(malla, argumentos, smoothingLength, particleMass);
 
     errorCode = comprobarArgsSalida(arguments, argumentos, blocks);
-    if (errorCode != 0) {
-        return errorCode;
-    }
     unsigned const tiempo1= clock();
     double const time = (double(tiempo1-tiempo0)/CLOCKS_PER_SEC);
     std::cout << "Execution Time: " << time;
+    return errorCode;
 }

@@ -3,6 +3,7 @@
 #include <numbers>
 #include <array>
 #include <limits>
+#include <tuple>
 #include "sim/grid.hpp"
 #include "sim/constantes.hpp"
 #include "sim/progargs.hpp"
@@ -14,6 +15,7 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
 
     // Para la transferencia de aceleraciones
     Constantes::ConstAccTransf constAccTransf{};
+    constAccTransf.h = smoothingLength;
     constAccTransf.hSquared = smoothingLength * smoothingLength;
     constAccTransf.factor2 = (45 / (std::numbers::pi * std::pow(smoothingLength, 6)) * Constantes::viscosidad *
                               particleMass);
@@ -27,23 +29,10 @@ std::vector<Block> ejecutarIteraciones(Grid& malla, Argumentos& argumentos, doub
         malla.reposicionarParticulasBloque(blocks);
         incrementDensities(blocks, smoothingLength, malla);
         transformDensities(blocks, smoothingLength, factorDensTransf);
-        transferAcceleration(blocks, smoothingLength, constAccTransf, malla);
+        transferAcceleration(blocks, constAccTransf, malla);
         particleColissions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
         particlesMovement(blocks);
         limitInteractions(blocks, malla.getNumberblocksx(), malla.getNumberblocksy(), malla.getNumberblocksz());
-        /* if (iter == argumentos.iteraciones - 1) {
-            for (auto &block: blocks) {
-                for (auto &particle: block.particles) {
-                    std::cout << std::setprecision(sizeof(float)) << "La partícula " << particle.id << " " << particle.density
-                              << " está en el bloque "
-                              << particle.idBloque << " " << block.id << " x: " << particle.px << " y: " << particle.py << " z: "
-                              << particle.pz
-                              << "    Velocidad: (" << particle.vx << ", " << particle.vy << ", " << particle.vz
-                              << "     Aceleración: (" << particle.ax << ", " << particle.ay << ", " << particle.az
-                              << ")" << std::endl;
-                }
-            }
-        } */
     }
 
     return blocks;
@@ -63,14 +52,6 @@ void initAccelerations(std::vector<Block>& blocks) {
     }
 }
 
-double calculateDistanceSquared(const Particle &particle1, const Particle &particle2) {
-    double const deltaX = particle1.px - particle2.px;
-    double const deltaY = particle1.py - particle2.py;
-    double const deltaZ = particle1.pz - particle2.pz;
-    return deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
-}
-
-
 
 void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
     double const hsq = h*h;
@@ -83,42 +64,52 @@ void incrementDensities(std::vector<Block>& blocks, double h, Grid& malla) {
                         const int neighbor_cx = block1.cx + dx;
                         const int neighbor_cy = block1.cy + dy;
                         const int neighbor_cz = block1.cz + dz;
-
-                        // Asegúrate de que las coordenadas del vecino estén dentro de los límites de la cuadrícula
+                        // Comprueba si las coordenadas del vecino estan dentro de los limites del Grid
                         if (neighbor_cx >= 0 && neighbor_cx < malla.getNumberblocksx() &&
                             neighbor_cy >= 0 && neighbor_cy < malla.getNumberblocksy() &&
                             neighbor_cz >= 0 && neighbor_cz < malla.getNumberblocksz()) {
-
-                            // Calcula el índice del bloque vecino
-                            const int neighborIndex = neighbor_cz + neighbor_cy * malla.getNumberblocksz()
-                                                      + neighbor_cx * malla.getNumberblocksz() * malla.getNumberblocksy();
-
-                            Block& block2 = blocks[neighborIndex];
-                            for (auto& particle2 : block2.particles) {
-                                if (particle1.id < particle2.id) {
-                                    double const distSquared = calculateDistanceSquared(particle1, particle2);
-                                    if (distSquared < hsq) {
-                                        // Calcula el incremento de densidad ∆ρij
-                                        double const deltaDensity= std::pow(((hsq) - distSquared), 3);
-                                        // Incrementa la densidad de ambas partículas
-                                        particle1.density += deltaDensity;
-                                        particle2.density += deltaDensity;
-                                        /* if ((particle1.id == 622 || particle2.id == 622)) {
-                                            std::cout << "Interaction " << particle1.id << " (" << particle1.idBloque << ") " << particle2.id << "\n";
-                                            std::cout << std::setprecision(32) << "squared distance = " << distSquared << "\n";
-                                            std::cout << std::setprecision(32) << "delta density = " << deltaDensity << "\n";
-                                            std::cout << std::setprecision(32) << "density particle " << particle1.id << " -> " << particle1.density << std::endl;
-                                            std::cout << std::setprecision(32) <<"density particle " << particle2.id << " -> " << particle2.density << std::endl  << "\n";
-                                        } */
-                                    }
-                                }
-                            }
+                            // Calcula el indice del bloque vecino
+                            const int neighborIndex = static_cast<int>(neighbor_cz + neighbor_cy * malla.getNumberblocksz()
+                                    + neighbor_cx * malla.getNumberblocksz() * malla.getNumberblocksy());
+                            comprobarParticula2Dens(blocks, particle1, hsq, neighborIndex);
                         }
                     }
                 }
             }
         }
     }
+}
+
+
+void comprobarParticula2Dens(std::vector<Block>& blocks, Particle& particle1, double hsq, int neighborIndex) {
+    Block& block2 = blocks[neighborIndex];
+    for (auto& particle2 : block2.particles) {
+
+        // Calculamos valores para todas las particle2 con un indice mayor, asi nos aseguramos de no repetir
+        if (particle1.id < particle2.id) {
+            double const deltaX = particle1.px - particle2.px;
+            double const deltaY = particle1.py - particle2.py;
+            double const deltaZ = particle1.pz - particle2.pz;
+            double const distSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+
+            if (distSquared < hsq) {
+                // Calcula el incremento de densidad
+                double const deltaDensity= std::pow(((hsq) - distSquared), 3);
+
+                // Incrementa la densidad de ambas particulas
+                particle1.density += deltaDensity;
+                particle2.density += deltaDensity;
+            }
+        }
+    }
+}
+
+
+double calculateDistanceSquared(const Particle &particle1, const Particle &particle2) {
+    double const deltaX = particle1.px - particle2.px;
+    double const deltaY = particle1.py - particle2.py;
+    double const deltaZ = particle1.pz - particle2.pz;
+    return deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 }
 
 
@@ -132,7 +123,7 @@ void transformDensities(std::vector<Block>& blocks, double h, double factorDensT
     }
 }
 
-void transferAcceleration(std::vector<Block>& blocks, double h, Constantes::ConstAccTransf& constAccTransf, Grid& malla) {
+void transferAcceleration(std::vector<Block>& blocks, Constantes::ConstAccTransf& constAccTransf, Grid& malla) {
     for (auto& block1 : blocks) {
         for (auto& particle1 : block1.particles) {
             // Considera solo los bloques que son vecinos inmediatos de block1
@@ -143,62 +134,72 @@ void transferAcceleration(std::vector<Block>& blocks, double h, Constantes::Cons
                         const int neighbor_cy = block1.cy + dy;
                         const int neighbor_cz = block1.cz + dz;
 
-                        // Asegúrate de que las coordenadas del vecino estén dentro de los límites de la cuadrícula
+                        // Comprueba si las coordenadas del vecino estan dentro de los limites del Grid
                         if (neighbor_cx >= 0 && neighbor_cx < malla.getNumberblocksx() &&
                             neighbor_cy >= 0 && neighbor_cy < malla.getNumberblocksy() &&
                             neighbor_cz >= 0 && neighbor_cz < malla.getNumberblocksz()) {
-
-                            // Calcula el índice del bloque vecino
-                            const int neighborIndex = neighbor_cz + neighbor_cy * malla.getNumberblocksz()
-                                                      + neighbor_cx * malla.getNumberblocksz() * malla.getNumberblocksy();
-
-                            Block &block2 = blocks[neighborIndex];
-                            for (auto &particle2: block2.particles) {
-                                if (particle1.id < particle2.id) {
-                                    const double distSquared = calculateDistanceSquared(particle1, particle2);
-                                    if (distSquared >= constAccTransf.hSquared) {
-                                        continue;
-                                    }
-                                    const double maxDistanceSquared = std::max(distSquared, Constantes::smallQ);
-                                    const double dist = std::sqrt(maxDistanceSquared);
-                                    const double distX = particle1.px - particle2.px;
-                                    const double distY = particle1.py - particle2.py;
-                                    const double distZ = particle1.pz - particle2.pz;
-
-                                    const double distdiv = 1 / dist;
-                                    const double hMinusDistSquared = std::pow(h - dist, 2);
-                                    const double deltaDensity = (particle1.density + particle2.density -
-                                                                 2 * Constantes::densFluido);
-
-                                    const double densitydivmul = 1 /
-                                                                 (particle1.density * particle2.density);
-                                    const double factorcomun = constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity;
-                                    const double deltaAijX =
-                                            ((distX * (factorcomun) +
-                                              (particle2.vx - particle1.vx) * constAccTransf.factor2)) * densitydivmul ;
-
-                                    const double deltaAijY =
-                                            ((distY * (factorcomun) +
-                                              (particle2.vy - particle1.vy) * constAccTransf.factor2)) * densitydivmul;
-
-                                    const double deltaAijZ =
-                                            ((distZ * (factorcomun) +
-                                              (particle2.vz - particle1.vz) * constAccTransf.factor2)) * densitydivmul;
-
-                                    particle1.ax += deltaAijX;
-                                    particle1.ay += deltaAijY;
-                                    particle1.az += deltaAijZ;
-                                    particle2.ax -= deltaAijX;
-                                    particle2.ay -= deltaAijY;
-                                    particle2.az -= deltaAijZ;
-                                }
-                            }
+                            // Calcula el indice del bloque vecino
+                            const int neighborIndex = static_cast<int>(neighbor_cz + neighbor_cy *malla.getNumberblocksz()
+                                    + neighbor_cx * malla.getNumberblocksz() * malla.getNumberblocksy());
+                            comprobarParticula2Acc(blocks, particle1, constAccTransf, neighborIndex);
                         }
                     }
                 }
             }
         }
     }
+}
+
+
+void comprobarParticula2Acc(std::vector<Block>& blocks, Particle& particle1, Constantes::ConstAccTransf& constAccTransf, int neighborIndex) {
+    Block &block2 = blocks[neighborIndex];
+    for (auto &particle2: block2.particles) {
+
+        // Calculamos valores para todas las particle2 con un indice mayor, asi nos aseguramos de no repetir
+        if (particle1.id < particle2.id) {
+            const double distSquared = calculateDistanceSquared(particle1, particle2);
+
+            // Solo continuamos si la distancia al cuadrado es mayor que "hSquared"
+            if (distSquared >= constAccTransf.hSquared) {
+                continue;
+            }
+
+            // Calculamos la diferencia para cada coordenada y se lo aplicamos a ambas particulas
+            auto [deltaAijX, deltaAijY, deltaAijZ] = calcularDeltas(particle1, particle2, constAccTransf, distSquared);
+            particle1.ax += deltaAijX;
+            particle1.ay += deltaAijY;
+            particle1.az += deltaAijZ;
+            particle2.ax -= deltaAijX;
+            particle2.ay -= deltaAijY;
+            particle2.az -= deltaAijZ;
+        }
+    }
+}
+
+
+std::tuple<double, double, double> calcularDeltas(Particle& particle1, Particle& particle2, Constantes::ConstAccTransf& constAccTransf, double distSquared) {
+    const double maxDistanceSquared = std::max(distSquared, Constantes::smallQ);
+    const double dist = std::sqrt(maxDistanceSquared);
+    const double distX = particle1.px - particle2.px;
+    const double distY = particle1.py - particle2.py;
+    const double distZ = particle1.pz - particle2.pz;
+
+    const double distdiv = 1 / dist;
+    const double hMinusDistSquared = std::pow(constAccTransf.h - dist, 2);
+    const double deltaDensity = (particle1.density + particle2.density -
+                                 2 * Constantes::densFluido);
+
+    const double densitydivmul = 1 / (particle1.density * particle2.density);
+    const double factorcomun = constAccTransf.commonFactor * hMinusDistSquared * distdiv * deltaDensity;
+
+    const double deltaAijX = ((distX * (factorcomun) +
+              (particle2.vx - particle1.vx) * constAccTransf.factor2)) * densitydivmul;
+    const double deltaAijY = ((distY * (factorcomun) +
+              (particle2.vy - particle1.vy) * constAccTransf.factor2)) * densitydivmul;
+    const double deltaAijZ = ((distZ * (factorcomun) +
+              (particle2.vz - particle1.vz) * constAccTransf.factor2)) * densitydivmul;
+
+    return std::make_tuple(deltaAijX, deltaAijY, deltaAijZ);
 }
 
 
