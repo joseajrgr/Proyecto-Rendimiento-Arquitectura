@@ -1,10 +1,17 @@
 #include <gtest/gtest.h>
 #include "sim/simulacion.hpp"
-
+//constantes para evitar avisos clang-tidy por magic number
+const double double_4_value = 4.0;
+const double double_2_value = 2.0;
+const double double_3_value = 3.0;
+const double double_10_value = 10.0;
+const double decimal01_value = 0.01;
+const double decimal1_value = 0.1;
 //test para comprobar que se inicializan las aceleraciones de forma correcta
-TEST(SimulationTests, InitAccelerations) {
+TEST(SimulationTests, InitAccelerations)
+{
     Block block(0,0,0,0);
-    const Particle particle{1, 1, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.1, 0.3, 2.0, 3.0, 3.0, 3.0, 4.0};
+    const Particle particle{1, 1, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.1, 0.3, 2.0, 3.0, 3.0, 3.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
@@ -20,12 +27,12 @@ TEST(SimulationTests, InitAccelerations) {
  */
 TEST(SimulationTests, ParticlesMovement) {
     Block block(0,0,0,0);
-    const Particle particle{1, 1, 0.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 4.0};
+    const Particle particle{1, 1, 0.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
     particlesMovement(blocks_vector);
-    double tolerance = 1e-5;
+    const double tolerance = 1e-5;
     ASSERT_NEAR(0.003003,blocks_vector[0].particles[0].px,tolerance);
     ASSERT_NEAR(1.003,blocks_vector[0].particles[0].py,tolerance);
     ASSERT_NEAR(2.002,blocks_vector[0].particles[0].pz,tolerance);
@@ -42,15 +49,15 @@ cada uno con su propia partícula*/
 TEST(SimulationTests, ParticlesMovement2) {
     Block block(0,0,0,0);
     Block block2(1,0,0,0);
-    const Particle particle{0, 1, 0.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 4.0};
-    const Particle particle2{1, 1, 0.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 4.0};
+    const Particle particle{0, 1, 0.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, double_4_value};
+    const Particle particle2{1, 1, 0.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     block2.addParticle(particle2);
     blocks_vector.push_back(block);
     blocks_vector.push_back(block2);
     particlesMovement(blocks_vector);
-    double tolerance = 1e-5;
+    const double tolerance = 1e-5;
     //comprobación para la partícula del primer bloque
     ASSERT_EQ(0,blocks_vector[0].particles[0].id);
     ASSERT_NEAR(0.003003,blocks_vector[0].particles[0].px,tolerance);
@@ -78,22 +85,22 @@ TEST(SimulationTests, ParticlesMovement2) {
 //Test para combrobar un bloque con cx=0, pero con deltax < 1e-10
 TEST(SimulationTests, ParticlesCollisions) {
     Block block(0,0,2,2);
-    const Particle particle{0, 1, 1.0, 1.0, 1.0, 3.0, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, 1.0, 1.0, 1.0, 3.0, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    particleColissions(blocks_vector,4.0,4.0,4.0);
+    particleColissions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(1.0,blocks_vector[0].particles[0].ax);
 }
 
 //Test para combrobar un bloque con cx=0, con deltax > 1e-10
 TEST(SimulationTests, ParticlesCollisionsx) {
     Block block(0,0,2,2);
-    const Particle particle{0, 1, -0.0652, 1.0, 1.0, -0.1, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, -0.0652, 1.0, 1.0, -0.1, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    particleColissions(blocks_vector,4.0,4.0,4.0);
+    particleColissions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(1,blocks_vector[0].particles[0].az);
     ASSERT_EQ(1,blocks_vector[0].particles[0].ay);
     ASSERT_NEAR(-112.0,blocks_vector[0].particles[0].ax,1e-5);
@@ -102,11 +109,11 @@ TEST(SimulationTests, ParticlesCollisionsx) {
 //Test para combrobar un bloque con cy=0, con deltay > 1e-10
 TEST(SimulationTests, ParticlesCollisionsy) {
     Block block(0,2,0,2);
-    const Particle particle{0, 1, 1.0, -0.08, 1.0, 1.0, -0.2, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, 1.0, -0.08, 1.0, 1.0, -0.2, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    particleColissions(blocks_vector,4.0,4.0,4.0);
+    particleColissions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(1,blocks_vector[0].particles[0].az);
     ASSERT_EQ(1,blocks_vector[0].particles[0].ax);
     ASSERT_NEAR(-242.99999,blocks_vector[0].particles[0].ay,1e-5);
@@ -115,11 +122,11 @@ TEST(SimulationTests, ParticlesCollisionsy) {
 //Test para combrobar un bloque con cz=0, con deltaz > 1e-10
 TEST(SimulationTests, ParticlesCollisionsz) {
     Block block(0,2,2,0);
-    const Particle particle{0, 1, 1.0, 1.0, -0.0652, 1.0, 1.0, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, 1.0, 1.0, -0.0652, 1.0, 1.0, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    particleColissions(blocks_vector,4.0,4.0,4.0);
+    particleColissions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(1,blocks_vector[0].particles[0].ay);
     ASSERT_EQ(1,blocks_vector[0].particles[0].ax);
     ASSERT_NEAR(-240,blocks_vector[0].particles[0].az,1e-5);
@@ -128,11 +135,11 @@ TEST(SimulationTests, ParticlesCollisionsz) {
 //Test para combrobar un bloque con cx=0,cy=0 y cz=0 con deltax,deltay,deltaz > 1e-10
 TEST(SimulationTests, ParticlesCollisionsxyzliminf) {
     Block block(0,0,0,0);
-    const Particle particle{0, 1, -0.0652, -0.08, -0.0652, -0.1, -0.2, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, -0.0652, -0.08, -0.0652, -0.1, -0.2, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    particleColissions(blocks_vector,4.0,4.0,4.0);
+    particleColissions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_NEAR(-112.0,blocks_vector[0].particles[0].ax,1e-5);
     ASSERT_NEAR(-242.99999,blocks_vector[0].particles[0].ay,1e-5);
     ASSERT_NEAR(-240,blocks_vector[0].particles[0].az,1e-5);
@@ -141,11 +148,11 @@ TEST(SimulationTests, ParticlesCollisionsxyzliminf) {
 //test para comprobar un bloque con cx,cy,cz=numblocs-1 y deltaz,deltax,deltay >1e-10
 TEST(SimulationTests, ParticlesCollisionsxyzlimsup) {
     Block block(0,3,3,3);
-    const Particle particle{0, 1, 0.065, 0.12, 0.065, -0.1, -0.2, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, 0.065, 0.12, 0.065, -0.1, -0.2, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    particleColissions(blocks_vector,4.0,4.0,4.0);
+    particleColissions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_NEAR(-130,blocks_vector[0].particles[0].ax,1e-5);
     ASSERT_NEAR(-855,blocks_vector[0].particles[0].ay,1e-5);
     ASSERT_NEAR(-258,blocks_vector[0].particles[0].az,1e-5);
@@ -156,9 +163,9 @@ TEST(SimulationTests, ParticlesCollisionsxyzDifBlocks) {
     Block block1(0,0,2,2);
     Block block2(0,2,0,2);
     Block block3(0,2,2,0);
-    const Particle particle1{0, 1, -0.0652, 1.0, 1.0, -0.1, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
-    const Particle particle2{0, 1, 1.0, -0.08, 1.0, 1.0, -0.2, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
-    const Particle particle3{0, 1, 1.0, 1.0, -0.0652, 1.0, 1.0, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle1{0, 1, -0.0652, 1.0, 1.0, -0.1, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
+    const Particle particle2{0, 1, 1.0, -0.08, 1.0, 1.0, -0.2, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
+    const Particle particle3{0, 1, 1.0, 1.0, -0.0652, 1.0, 1.0, -0.1, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block1.addParticle(particle1);
     block2.addParticle(particle2);
@@ -166,7 +173,7 @@ TEST(SimulationTests, ParticlesCollisionsxyzDifBlocks) {
     blocks_vector.push_back(block1);
     blocks_vector.push_back(block2);
     blocks_vector.push_back(block3);
-    particleColissions(blocks_vector,4.0,4.0,4.0);
+    particleColissions(blocks_vector,double_4_value,double_4_value,double_4_value);
     //comprobamos la particula del primer bloque
     ASSERT_EQ(1,blocks_vector[0].particles[0].ay);
     ASSERT_EQ(1,blocks_vector[0].particles[0].az);
@@ -184,11 +191,11 @@ TEST(SimulationTests, ParticlesCollisionsxyzDifBlocks) {
 //Test para combrobar un bloque con cx=0, y una particula con posicion inferior al liminferior.x
 TEST(SimulationTests, LimitInteractionsx) {
     Block block(0,0,2,2);
-    const Particle particle{0, 1, -0.066, 1.0, 1.0, -0.1, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, -0.066, 1.0, 1.0, -0.1, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    limitInteractions(blocks_vector,4.0,4.0,4.0);
+    limitInteractions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(-0.064,blocks_vector[0].particles[0].px);
     ASSERT_EQ(+0.1,blocks_vector[0].particles[0].hvx);
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vx,1e-5);
@@ -197,11 +204,11 @@ TEST(SimulationTests, LimitInteractionsx) {
 //Test para combrobar un bloque con cy=0, y una particula con posicion inferior al liminferior.y
 TEST(SimulationTests, LimitInteractionsy) {
     Block block(0,2,0,2);
-    const Particle particle{0, 1, 1.0, -0.09, 1.0, 1.0, -0.1, 2.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, 1.0, -0.09, 1.0, 1.0, -0.1, 2.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    limitInteractions(blocks_vector,4.0,4.0,4.0);
+    limitInteractions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(-0.07,blocks_vector[0].particles[0].py);
     ASSERT_EQ(+0.1,blocks_vector[0].particles[0].hvy);
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vy,1e-5);
@@ -210,11 +217,11 @@ TEST(SimulationTests, LimitInteractionsy) {
 //Test para combrobar un bloque con cz=0, y una particula con posicion inferior al liminferior.z
 TEST(SimulationTests, LimitInteractionsz) {
     Block block(0,2,2,0);
-    const Particle particle{0, 1, 1.0, 1.0, -0.066, 1.0, 3.0, -0.1, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, 1.0, 1.0, -0.066, 1.0, 3.0, -0.1, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    limitInteractions(blocks_vector,4.0,4.0,4.0);
+    limitInteractions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(-0.064,blocks_vector[0].particles[0].pz);
     ASSERT_EQ(+0.1,blocks_vector[0].particles[0].hvz);
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vz,1e-5);
@@ -224,11 +231,11 @@ TEST(SimulationTests, LimitInteractionsz) {
  con ci=0 */
 TEST(SimulationTests, LimitInteractionsxyzliminf) {
     Block block(0,0,0,0);
-    const Particle particle{0, 1, -0.066, -0.09, -0.066, -0.1, -0.1, -0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, -0.066, -0.09, -0.066, -0.1, -0.1, -0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    limitInteractions(blocks_vector,4.0,4.0,4.0);
+    limitInteractions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(-0.064,blocks_vector[0].particles[0].px);
     ASSERT_EQ(+0.1,blocks_vector[0].particles[0].hvx);
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vx,1e-5);
@@ -244,11 +251,11 @@ TEST(SimulationTests, LimitInteractionsxyzliminf) {
 con ci = numblocksi-1*/
 TEST(SimulationTests, LimitInteractionsxyzlimsup) {
     Block block(0,3,3,3);
-    const Particle particle{0, 1, +0.066, +0.11, +0.066, +0.1, +0.1, +0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle{0, 1, +0.066, +0.11, +0.066, +0.1, +0.1, +0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block.addParticle(particle);
     blocks_vector.push_back(block);
-    limitInteractions(blocks_vector,4.0,4.0,4.0);
+    limitInteractions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(+0.064,blocks_vector[0].particles[0].px);
     ASSERT_EQ(-0.1,blocks_vector[0].particles[0].hvx);
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vx,1e-5);
@@ -265,9 +272,9 @@ TEST(SimulationTests, LimitInteractionsxyzdifbloklimsup) {
     Block block1(0,3,0,0);
     Block block2(0,0,3,0);
     Block block3(0,0,0,3);
-    const Particle particle1{0, 1, +0.066, +1.0, +1.0, +0.1, +0.2, +0.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.0};
-    const Particle particle2{0, 1, 1.0, +0.11, +1.0, +0.2, +0.1, +0.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.0};
-    const Particle particle3{0, 1, 1.0, 1.0, +0.066, +0.2, +0.2, +0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.0};
+    const Particle particle1{0, 1, +0.066, +1.0, +1.0, +0.1, +0.2, +0.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, double_4_value};
+    const Particle particle2{0, 1, 1.0, +0.11, +1.0, +0.2, +0.1, +0.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, double_4_value};
+    const Particle particle3{0, 1, 1.0, 1.0, +0.066, +0.2, +0.2, +0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, double_4_value};
     std::vector<Block> blocks_vector;
     block1.addParticle(particle1);
     block2.addParticle(particle2);
@@ -275,7 +282,7 @@ TEST(SimulationTests, LimitInteractionsxyzdifbloklimsup) {
     blocks_vector.push_back(block1);
     blocks_vector.push_back(block2);
     blocks_vector.push_back(block3);
-    limitInteractions(blocks_vector,4.0,4.0,4.0);
+    limitInteractions(blocks_vector,double_4_value,double_4_value,double_4_value);
     ASSERT_EQ(+0.064,blocks_vector[0].particles[0].px);
     ASSERT_EQ(-0.1,blocks_vector[0].particles[0].hvx);
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vx,1e-5);
@@ -294,7 +301,7 @@ TEST(SimulationTests, TransformDensities) {
     std::vector<Block> blocks_vector;
     block1.addParticle(particle1);
     blocks_vector.push_back(block1);
-    transformDensities(blocks_vector,2.0,0.1);
+    transformDensities(blocks_vector,double_2_value,decimal1_value);
     ASSERT_NEAR(blocks_vector[0].particles[0].density,6.5,1e-5);
 }
 
@@ -313,7 +320,7 @@ TEST(SimulationTests, TransformDensities2) {
     blocks_vector.push_back(block1);
     blocks_vector.push_back(block2);
     blocks_vector.push_back(block3);
-    transformDensities(blocks_vector,2.0,0.1);
+    transformDensities(blocks_vector,double_2_value,decimal1_value);
     ASSERT_NEAR(blocks_vector[0].particles[0].density,6.5,1e-5);
     ASSERT_NEAR(blocks_vector[1].particles[0].density,6.6,1e-5);
     ASSERT_NEAR(blocks_vector[2].particles[0].density,6.7,1e-5);
@@ -340,7 +347,7 @@ TEST(SimulationTests, incrementDensities){
     Fluid fluid{1.0,3,particulas};
     std::vector<Block> grid_blocks = grid.getBlocks();
     grid.reposicionarParticulasFluid(fluid,grid_blocks);
-    incrementDensities(grid_blocks,0.1,grid);
+    incrementDensities(grid_blocks,decimal1_value,grid);
     ASSERT_EQ(0.0,grid_blocks[0].particles[0].density);
     ASSERT_EQ(2.0,grid_blocks[1].particles[0].density);
     ASSERT_EQ(1.0,grid_blocks[2].particles[0].density);
@@ -367,7 +374,7 @@ TEST(SimulationTests, incrementDensities2){
     Fluid fluid{1.0,3,particulas};
     std::vector<Block> grid_blocks = grid.getBlocks();
     grid.reposicionarParticulasFluid(fluid,grid_blocks);
-    incrementDensities(grid_blocks,3.0,grid);
+    incrementDensities(grid_blocks,double_3_value,grid);
     ASSERT_EQ(189.0,grid_blocks[0].particles[0].density);
     ASSERT_EQ(66.0,grid_blocks[1].particles[0].density);
     ASSERT_EQ(126.0,grid_blocks[2].particles[0].density);
@@ -395,11 +402,8 @@ TEST(SimulationTests, transferAcceleration){
     Fluid fluid{1.0,3,particulas};
     std::vector<Block> grid_blocks = grid.getBlocks();
     grid.reposicionarParticulasFluid(fluid,grid_blocks);
-    Constantes::ConstAccTransf constAccTransf;
-    constAccTransf.hSquared = 0.01;
-    constAccTransf.factor2 = 4.0;
-    constAccTransf.commonFactor = 2.0;
-    transferAcceleration(grid_blocks,0.01,constAccTransf,grid);
+    Constantes::ConstAccTransf constAccTransf={decimal01_value,decimal01_value,double_4_value,double_2_value};
+    transferAcceleration(grid_blocks,constAccTransf,grid);
     ASSERT_EQ(0.0,grid_blocks[0].particles[0].ax);
     ASSERT_EQ(0.0,grid_blocks[0].particles[0].ay);
     ASSERT_EQ(0.0,grid_blocks[0].particles[0].az);
@@ -432,11 +436,8 @@ TEST(SimulationTests, transferAcceleration2){
     Fluid fluid{1.0,3,particulas};
     std::vector<Block> grid_blocks = grid.getBlocks();
     grid.reposicionarParticulasFluid(fluid,grid_blocks);
-    Constantes::ConstAccTransf constAccTransf;
-    constAccTransf.hSquared = 10.0; //definimos un hsquared tal que se actualizen las aceleraciones
-    constAccTransf.factor2 = 4.0;
-    constAccTransf.commonFactor = 2.0;
-    transferAcceleration(grid_blocks,0.01,constAccTransf,grid);
+    Constantes::ConstAccTransf constAccTransf={decimal01_value,double_10_value,double_4_value,double_2_value};
+    transferAcceleration(grid_blocks,constAccTransf,grid);
     ASSERT_NEAR(156.899959,grid_blocks[0].particles[0].ax,1e-5);
     ASSERT_NEAR(175.596125,grid_blocks[0].particles[0].ay,1e-6);
     ASSERT_NEAR(87.838062,grid_blocks[0].particles[0].az,1e-6);
