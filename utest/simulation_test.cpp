@@ -36,6 +36,9 @@ TEST(SimulationTests, ParticlesMovement) {
     ASSERT_NEAR(3.003,blocks_vector[0].particles[0].hvy,tolerance);
     ASSERT_NEAR(2.003,blocks_vector[0].particles[0].hvz,tolerance);
 }
+
+/*test para comprobar particlesmovement con un vector de bloques de tamaño mayor a 1
+cada uno con su propia partícula*/
 TEST(SimulationTests, ParticlesMovement2) {
     Block block(0,0,0,0);
     Block block2(1,0,0,0);
@@ -178,6 +181,7 @@ TEST(SimulationTests, ParticlesCollisionsxyzDifBlocks) {
     ASSERT_NEAR(-240,blocks_vector[2].particles[0].az,1e-5);
 }
 
+//Test para combrobar un bloque con cx=0, y una particula con posicion inferior al liminferior.x
 TEST(SimulationTests, LimitInteractionsx) {
     Block block(0,0,2,2);
     const Particle particle{0, 1, -0.066, 1.0, 1.0, -0.1, 3.0, 2.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0, 4.0};
@@ -190,6 +194,7 @@ TEST(SimulationTests, LimitInteractionsx) {
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vx,1e-5);
 }
 
+//Test para combrobar un bloque con cy=0, y una particula con posicion inferior al liminferior.y
 TEST(SimulationTests, LimitInteractionsy) {
     Block block(0,2,0,2);
     const Particle particle{0, 1, 1.0, -0.09, 1.0, 1.0, -0.1, 2.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 4.0};
@@ -202,6 +207,7 @@ TEST(SimulationTests, LimitInteractionsy) {
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vy,1e-5);
 }
 
+//Test para combrobar un bloque con cz=0, y una particula con posicion inferior al liminferior.z
 TEST(SimulationTests, LimitInteractionsz) {
     Block block(0,2,2,0);
     const Particle particle{0, 1, 1.0, 1.0, -0.066, 1.0, 3.0, -0.1, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0, 4.0};
@@ -214,6 +220,8 @@ TEST(SimulationTests, LimitInteractionsz) {
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vz,1e-5);
 }
 
+/*Test para comprobar que limitinteractions funciona correctamente en todas las cordenadas simultaneamente, en un bloque
+ con ci=0 */
 TEST(SimulationTests, LimitInteractionsxyzliminf) {
     Block block(0,0,0,0);
     const Particle particle{0, 1, -0.066, -0.09, -0.066, -0.1, -0.1, -0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.0};
@@ -232,6 +240,8 @@ TEST(SimulationTests, LimitInteractionsxyzliminf) {
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vz,1e-5);
 }
 
+/*test para comprobar que limitinteractions funciona correctamente en todas las cordenadas simultaneamente, en un bloque
+con ci = numblocksi-1*/
 TEST(SimulationTests, LimitInteractionsxyzlimsup) {
     Block block(0,3,3,3);
     const Particle particle{0, 1, +0.066, +0.11, +0.066, +0.1, +0.1, +0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.0};
@@ -250,6 +260,7 @@ TEST(SimulationTests, LimitInteractionsxyzlimsup) {
     ASSERT_NEAR(-1.0,blocks_vector[0].particles[0].vz,1e-5);
 }
 
+//test para comprobar que limitinteractions funciona pasando un vector de bloques de tamaño mayor que uno
 TEST(SimulationTests, LimitInteractionsxyzdifbloklimsup) {
     Block block1(0,3,0,0);
     Block block2(0,0,3,0);
@@ -287,7 +298,7 @@ TEST(SimulationTests, TransformDensities) {
     ASSERT_NEAR(blocks_vector[0].particles[0].density,6.5,1e-5);
 }
 
-//test para comprobr el funcionamiento de transformdensities con varios bloques
+//test para comprobar el funcionamiento de transformdensities con varios bloques
 TEST(SimulationTests, TransformDensities2) {
     Block block1(0,3,0,0);
     Block block2(1,3,1,0);
@@ -308,6 +319,7 @@ TEST(SimulationTests, TransformDensities2) {
     ASSERT_NEAR(blocks_vector[2].particles[0].density,6.7,1e-5);
 }
 
+//test para comprobar que no se incrementa las densidades, imponiendo un h pequeño
 TEST(SimulationTests, incrementDensities){
     const Punto bmin{0.0,0.0,0.0};
     const Punto bmax{2.0,2.0,1.0};
@@ -334,6 +346,7 @@ TEST(SimulationTests, incrementDensities){
     ASSERT_EQ(1.0,grid_blocks[2].particles[0].density);
 }
 
+//test para comprobar que se actualizan las densidades al invocar a incrementDensities, imponiendo un h grande
 TEST(SimulationTests, incrementDensities2){
     const Punto bmin{0.0,0.0,0.0};
     const Punto bmax{2.0,2.0,1.0};
@@ -360,6 +373,8 @@ TEST(SimulationTests, incrementDensities2){
     ASSERT_EQ(126.0,grid_blocks[2].particles[0].density);
 }
 
+/*test para comprobar que si distSquared >= constAccTransf.hSquared
+  no se actualizan las aceleraciones al invocar a transferAcceleration*/
 TEST(SimulationTests, transferAcceleration){
     const Punto bmin{0.0,0.0,0.0};
     const Punto bmax{2.0,2.0,1.0};
@@ -395,6 +410,8 @@ TEST(SimulationTests, transferAcceleration){
     ASSERT_EQ(1.0,grid_blocks[2].particles[0].ay);
     ASSERT_EQ(1.0,grid_blocks[2].particles[0].az);
 }
+
+//test para comprobar que se actulizan las aceleraciones al llamar a transefercceleration
 TEST(SimulationTests, transferAcceleration2){
     const Punto bmin{0.0,0.0,0.0};
     const Punto bmax{2.0,2.0,1.0};

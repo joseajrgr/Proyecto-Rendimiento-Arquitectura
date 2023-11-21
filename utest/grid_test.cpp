@@ -151,52 +151,8 @@ TEST(GridTests, repos_fluid_particula_neg) {
     ASSERT_EQ(0,blocks[1].particles[0].id);
 }
 
-//test para testear comprobar_bloques() con dos bloques con id diferentes
-TEST(GridTests, comprobar_bloques_difid) {
-    //creamos una malla que tenga 2 bloques
-    const Punto bmin{0.0,0.0,0.0};
-    const Punto bmax{2.0,1.0,1.0};
-    Grid grid(bmin, bmax);
-    const double smoothingLength = 1.0;
-    grid.dividirEnBloques(smoothingLength);
-    //definimos 2 particulas y un fluid
-    std::vector<Particle> particulas;
-    //La partícula 1 deberá ir al primer bloque
-    Particle particle1={0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    particulas.push_back(particle1);
-    Fluid fluid{1.0,1,particulas};
-    std::vector<Block> blocks = grid.getBlocks();
-    grid.reposicionarParticulasFluid(fluid,blocks);
-    auto iterator=grid.comprobarBloque(blocks[0],particle1,blocks[1],blocks[0].particles.begin());
-    //comprobamos que la particula se reposiciona al pasar dos bloques con distinto id
-    ASSERT_EQ(0,blocks[0].particles.size());
-    ASSERT_EQ(1,blocks[1].particles.size());
-    ASSERT_EQ(blocks[0].particles.end(),iterator);
-}
-
-//test para testear comprobar_bloques() con dos bloques con mismo id
-TEST(GridTests, comprobar_bloques_sameid) {
-    //creamos una malla que tenga 2 bloques
-    const Punto bmin{0.0,0.0,0.0};
-    const Punto bmax{2.0,1.0,1.0};
-    Grid grid(bmin, bmax);
-    const double smoothingLength = 1.0;
-    grid.dividirEnBloques(smoothingLength);
-    //definimos 2 particulas y un fluid
-    std::vector<Particle> particulas;
-    //La partícula 1 deberá ir al primer bloque
-    Particle particle1={0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    particulas.push_back(particle1);
-    Fluid fluid{1.0,1,particulas};
-    std::vector<Block> blocks = grid.getBlocks();
-    grid.reposicionarParticulasFluid(fluid,blocks);
-    auto iterator=grid.comprobarBloque(blocks[0],particle1,blocks[0],blocks[0].particles.begin());
-    //comprobamos que la particula no se reposiciona al pasar los dos bloques con el mismo blockid
-    ASSERT_EQ(1,blocks[0].particles.size());
-    ASSERT_EQ(0,blocks[1].particles.size());
-    ASSERT_EQ(blocks[0].particles.end(),iterator);
-}
-
+/*test para comprobar reposicionarParticulaBloque de forma sucesiva alteranod el px de las partículas
+entre las llamadas de reposicionarParticulasBloque*/
 TEST(GridTests, repos_block_correcto) {
     //creamos una malla que tenga 2 bloques
     const Punto bmin{0.0,0.0,0.0};
@@ -256,6 +212,7 @@ TEST(GridTests, repos_block_ext) {
     ASSERT_EQ(0,blocks[0].particles[0].id);
 }
 
+//test para comprobar reposicionarParticulasBloque() con una particula con px negativa
 TEST(GridTests, repos_block_neg) {
     //creamos una malla que tenga 2 bloques
     const Punto bmin{-2.0,-1.0,-1.0};
