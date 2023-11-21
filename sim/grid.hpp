@@ -31,23 +31,23 @@ public:
 
     std::pair<double, double> simular_malla(const Fluid &fluid);
 
-    void reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &blocks) const;
+    void reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &bloques) const;
 
-    void reposicionarParticulasBloque(std::vector<Block> &blocks) const;
+    void reposicionarParticulasBloque(std::vector<Block> &bloques) const;
 
     [[nodiscard]] inline const std::vector<Block> &getBlocks() const { return blocks; }
 
 private:
-    double numberblocksx;
-    double numberblocksy;
-    double numberblocksz;
-    double numBlocks;
-    double meshx;
-    double meshy;
-    double meshz;
-    double invmeshx;
-    double invmeshy;
-    double invmeshz;
+    double numberblocksx{0.0};
+    double numberblocksy{0.0};
+    double numberblocksz{0.0};
+    double numBlocks{0.0};
+    double meshx{0.0};
+    double meshy{0.0};
+    double meshz{0.0};
+    double invmeshx{0.0};
+    double invmeshy{0.0};
+    double invmeshz{0.0};
     Punto bmin; // Limite inferior del recinto
     Punto bmax; // Limite superior del recinto
     std::vector<Block> blocks;

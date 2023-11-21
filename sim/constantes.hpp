@@ -26,7 +26,7 @@ namespace Constantes {
     extern const Punto limSuperior;
 
     // Definir constantes para los códigos de error
-    enum ErrorCode {
+    enum ErrorCode:int8_t {
         NO_ERROR = 0,
         INVALID_ARGUMENTS = -1,
         INVALID_TIME_STEPS = -2,
