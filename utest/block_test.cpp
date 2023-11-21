@@ -28,12 +28,3 @@ TEST(BlockTests, AddMultipleParticles) {
     ASSERT_EQ(particle2, block.particles.at(1));
     ASSERT_EQ(particle3, block.particles.at(2));
 }
-
-/*test para probar que no deja añadir una particula incorrecta, pero el clang-tidy no deja compilar para probar el test
-TEST(BlockTest, AddInvalidParticle) {
-    Block block(0, 0, 0, 0);
-    Particle particle(1,1,1,1);
-
-    EXPECT_THROW(block.addParticle(particle), std::exception);
-}
-*/
