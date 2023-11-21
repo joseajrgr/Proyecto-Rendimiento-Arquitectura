@@ -18,7 +18,8 @@ struct Argumentos {
 };
 
 
-void leerFluido(std::ifstream &in, Fluid &fluid);
+
+Constantes::ErrorCode leerFluido(std::ifstream &in, Fluid &fluid);
 
 Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> arguments, Argumentos &argumentos);
 

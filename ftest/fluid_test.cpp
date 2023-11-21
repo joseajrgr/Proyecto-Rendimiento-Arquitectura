@@ -12,7 +12,7 @@ TEST(Fluid_Tests, NumberParticlesZero){
   ASSERT_EQ(codError, 251);
 }
 
-TEST(Fluid_Tests, BadParticlesNumber){
+TEST(Fluid_Tests, BadParticlesNumberLess){
   // Arrange
     const char* script = "./ftest/scripts/test2-error.sh";
   // Act
@@ -23,7 +23,7 @@ TEST(Fluid_Tests, BadParticlesNumber){
   ASSERT_EQ(codError, 251);
 }
 
-TEST(Fluid_Tests, IterationsValueZero){
+TEST(Fluid_Tests, BadParticlesNumberMore){
   // Arrange
     const char* script = "./ftest/scripts/test3-error.sh";
   // Act
@@ -34,7 +34,7 @@ TEST(Fluid_Tests, IterationsValueZero){
   ASSERT_EQ(codError, 251);
 }
 
-TEST(Fluid_Tests, WrongIterationsValue){
+TEST(Fluid_Tests, IterationsValueZero){
   // Arrange
     const char* script = "./ftest/scripts/test4-error.sh";
   // Act
@@ -45,7 +45,7 @@ TEST(Fluid_Tests, WrongIterationsValue){
   ASSERT_EQ(codError, 251);
 }
 
-TEST(Fluid_Tests, InputfileWrong){
+TEST(Fluid_Tests, WrongIterationsValue){
   // Arrange
     const char* script = "./ftest/scripts/test5-error.sh";
   // Act
@@ -56,9 +56,20 @@ TEST(Fluid_Tests, InputfileWrong){
   ASSERT_EQ(codError, 251);
 }
 
-TEST(Fluid_Tests, OutputFileWrong){
+TEST(Fluid_Tests, InputfileWrong){
   // Arrange
     const char* script = "./ftest/scripts/test6-error.sh";
+  // Act
+  int result = std::system(script);
+  int codError = WEXITSTATUS(result);
+  // Assert
+  ASSERT_EQ(result, 64256);
+  ASSERT_EQ(codError, 251);
+}
+
+TEST(Fluid_Tests, OutputFileWrong){
+  // Arrange
+    const char* script = "./ftest/scripts/test7-error.sh";
   // Act
   int result = std::system(script);
   int codError = WEXITSTATUS(result);

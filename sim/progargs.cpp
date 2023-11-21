@@ -8,20 +8,31 @@
 
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-void leerFluido(std::ifstream &in, Fluid &fluid) {
+Constantes::ErrorCode leerFluido(std::ifstream &in, Fluid &fluid) {
     in.read(reinterpret_cast<char *>(&fluid.particlespermeter), sizeof(float));
     in.read(reinterpret_cast<char *>(&fluid.numberparticles), sizeof(int));
     fluid.particles.resize(fluid.numberparticles);
-    for (int i = 0; i < fluid.numberparticles; ++i) {
+    for (int i = 0; i < fluid.numberparticles + 1; ++i) {
+      if(i!=fluid.numberparticles){
         fluid.particles[i].id = i;
         for (double *attr: {&fluid.particles[i].px, &fluid.particles[i].py, &fluid.particles[i].pz,
-                            &fluid.particles[i].hvx, &fluid.particles[i].hvy, &fluid.particles[i].hvz,
-                            &fluid.particles[i].vx, &fluid.particles[i].vy, &fluid.particles[i].vz}) {
-            float temp = 0;
-            in.read(reinterpret_cast<char *>(&temp), sizeof(float));
-            *attr = static_cast<double>(temp);
+                              &fluid.particles[i].hvx, &fluid.particles[i].hvy, &fluid.particles[i].hvz,
+                              &fluid.particles[i].vx, &fluid.particles[i].vy, &fluid.particles[i].vz}) {
+          float temp = 0;
+          if(not in.read(reinterpret_cast<char *>(&temp), sizeof(float))){
+            return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
+          }
+          *attr = static_cast<double>(temp);
         }
+      }
+      else{
+          float temp = 0;
+          if(in.read(reinterpret_cast<char *>(&temp), sizeof(float))){
+            return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
+          }
+      }
     }
+    return Constantes::ErrorCode::NO_ERROR;
 }
 // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
@@ -94,17 +105,15 @@ Constantes::ErrorCode comprobarParticulas(std::vector<std::string> arguments, Ar
     }
 
     // Comprueba el numero de particulas del archivo de entrada
-    leerFluido(input, argumentos.fluid);
+    const Constantes::ErrorCode errorCode = leerFluido(input, argumentos.fluid);
     if (argumentos.fluid.particles.empty()) {
         std::cerr << "Error: Invalid number of particles: 0.\n";
         return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
 
     // Comprueba si el numero de particulas leidas coincide con numberparticles
-    if (argumentos.fluid.particles.size() !=
-        static_cast<std::vector<Particle>::size_type>(argumentos.fluid.numberparticles)) {
-        std::cerr << "Error: Number of particles mismatch. Header: "
-                  << argumentos.fluid.numberparticles << ", Found: " << argumentos.fluid.particles.size() << ".\n";
+    if (errorCode == Constantes::ErrorCode::INVALID_PARTICLE_COUNT) {
+        std::cerr << "Error: Number of particles mismatch\n";
         return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
     return Constantes::NO_ERROR;
