@@ -143,9 +143,6 @@ TEST(SimulationTests, ParticlesCollisionsxyzlimsup) {
     block.addParticle(particle);
     blocks_vector.push_back(block);
     particleColissions(blocks_vector,4.0,4.0,4.0);
-    std::cout<<blocks_vector[0].particles[0].ax<<"\n";
-    std::cout<<blocks_vector[0].particles[0].ay<<"\n";
-    std::cout<<blocks_vector[0].particles[0].az<<"\n";
     ASSERT_NEAR(-130,blocks_vector[0].particles[0].ax,1e-5);
     ASSERT_NEAR(-855,blocks_vector[0].particles[0].ay,1e-5);
     ASSERT_NEAR(-258,blocks_vector[0].particles[0].az,1e-5);
@@ -309,4 +306,127 @@ TEST(SimulationTests, TransformDensities2) {
     ASSERT_NEAR(blocks_vector[0].particles[0].density,6.5,1e-5);
     ASSERT_NEAR(blocks_vector[1].particles[0].density,6.6,1e-5);
     ASSERT_NEAR(blocks_vector[2].particles[0].density,6.7,1e-5);
+}
+
+TEST(SimulationTests, incrementDensities){
+    const Punto bmin{0.0,0.0,0.0};
+    const Punto bmax{2.0,2.0,1.0};
+    Grid grid(bmin, bmax);
+    const double smoothingLength = 1.0;
+    grid.dividirEnBloques(smoothingLength);
+    //definimos 2 particulas y un fluid
+    std::vector<Particle> particulas;
+    //La partícula 1 deberá ir al primer bloque
+    const Particle particle1={0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    //La partícula 2 deberá ir al segundo bloque
+    const Particle particle2{1, 0, 2.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    //La partícula 3 deberá ir al segundo bloque
+    const Particle particle3{2, 0, 0.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0};
+    particulas.push_back(particle1);
+    particulas.push_back(particle2);
+    particulas.push_back(particle3);
+    Fluid fluid{1.0,3,particulas};
+    std::vector<Block> grid_blocks = grid.getBlocks();
+    grid.reposicionarParticulasFluid(fluid,grid_blocks);
+    incrementDensities(grid_blocks,0.1,grid);
+    ASSERT_EQ(0.0,grid_blocks[0].particles[0].density);
+    ASSERT_EQ(2.0,grid_blocks[1].particles[0].density);
+    ASSERT_EQ(1.0,grid_blocks[2].particles[0].density);
+}
+
+TEST(SimulationTests, incrementDensities2){
+    const Punto bmin{0.0,0.0,0.0};
+    const Punto bmax{2.0,2.0,1.0};
+    Grid grid(bmin, bmax);
+    const double smoothingLength = 1.0;
+    grid.dividirEnBloques(smoothingLength);
+    //definimos 2 particulas y un fluid
+    std::vector<Particle> particulas;
+    //La partícula 1 deberá ir al primer bloque
+    const Particle particle1={0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    //La partícula 2 deberá ir al segundo bloque
+    const Particle particle2{1, 0, 2.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    //La partícula 3 deberá ir al segundo bloque
+    const Particle particle3{2, 0, 0.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0};
+    particulas.push_back(particle1);
+    particulas.push_back(particle2);
+    particulas.push_back(particle3);
+    Fluid fluid{1.0,3,particulas};
+    std::vector<Block> grid_blocks = grid.getBlocks();
+    grid.reposicionarParticulasFluid(fluid,grid_blocks);
+    incrementDensities(grid_blocks,3.0,grid);
+    ASSERT_EQ(189.0,grid_blocks[0].particles[0].density);
+    ASSERT_EQ(66.0,grid_blocks[1].particles[0].density);
+    ASSERT_EQ(126.0,grid_blocks[2].particles[0].density);
+}
+
+TEST(SimulationTests, transferAcceleration){
+    const Punto bmin{0.0,0.0,0.0};
+    const Punto bmax{2.0,2.0,1.0};
+    Grid grid(bmin, bmax);
+    const double smoothingLength = 1.0;
+    grid.dividirEnBloques(smoothingLength);
+    //definimos 2 particulas y un fluid
+    std::vector<Particle> particulas;
+    //La partícula 1 deberá ir al primer bloque
+    const Particle particle1={0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    //La partícula 2 deberá ir al segundo bloque
+    const Particle particle2{1, 0, 2.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    //La partícula 3 deberá ir al segundo bloque
+    const Particle particle3{2, 0, 0.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0};
+    particulas.push_back(particle1);
+    particulas.push_back(particle2);
+    particulas.push_back(particle3);
+    Fluid fluid{1.0,3,particulas};
+    std::vector<Block> grid_blocks = grid.getBlocks();
+    grid.reposicionarParticulasFluid(fluid,grid_blocks);
+    Constantes::ConstAccTransf constAccTransf;
+    constAccTransf.hSquared = 0.01;
+    constAccTransf.factor2 = 4.0;
+    constAccTransf.commonFactor = 2.0;
+    transferAcceleration(grid_blocks,0.01,constAccTransf,grid);
+    ASSERT_EQ(0.0,grid_blocks[0].particles[0].ax);
+    ASSERT_EQ(0.0,grid_blocks[0].particles[0].ay);
+    ASSERT_EQ(0.0,grid_blocks[0].particles[0].az);
+    ASSERT_EQ(2.0,grid_blocks[1].particles[0].ax);
+    ASSERT_EQ(2.0,grid_blocks[1].particles[0].ay);
+    ASSERT_EQ(2.0,grid_blocks[1].particles[0].az);
+    ASSERT_EQ(1.0,grid_blocks[2].particles[0].ax);
+    ASSERT_EQ(1.0,grid_blocks[2].particles[0].ay);
+    ASSERT_EQ(1.0,grid_blocks[2].particles[0].az);
+}
+TEST(SimulationTests, transferAcceleration2){
+    const Punto bmin{0.0,0.0,0.0};
+    const Punto bmax{2.0,2.0,1.0};
+    Grid grid(bmin, bmax);
+    const double smoothingLength = 1.0;
+    grid.dividirEnBloques(smoothingLength);
+    //definimos 2 particulas y un fluid
+    std::vector<Particle> particulas;
+    //La partícula 1 deberá ir al primer bloque
+    const Particle particle1={0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0};
+    //La partícula 2 deberá ir al segundo bloque
+    const Particle particle2{1, 0, 2.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 10.0};
+    //La partícula 3 deberá ir al segundo bloque
+    const Particle particle3{2, 0, 0.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 10.0};
+    particulas.push_back(particle1);
+    particulas.push_back(particle2);
+    particulas.push_back(particle3);
+    Fluid fluid{1.0,3,particulas};
+    std::vector<Block> grid_blocks = grid.getBlocks();
+    grid.reposicionarParticulasFluid(fluid,grid_blocks);
+    Constantes::ConstAccTransf constAccTransf;
+    constAccTransf.hSquared = 10.0; //definimos un hsquared tal que se actualizen las aceleraciones
+    constAccTransf.factor2 = 4.0;
+    constAccTransf.commonFactor = 2.0;
+    transferAcceleration(grid_blocks,0.01,constAccTransf,grid);
+    ASSERT_NEAR(156.899959,grid_blocks[0].particles[0].ax,1e-5);
+    ASSERT_NEAR(175.596125,grid_blocks[0].particles[0].ay,1e-6);
+    ASSERT_NEAR(87.838062,grid_blocks[0].particles[0].az,1e-6);
+    ASSERT_NEAR(237.97864,grid_blocks[1].particles[0].ax,1e-5);
+    ASSERT_NEAR(-409.574765,grid_blocks[1].particles[0].ay,1e-5);
+    ASSERT_NEAR(-203.8073828,grid_blocks[1].particles[0].az,1e-5);
+    ASSERT_NEAR(-391.8786,grid_blocks[2].particles[0].ax,1e-5);
+    ASSERT_NEAR(236.97864,grid_blocks[2].particles[0].ay,1e-5);
+    ASSERT_NEAR(118.96932,grid_blocks[2].particles[0].az,1e-5);
 }
