@@ -27,28 +27,21 @@ void leerFluido(std::ifstream &in, Fluid &fluid) {
 
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-bool compareParticlesByID(const Particle &a, const Particle &b) {
-    return a.id < b.id;
-}
-
 void escribirFluido(std::ofstream &out, Fluid &fluid, const std::vector<Block> &blocks) {
     auto temp = static_cast<float>(fluid.particlespermeter);
     out.write(reinterpret_cast<const char *>(&temp), sizeof(float));
     out.write(reinterpret_cast<const char *>(&fluid.numberparticles), sizeof(int));
 
-    // Vector to store all particles for sorting
-    std::vector<Particle> allParticles;
-
-    // Collect all particles from blocks into a single vector
+    // Recorre todos los bloques y sus partículas
     for (const auto &block: blocks) {
-        allParticles.insert(allParticles.end(), block.particles.begin(), block.particles.end());
+        for (const auto &particle: block.particles) {
+            // Inserta la partícula en la posición correcta para mantener el orden
+            fluid.particles[particle.id]= particle;
+        }
     }
 
-    // Sort particles by ID
-    std::sort(allParticles.begin(), allParticles.end(), compareParticlesByID);
-
-    // Write sorted particles to the output file
-    for (auto &particle: allParticles) {
+    // Escribe las partículas ordenadas en el archivo de salida
+    for (auto &particle: fluid.particles) {
         for (double *attr: {&particle.px, &particle.py, &particle.pz,
                             &particle.hvx, &particle.hvy, &particle.hvz,
                             &particle.vx, &particle.vy, &particle.vz}) {
