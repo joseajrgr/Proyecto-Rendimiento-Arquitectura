@@ -11,7 +11,7 @@
 
 
 struct Argumentos {
-    int iteraciones;
+    int iteraciones = 0;
     std::string archivoEntrada;
     std::string archivoSalida;
     Fluid fluid;

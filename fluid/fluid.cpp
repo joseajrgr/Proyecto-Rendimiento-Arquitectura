@@ -16,8 +16,8 @@ int main(int argc, char *argv[]) {
     Argumentos argumentos;
 
     Constantes::ErrorCode errorCode = comprobarArgsEntrada(argc, arguments, argumentos);
-    if (errorCode != 0) {
-        return errorCode;
+    if (errorCode != Constantes::ErrorCode::NO_ERROR) {
+        return static_cast<int>(errorCode);
     }
 
     // Calcula los valores utilizando la función calculateValues
@@ -32,5 +32,5 @@ int main(int argc, char *argv[]) {
     unsigned const tiempo1 = clock();
     double const time = (double(tiempo1 - tiempo0) / CLOCKS_PER_SEC);
     std::cout << "Execution Time: " << time;
-    return errorCode;
+    return static_cast<int>(errorCode);
 }
