@@ -9,7 +9,7 @@
 
 
 int main(int argc, char *argv[]) {
-    unsigned const tiempo0=clock();
+    unsigned const tiempo0 = clock();
     std::span const args_view{argv, static_cast<std::size_t>(argc)};
     std::vector<std::string> const arguments{args_view.begin() + 1, args_view.end()};
 
@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
     std::vector<Block> blocks = ejecutarIteraciones(malla, argumentos, smoothingLength, particleMass);
 
     errorCode = comprobarArgsSalida(arguments, argumentos, blocks);
-    unsigned const tiempo1= clock();
-    double const time = (double(tiempo1-tiempo0)/CLOCKS_PER_SEC);
+    unsigned const tiempo1 = clock();
+    double const time = (double(tiempo1 - tiempo0) / CLOCKS_PER_SEC);
     std::cout << "Execution Time: " << time;
     return errorCode;
 }

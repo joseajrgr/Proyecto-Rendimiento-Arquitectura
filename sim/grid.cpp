@@ -5,8 +5,10 @@
 
 
 // Inicializar los valores para el constructor
-Grid::Grid(const Punto& bmin, const Punto& bmax) : numberblocksx(0.0), numberblocksy(0.0),
-                                                   numberblocksz(0.0), numBlocks(0.0), meshx(0.0), meshy(0.0), meshz(0.0),invmeshx(0.0), invmeshy(0.0), invmeshz(0.0), bmin(bmin), bmax(bmax) {}
+Grid::Grid(const Punto &bmin, const Punto &bmax) : numberblocksx(0.0), numberblocksy(0.0),
+                                                   numberblocksz(0.0), numBlocks(0.0), meshx(0.0), meshy(0.0),
+                                                   meshz(0.0), invmeshx(0.0), invmeshy(0.0), invmeshz(0.0), bmin(bmin),
+                                                   bmax(bmax) {}
 
 
 // Funcion quue divide la malla en bloques
@@ -21,9 +23,9 @@ void Grid::dividirEnBloques(double smoothingLength) {
     meshx = (bmax.x - bmin.x) / numberblocksx;
     meshy = (bmax.y - bmin.y) / numberblocksy;
     meshz = (bmax.z - bmin.z) / numberblocksz;
-    invmeshx=1/meshx;
-    invmeshy=1/meshy;
-    invmeshz=1/meshz;
+    invmeshx = 1 / meshx;
+    invmeshy = 1 / meshy;
+    invmeshz = 1 / meshz;
     dividirVectorBloques(blocks);
 }
 
@@ -53,11 +55,15 @@ void Grid::reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &bloques
     for (int i = 0; i < fluid.numberparticles; ++i) {
         Particle &particula = fluid.particles[i];
 
-        const int indicex = std::max(0, std::min(static_cast<int>((particula.px - bmin.x) * invmeshx), static_cast<int>(numberblocksx) - 1));
-        const int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * invmeshy), static_cast<int>(numberblocksy) - 1));
-        const int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * invmeshz), static_cast<int>(numberblocksz) - 1));
+        const int indicex = std::max(0, std::min(static_cast<int>((particula.px - bmin.x) * invmeshx),
+                                                 static_cast<int>(numberblocksx) - 1));
+        const int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * invmeshy),
+                                                 static_cast<int>(numberblocksy) - 1));
+        const int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * invmeshz),
+                                                 static_cast<int>(numberblocksz) - 1));
 
-        const int blockId = static_cast<int>(indicez + indicey * numberblocksz + indicex * numberblocksz * numberblocksy);
+        const int blockId = static_cast<int>(indicez + indicey * numberblocksz +
+                                             indicex * numberblocksz * numberblocksy);
         Block &block = bloques[blockId];
         particula.idBloque = block.id;
         block.addParticle(particula);
@@ -70,13 +76,17 @@ void Grid::reposicionarParticulasBloque(std::vector<Block> &bloques) const {
     // Crear una copia vacía de los bloques con el mismo tamaño que bloques
     std::vector<Block> nuevosBloques(bloques.size());
     dividirVectorBloques(nuevosBloques);
-    for (const Block &block : bloques) {
-        for (Particle particula : block.particles) {
-            const int indicex = std::max(0, std::min(static_cast<int>((particula.px - bmin.x) * invmeshx), static_cast<int>(numberblocksx) - 1));
-            const int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * invmeshy), static_cast<int>(numberblocksy) - 1));
-            const int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * invmeshz), static_cast<int>(numberblocksz) - 1));
+    for (const Block &block: bloques) {
+        for (Particle particula: block.particles) {
+            const int indicex = std::max(0, std::min(static_cast<int>((particula.px - bmin.x) * invmeshx),
+                                                     static_cast<int>(numberblocksx) - 1));
+            const int indicey = std::max(0, std::min(static_cast<int>((particula.py - bmin.y) * invmeshy),
+                                                     static_cast<int>(numberblocksy) - 1));
+            const int indicez = std::max(0, std::min(static_cast<int>((particula.pz - bmin.z) * invmeshz),
+                                                     static_cast<int>(numberblocksz) - 1));
 
-            const int blockId = static_cast<int>(indicez + indicey * numberblocksz + indicex * numberblocksz * numberblocksy);
+            const int blockId = static_cast<int>(indicez + indicey * numberblocksz +
+                                                 indicex * numberblocksz * numberblocksy);
             Block &newBlock = nuevosBloques[blockId];
             // std::cout << blockId << " " << newBlock.id << "\n";
             particula.idBloque = newBlock.id;
@@ -96,7 +106,7 @@ void Grid::dividirVectorBloques(std::vector<Block> &nuevosBloques) const {
             for (int i = 0; i < numberblocksz; ++i) {
                 // Añade el bloque al final del vector
                 bloqueId += 1;
-                nuevosBloques.emplace_back(bloqueId, k ,j, i);
+                nuevosBloques.emplace_back(bloqueId, k, j, i);
             }
         }
     }

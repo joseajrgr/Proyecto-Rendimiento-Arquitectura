@@ -18,7 +18,7 @@ struct Particle {
     double density;
 
     //metodo para comparar que dos partículas son iguales. Este método se usará en los tests
-    bool operator==(const Particle& other) const {
+    bool operator==(const Particle &other) const {
         return id == other.id &&
                idBloque == other.idBloque &&
                px == other.px && py == other.py && pz == other.pz &&
@@ -32,12 +32,14 @@ struct Particle {
 class Block {
 public:
     Block();
+
     int id;
     int cx, cy, cz; // Indice del bloque en cada coordenada
     std::vector<Particle> particles;
 
     Block(int id, int cx, int cy, int cz);
-    void addParticle(const Particle& particle);
+
+    void addParticle(const Particle &particle);
 };
 
 
