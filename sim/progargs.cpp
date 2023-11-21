@@ -87,7 +87,7 @@ Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> ar
 
     // Por ultimo, revisamos el fichero de entrada y sus particulas (si tampoco da error, devuelve NO_ERROR)
     const Constantes::ErrorCode errorCode = comprobarParticulas(arguments, argumentos);
-    if (errorCode != 0) {
+    if (errorCode != Constantes::ErrorCode::NO_ERROR) {
         return errorCode;
     }
     return Constantes::ErrorCode::NO_ERROR;
@@ -116,7 +116,7 @@ Constantes::ErrorCode comprobarParticulas(std::vector<std::string> arguments, Ar
         std::cerr << "Error: Number of particles mismatch\n";
         return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
-    return Constantes::NO_ERROR;
+    return Constantes::ErrorCode::NO_ERROR;
 }
 
 

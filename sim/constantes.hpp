@@ -1,6 +1,7 @@
 #ifndef PROYECTO_RENDIMIENTO_ARQUITECTURA_CONSTANTES_HPP
 #define PROYECTO_RENDIMIENTO_ARQUITECTURA_CONSTANTES_HPP
 
+#include <cstdint>
 #include "block.hpp"  // Incluimos block.hpp para tener acceso a la estructura "Punto"
 
 namespace Constantes {
@@ -26,7 +27,7 @@ namespace Constantes {
     extern const Punto limSuperior;
 
     // Definir constantes para los códigos de error
-    enum ErrorCode:int8_t {
+    enum ErrorCode:std::int8_t {
         NO_ERROR = 0,
         INVALID_ARGUMENTS = -1,
         INVALID_TIME_STEPS = -2,
