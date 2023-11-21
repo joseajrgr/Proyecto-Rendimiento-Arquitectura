@@ -3,6 +3,7 @@
 add_executable(utest
         block_test.cpp
         grid_test.cpp
+        progargs_test.cpp
         simulation_test.cpp)
 # Library dependencies
 target_link_libraries (utest

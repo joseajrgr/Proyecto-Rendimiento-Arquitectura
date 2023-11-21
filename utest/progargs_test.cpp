@@ -54,7 +54,7 @@ TEST(Propargs_Tests, NumIterationsInvalidFormat) {
 }
 
 //test para comprobar que al pasar en el inputfile un archivo que no se puede leer o no existe, se obtiene un error
-TEST(Propargs_Tests, OpenFileWrongFormat) {
+TEST(Propargs_Tests, InputFileWrongFormat) {
     // Arrange
     const std::vector<std::string> arguments = {"10", "mesifrutero", "out.fld"};
     Argumentos argumentos;
@@ -65,29 +65,31 @@ TEST(Propargs_Tests, OpenFileWrongFormat) {
     ASSERT_EQ(result, -3);
 }
 
-//test para comprobar que si el argumento outputfile no se puede abrir, da un error
-/*TEST(Propargs_Tests, OutFileWrongFormat) {
+//test para comprobar que si el argumento outputfile no se puede abrir porque no existe la ruta, da un error
+TEST(Propargs_Tests, OutFileWrongFormat) {
     // Arrange
-    const std::vector<std::string> arguments = {"10", "small.fld", "mesifrutero"};
+    const std::vector<std::string> arguments = {"10", "small.fld", "wrong/mesifrutero"};
     Argumentos argumentos;
+    std::vector<Block> blocks;
     const size_t argc = arguments.size() + 1;
     // Act
     Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
-    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos);
+    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
     // Assert
     ASSERT_EQ(resultin, 0);
     ASSERT_EQ(resultout, -4);
-}*/
+}
 
 //test con argumentos correctos, y el inputfile es small.fld
 TEST(Propargs_Tests, AllCorrectSmall) {
     // Arrange
     const std::vector<std::string> arguments = {"10", "small.fld", "out.fld"};
     Argumentos argumentos;
+    std::vector<Block> blocks;
     const size_t argc = arguments.size() + 1;
     // Act
     Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
-    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos);
+    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
     // Assert
     ASSERT_EQ(resultin, 0);
     ASSERT_EQ(resultout, 0);
@@ -98,10 +100,11 @@ TEST(Propargs_Tests, AllCorrectLarge) {
     // Arrange
     const std::vector<std::string> arguments = {"10", "large.fld", "out.fld"};
     Argumentos argumentos;
+    std::vector<Block> blocks;
     const size_t argc = arguments.size() + 1;
     // Act
     Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
-    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos);
+    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
     // Assert
     ASSERT_EQ(resultin, 0);
     ASSERT_EQ(resultout, 0);
