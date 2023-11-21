@@ -13,19 +13,29 @@ struct Fluid {
 class Grid {
 public:
     [[nodiscard]] inline double getNumberblocksx() const { return numberblocksx; }
+
     [[nodiscard]] inline double getNumberblocksy() const { return numberblocksy; }
+
     [[nodiscard]] inline double getNumberblocksz() const { return numberblocksz; }
+
     [[nodiscard]] inline double getMeshx() const { return meshx; }
+
     [[nodiscard]] inline double getMeshy() const { return meshy; }
+
     [[nodiscard]] inline double getMeshz() const { return meshz; }
 
     // Relativo a dividir la malla
-    Grid(const Punto& bmin, const Punto& bmax);
+    Grid(const Punto &bmin, const Punto &bmax);
+
     void dividirEnBloques(double smoothingLength);
+
     std::pair<double, double> simular_malla(const Fluid &fluid);
+
     void reposicionarParticulasFluid(Fluid &fluid, std::vector<Block> &blocks) const;
+
     void reposicionarParticulasBloque(std::vector<Block> &blocks) const;
-    [[nodiscard]] inline const std::vector<Block>& getBlocks() const { return blocks; }
+
+    [[nodiscard]] inline const std::vector<Block> &getBlocks() const { return blocks; }
 
 private:
     double numberblocksx;
@@ -44,7 +54,6 @@ private:
 
     void dividirVectorBloques(std::vector<Block> &nuevosBloques) const;
 };
-
 
 
 #endif //PROYECTO_RENDIMIENTO_ARQUITECTURA_GRID_HPP

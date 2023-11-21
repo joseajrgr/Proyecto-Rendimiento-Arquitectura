@@ -38,6 +38,9 @@ namespace Constantes {
 
     extern const double factor05;
     extern const double factor1e10;
+    extern const double seis;
+    extern const double cuarentaycinco;
+    extern const double quince;
 
     // Para la transferencia de la aceleracion
     struct ConstAccTransf {

@@ -8,17 +8,17 @@
 
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-void leerFluido(std::ifstream& in, Fluid& fluid) {
-    in.read(reinterpret_cast<char*>(&fluid.particlespermeter), sizeof(float));
-    in.read(reinterpret_cast<char*>(&fluid.numberparticles), sizeof(int));
+void leerFluido(std::ifstream &in, Fluid &fluid) {
+    in.read(reinterpret_cast<char *>(&fluid.particlespermeter), sizeof(float));
+    in.read(reinterpret_cast<char *>(&fluid.numberparticles), sizeof(int));
     fluid.particles.resize(fluid.numberparticles);
     for (int i = 0; i < fluid.numberparticles; ++i) {
         fluid.particles[i].id = i;
-        for (double* attr : {&fluid.particles[i].px, &fluid.particles[i].py, &fluid.particles[i].pz,
-                             &fluid.particles[i].hvx, &fluid.particles[i].hvy, &fluid.particles[i].hvz,
-                             &fluid.particles[i].vx, &fluid.particles[i].vy, &fluid.particles[i].vz}) {
+        for (double *attr: {&fluid.particles[i].px, &fluid.particles[i].py, &fluid.particles[i].pz,
+                            &fluid.particles[i].hvx, &fluid.particles[i].hvy, &fluid.particles[i].hvz,
+                            &fluid.particles[i].vx, &fluid.particles[i].vy, &fluid.particles[i].vz}) {
             float temp = 0;
-            in.read(reinterpret_cast<char*>(&temp), sizeof(float));
+            in.read(reinterpret_cast<char *>(&temp), sizeof(float));
             *attr = static_cast<double>(temp);
         }
     }
@@ -27,20 +27,20 @@ void leerFluido(std::ifstream& in, Fluid& fluid) {
 
 
 //NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-bool compareParticlesByID(const Particle& a, const Particle& b) {
+bool compareParticlesByID(const Particle &a, const Particle &b) {
     return a.id < b.id;
 }
 
-void escribirFluido(std::ofstream& out, Fluid& fluid, const std::vector<Block>& blocks) {
+void escribirFluido(std::ofstream &out, Fluid &fluid, const std::vector<Block> &blocks) {
     auto temp = static_cast<float>(fluid.particlespermeter);
-    out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
-    out.write(reinterpret_cast<const char*>(&fluid.numberparticles), sizeof(int));
+    out.write(reinterpret_cast<const char *>(&temp), sizeof(float));
+    out.write(reinterpret_cast<const char *>(&fluid.numberparticles), sizeof(int));
 
     // Vector to store all particles for sorting
     std::vector<Particle> allParticles;
 
     // Collect all particles from blocks into a single vector
-    for (const auto& block : blocks) {
+    for (const auto &block: blocks) {
         allParticles.insert(allParticles.end(), block.particles.begin(), block.particles.end());
     }
 
@@ -48,12 +48,12 @@ void escribirFluido(std::ofstream& out, Fluid& fluid, const std::vector<Block>& 
     std::sort(allParticles.begin(), allParticles.end(), compareParticlesByID);
 
     // Write sorted particles to the output file
-    for (auto& particle : allParticles) {
-        for (double* attr : {&particle.px, &particle.py, &particle.pz,
-                             &particle.hvx, &particle.hvy, &particle.hvz,
-                             &particle.vx, &particle.vy, &particle.vz}) {
+    for (auto &particle: allParticles) {
+        for (double *attr: {&particle.px, &particle.py, &particle.pz,
+                            &particle.hvx, &particle.hvy, &particle.hvz,
+                            &particle.vx, &particle.vy, &particle.vz}) {
             temp = static_cast<float>(*attr);
-            out.write(reinterpret_cast<const char*>(&temp), sizeof(float));
+            out.write(reinterpret_cast<const char *>(&temp), sizeof(float));
         }
     }
 }
@@ -62,11 +62,11 @@ void escribirFluido(std::ofstream& out, Fluid& fluid, const std::vector<Block>& 
 // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
 
-Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> arguments, Argumentos& argumentos) {
+Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> arguments, Argumentos &argumentos) {
     // Comprueba el numero de argumentos
     if (argc != 4) {
         std::cerr << "Error: Invalid number of arguments. Usage: " << arguments.size()
-            << " <nts> <inputfile> <outputfile>\n";
+                  << " <nts> <inputfile> <outputfile>\n";
         return Constantes::ErrorCode::INVALID_ARGUMENTS;
     }
 
@@ -90,7 +90,7 @@ Constantes::ErrorCode comprobarArgsEntrada(int argc, std::vector<std::string> ar
 }
 
 
-Constantes::ErrorCode comprobarParticulas(std::vector<std::string> arguments, Argumentos& argumentos) {
+Constantes::ErrorCode comprobarParticulas(std::vector<std::string> arguments, Argumentos &argumentos) {
     // Comprueba si se puede leer el archivo de entrada
     argumentos.archivoEntrada = arguments[1];
     std::ifstream input(argumentos.archivoEntrada, std::ios::binary);
@@ -108,17 +108,18 @@ Constantes::ErrorCode comprobarParticulas(std::vector<std::string> arguments, Ar
     }
 
     // Comprueba si el numero de particulas leidas coincide con numberparticles
-    if (argumentos.fluid.particles.size() != static_cast<std::vector<Particle>::size_type>(argumentos.fluid.numberparticles)) {
+    if (argumentos.fluid.particles.size() !=
+        static_cast<std::vector<Particle>::size_type>(argumentos.fluid.numberparticles)) {
         std::cerr << "Error: Number of particles mismatch. Header: "
                   << argumentos.fluid.numberparticles << ", Found: " << argumentos.fluid.particles.size() << ".\n";
         return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
     }
-
     return Constantes::NO_ERROR;
 }
 
 
-Constantes::ErrorCode comprobarArgsSalida(std::vector<std::string> arguments, Argumentos& argumentos, std::vector<Block>& blocks) {
+Constantes::ErrorCode
+comprobarArgsSalida(std::vector<std::string> arguments, Argumentos &argumentos, std::vector<Block> &blocks) {
     // Comprobar si se puede abrir el fichero de salida
     std::ofstream output(arguments[2], std::ios::binary);
     if (!output) {
