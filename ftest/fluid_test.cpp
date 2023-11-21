@@ -34,15 +34,15 @@ TEST(Fluid_Tests, BadParticlesNumberMore){
   ASSERT_EQ(codError, 251);
 }
 
-TEST(Fluid_Tests, IterationsValueZero){
+TEST(Fluid_Tests, IterationsValueLessZero){
   // Arrange
     const char* script = "./ftest/scripts/test4-error.sh";
   // Act
   int result = std::system(script);
   int codError = WEXITSTATUS(result);
   // Assert
-  ASSERT_EQ(result, 64256);
-  ASSERT_EQ(codError, 251);
+  ASSERT_EQ(result, 65024);
+  ASSERT_EQ(codError, 254);
 }
 
 TEST(Fluid_Tests, WrongIterationsValue){
@@ -52,8 +52,8 @@ TEST(Fluid_Tests, WrongIterationsValue){
   int result = std::system(script);
   int codError = WEXITSTATUS(result);
   // Assert
-  ASSERT_EQ(result, 64256);
-  ASSERT_EQ(codError, 251);
+  ASSERT_EQ(result, 65280);
+  ASSERT_EQ(codError, 255);
 }
 
 TEST(Fluid_Tests, InputfileWrong){
@@ -63,8 +63,8 @@ TEST(Fluid_Tests, InputfileWrong){
   int result = std::system(script);
   int codError = WEXITSTATUS(result);
   // Assert
-  ASSERT_EQ(result, 64256);
-  ASSERT_EQ(codError, 251);
+  ASSERT_EQ(result, 64768);
+  ASSERT_EQ(codError, 253);
 }
 
 TEST(Fluid_Tests, OutputFileWrong){
@@ -74,11 +74,11 @@ TEST(Fluid_Tests, OutputFileWrong){
   int result = std::system(script);
   int codError = WEXITSTATUS(result);
   // Assert
-  ASSERT_EQ(result, 64256);
-  ASSERT_EQ(codError, 251);
+  ASSERT_EQ(result, 64512);
+  ASSERT_EQ(codError, 252);
 }
 
-TEST(Fluid_Tests, ComparasionSmall1) {
+TEST(Fluid_Tests, ComparationSmall1) {
     // Arrange
     const char* script = "./ftest/scripts/test1S.sh";
     const std::string outfileName = "./ftest/reference_files/small-1.fld";
@@ -92,7 +92,7 @@ TEST(Fluid_Tests, ComparasionSmall1) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionSmall2) {
+TEST(Fluid_Tests, ComparationSmall2) {
     // Arrange
     const char* script = "./ftest/scripts/test2S.sh";
   const std::string outfileName = "./ftest/reference_files/small-2.fld";
@@ -106,7 +106,7 @@ TEST(Fluid_Tests, ComparasionSmall2) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionSmall3) {
+TEST(Fluid_Tests, ComparationSmall3) {
     // Arrange
     const char* script = "./ftest/scripts/test3S.sh";
   const std::string outfileName = "./ftest/reference_files/small-3.fld";
@@ -120,7 +120,7 @@ TEST(Fluid_Tests, ComparasionSmall3) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionSmall4) {
+TEST(Fluid_Tests, ComparationSmall4) {
     // Arrange
     const char* script = "./ftest/scripts/test4S.sh";
   const std::string outfileName = "./ftest/reference_files/small-4.fld";
@@ -134,7 +134,7 @@ TEST(Fluid_Tests, ComparasionSmall4) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionSmall5) {
+TEST(Fluid_Tests, ComparationSmall5) {
     // Arrange
     const char* script = "./ftest/scripts/test5S.sh";
   const std::string outfileName = "./ftest/reference_files/small-5.fld";
@@ -148,7 +148,7 @@ TEST(Fluid_Tests, ComparasionSmall5) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionLarge1) {
+TEST(Fluid_Tests, ComparationLarge1) {
     // Arrange
     const char* script = "./ftest/scripts/test1L.sh";
   const std::string outfileName = "./ftest/reference_files/large-1.fld";
@@ -162,7 +162,7 @@ TEST(Fluid_Tests, ComparasionLarge1) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionLarge2) {
+TEST(Fluid_Tests, ComparationLarge2) {
     // Arrange
     const char* script = "./ftest/scripts/test2L.sh";
   const std::string outfileName = "./ftest/reference_files/large-2.fld";
@@ -176,7 +176,7 @@ TEST(Fluid_Tests, ComparasionLarge2) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionLarge3) {
+TEST(Fluid_Tests, ComparationLarge3) {
     // Arrange
     const char* script = "./ftest/scripts/test3L.sh";
   const std::string outfileName = "./ftest/reference_files/large-3.fld";
@@ -190,7 +190,7 @@ TEST(Fluid_Tests, ComparasionLarge3) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionLarge4) {
+TEST(Fluid_Tests, ComparationLarge4) {
     // Arrange
     const char* script = "./ftest/scripts/test4L.sh";
   const std::string outfileName = "./ftest/reference_files/large-4.fld";
@@ -204,7 +204,7 @@ TEST(Fluid_Tests, ComparasionLarge4) {
     ASSERT_EQ(equal, 0);
 }
 
-TEST(Fluid_Tests, ComparasionLarge5) {
+TEST(Fluid_Tests, ComparationLarge5) {
     // Arrange
     const char* script = "./ftest/scripts/test5L.sh";
   const std::string outfileName = "./ftest/reference_files/large-5.fld";
