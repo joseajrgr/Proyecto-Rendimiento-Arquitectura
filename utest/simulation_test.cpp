@@ -374,7 +374,7 @@ TEST(SimulationTests, incrementDensities2){
     Fluid fluid{1.0,3,particulas};
     std::vector<Block> grid_blocks = grid.getBlocks();
     grid.reposicionarParticulasFluid(fluid,grid_blocks);
-    incrementDensities(grid_blocks,double_3_value,grid);
+    incrementDensities(grid_blocks,double_3_value*double_3_value,grid);
     ASSERT_EQ(189.0,grid_blocks[0].particles[0].density);
     ASSERT_EQ(66.0,grid_blocks[1].particles[0].density);
     ASSERT_EQ(126.0,grid_blocks[2].particles[0].density);
