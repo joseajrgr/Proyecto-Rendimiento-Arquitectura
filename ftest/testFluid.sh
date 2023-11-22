@@ -14,7 +14,7 @@ ejecutar_FLUID_cpp() {
     if [ "$resultado" -eq "$4" ]; then
       if [ "$resultado" -eq 0 ]; then
           # Ejecutar el programa ftest con los argumentos proporcionados, valor de retorno en equal
-          $ruta_ftest "$5" "$3" "1e-4"
+          $ruta_ftest "$5" "$3" "1e-7"
           equal=$?
            if [ "$equal" -eq 0 ]; then
                 ((pruebas_pasadas++))
@@ -67,7 +67,9 @@ ejecutar_FLUID_cpp 3 "./ftest/files_fld/large.fld" "./ftest/outfiles_fld/outL.fl
 ejecutar_FLUID_cpp 4 "./ftest/files_fld/large.fld" "./ftest/outfiles_fld/outL.fld" 0 "./ftest/reference_files/large-4.fld"
 #test 17, ejecución de fluid con archivo de lectura large y cinco iteraciones, se espera que funcione correctamente y retorne 0
 ejecutar_FLUID_cpp 5 "./ftest/files_fld/large.fld" "./ftest/outfiles_fld/outL.fld" 0 "./ftest/reference_files/large-5.fld"
+#test 18, ejecución de fluid con archivo de lectura small y cero iteraciones, se espera que funcione correctamente y retorne 0
+ejecutar_FLUID_cpp 0 "./ftest/files_fld/small.fld" "./ftest/outfiles_fld/outS.fld" 0 "./ftest/reference_files/small.fld"
 
 #Se muestran los resultados de la ejecución de estos tests
-echo "Resultados de los 17 tests:"
-echo "Tests pasados: $pruebas_pasadas de 17"
+echo "Resultados de los 18 tests:"
+echo "Tests pasados: $pruebas_pasadas de 18"
