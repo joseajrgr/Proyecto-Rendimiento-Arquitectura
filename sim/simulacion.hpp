@@ -25,9 +25,9 @@ ejecutarIteraciones(Grid &malla, Argumentos &argumentos, double smoothingLength,
 void initAccelerations(std::vector<Block> &blocks);
 
 // Incremento de densidades
-void incrementDensities(std::vector<Block> &blocks, double h, Grid &malla);
+void incrementDensities(std::vector<Block> &blocks, double hSquared, Grid &malla);
 
-void comprobarParticula2Dens(std::vector<Block> &blocks, Particle &particle1, double hsq, int neighborIndex);
+void comprobarParticula2Dens(std::vector<Block> &blocks, Particle &particle1, double hSquared, int neighborIndex);
 
 // Transformacion de densidades
 void transformDensities(std::vector<Block> &blocks, double h, double factorDensTransf);
