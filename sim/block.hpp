@@ -17,7 +17,7 @@ struct Particle {
     double ax, ay, az; // Coordenadas de la aceleración
     double density;
 
-    //metodo para comparar que dos partículas son iguales. Este método se usará en los tests
+    // Metodo para comparar que dos particulas son iguales. Este metodo se usara en los tests
     bool operator==(const Particle &other) const {
         return id == other.id &&
                idBloque == other.idBloque &&

@@ -15,6 +15,7 @@ namespace Constantes {
     const Punto limInferior = {-0.065, -0.08, -0.065};
     const Punto limSuperior = {0.065, 0.1, 0.065};
 
+    // Distintos numeros a los que accedemos al operar
     const double factor05 = 0.5;
     const double factor1e10 = 1e-10;
     const double seis = 6;

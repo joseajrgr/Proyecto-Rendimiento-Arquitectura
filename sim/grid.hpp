@@ -5,8 +5,8 @@
 #include "block.hpp"  // Incluimos block.hpp para tener acceso a la estructura "Punto"
 
 struct Fluid {
-    float particlespermeter = 0;  // Partículas por metro
-    int numberparticles = 0;  // Número de partículas
+    float particlespermeter = 0;  // Particulas por metro
+    int numberparticles = 0;  // Numero total de particulas
     std::vector<Particle> particles;
 };
 

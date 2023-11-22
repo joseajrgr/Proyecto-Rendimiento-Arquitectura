@@ -13,24 +13,23 @@ Constantes::ErrorCode leerFluido(std::ifstream &in, Fluid &fluid) {
     in.read(reinterpret_cast<char *>(&fluid.numberparticles), sizeof(int));
     fluid.particles.resize(fluid.numberparticles);
     for (int i = 0; i < fluid.numberparticles + 1; ++i) {
-      if(i!=fluid.numberparticles){
-        fluid.particles[i].id = i;
-        for (double *attr: {&fluid.particles[i].px, &fluid.particles[i].py, &fluid.particles[i].pz,
-                              &fluid.particles[i].hvx, &fluid.particles[i].hvy, &fluid.particles[i].hvz,
-                              &fluid.particles[i].vx, &fluid.particles[i].vy, &fluid.particles[i].vz}) {
-          float temp = 0;
-          if(not in.read(reinterpret_cast<char *>(&temp), sizeof(float))){
-            return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
-          }
-          *attr = static_cast<double>(temp);
+        if (i != fluid.numberparticles) {
+            fluid.particles[i].id = i;
+            for (double *attr: {&fluid.particles[i].px, &fluid.particles[i].py, &fluid.particles[i].pz,
+                                &fluid.particles[i].hvx, &fluid.particles[i].hvy, &fluid.particles[i].hvz,
+                                &fluid.particles[i].vx, &fluid.particles[i].vy, &fluid.particles[i].vz}) {
+                float temp = 0; // Hasta que se llegue a la iteracion "numberparticles" lee (si no puede, da error)
+                if (not in.read(reinterpret_cast<char *>(&temp), sizeof(float))) {
+                    return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
+                }
+                *attr = static_cast<double>(temp);
+            }
+        } else { // Si puede iterar mas veces de lo especificado en "numberparticles" tambien devuelve error
+            float temp = 0;
+            if (in.read(reinterpret_cast<char *>(&temp), sizeof(float))) {
+                return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
+            }
         }
-      }
-      else{
-          float temp = 0;
-          if(in.read(reinterpret_cast<char *>(&temp), sizeof(float))){
-            return Constantes::ErrorCode::INVALID_PARTICLE_COUNT;
-          }
-      }
     }
     return Constantes::ErrorCode::NO_ERROR;
 }
@@ -43,15 +42,15 @@ void escribirFluido(std::ofstream &out, Fluid &fluid, const std::vector<Block> &
     out.write(reinterpret_cast<const char *>(&temp), sizeof(float));
     out.write(reinterpret_cast<const char *>(&fluid.numberparticles), sizeof(int));
 
-    // Recorre todos los bloques y sus partículas
+    // Recorre todos los bloques y sus particulas
     for (const auto &block: blocks) {
         for (const auto &particle: block.particles) {
-            // Inserta la partícula en la posición correcta para mantener el orden
-            fluid.particles[particle.id]= particle;
+            // Actualiza las particulas del fluid (asi podremos imprimirlas en el orden original)
+            fluid.particles[particle.id] = particle;
         }
     }
 
-    // Escribe las partículas ordenadas en el archivo de salida
+    // Escribe las particulas ordenadas en el archivo de salida (y en formato "float")
     for (auto &particle: fluid.particles) {
         for (double *attr: {&particle.px, &particle.py, &particle.pz,
                             &particle.hvx, &particle.hvy, &particle.hvz,
@@ -61,8 +60,6 @@ void escribirFluido(std::ofstream &out, Fluid &fluid, const std::vector<Block> &
         }
     }
 }
-
-
 // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
 
