@@ -9,7 +9,7 @@ TEST(Propargs_Tests, NumArguments3) {
     Argumentos argumentos;
     const size_t argc = arguments.size() + 1;
     // Act
-    Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
+    const Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
 
     // Assert
     ASSERT_EQ(result, -1);
@@ -22,7 +22,7 @@ TEST(Propargs_Tests, NumArguments5) {
     Argumentos argumentos;
     const size_t argc = arguments.size() + 1;
     // Act
-    Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
+    const Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
     // Assert
     ASSERT_EQ(result, -1);
 }
@@ -34,7 +34,7 @@ TEST(Propargs_Tests, NumIterationsInvalidValue) {
     Argumentos argumentos;
     const size_t argc = arguments.size() + 1;
     // Act
-    Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
+    const Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
 
     // Assert
     ASSERT_EQ(result, -2);
@@ -47,7 +47,7 @@ TEST(Propargs_Tests, NumIterationsInvalidFormat) {
     Argumentos argumentos;
     const size_t argc = arguments.size() + 1;
     // Act
-    Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
+    const Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
 
     // Assert
     ASSERT_EQ(result, -1);
@@ -60,7 +60,7 @@ TEST(Propargs_Tests, InputFileWrongFormat) {
     Argumentos argumentos;
     const size_t argc = arguments.size() + 1;
     // Act
-    Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
+    const Constantes::ErrorCode result = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
     // Assert
     ASSERT_EQ(result, -3);
 }
@@ -73,8 +73,8 @@ TEST(Propargs_Tests, OutFileWrongFormat) {
     std::vector<Block> blocks;
     const size_t argc = arguments.size() + 1;
     // Act
-    Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
-    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
+    const Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
+    const Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
     // Assert
     ASSERT_EQ(resultin, 0);
     ASSERT_EQ(resultout, -4);
@@ -88,8 +88,8 @@ TEST(Propargs_Tests, AllCorrectSmall) {
     std::vector<Block> blocks;
     const size_t argc = arguments.size() + 1;
     // Act
-    Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
-    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
+    const Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
+    const Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
     // Assert
     ASSERT_EQ(resultin, 0);
     ASSERT_EQ(resultout, 0);
@@ -103,8 +103,8 @@ TEST(Propargs_Tests, AllCorrectLarge) {
     std::vector<Block> blocks;
     const size_t argc = arguments.size() + 1;
     // Act
-    Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
-    Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
+    const Constantes::ErrorCode resultin = comprobarArgsEntrada(static_cast<int>(argc), arguments, argumentos);
+    const Constantes::ErrorCode resultout = comprobarArgsSalida(arguments, argumentos, blocks);
     // Assert
     ASSERT_EQ(resultin, 0);
     ASSERT_EQ(resultout, 0);

@@ -6,10 +6,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <iomanip>
-
-
+#include <span>
 
 struct Particle {
     int64_t id;
@@ -19,17 +16,14 @@ struct Particle {
     double density;
     double ax, ay, az;
 };
-struct ParticleInfo {
-    Particle particle;
-    int blockIndex;
-};
 
 struct Fluid{
-    int particlespermeter;
-    int numberparticles;
+    int particlespermeter = 0;
+    int numberparticles = 0;
     std::vector<Particle> particles;
 };
 
+//NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
 void readFldFile(std::ifstream& file, Fluid& fluid){
   file.read(reinterpret_cast<char*>(&fluid.particlespermeter), sizeof(float));
   file.read(reinterpret_cast<char*>(&fluid.numberparticles), sizeof(int));
@@ -45,58 +39,48 @@ void readFldFile(std::ifstream& file, Fluid& fluid){
     }
   }
 }
+// NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
 
 int compareFiles(const std::string& datafilename, const std::string& outfilename, double tolerance) {
-  //leo archivo de trazas y guardo los datos en un vector de struct de ParticleInfo
+  //leo archivo de trazas y guardo los datos en un vector de struct de ParticleInfo, y luego hago lo mismo con el archivo de salida de fluid
   Fluid fluidData;
   std::ifstream file(datafilename, std::ios::binary);
   if (!file.is_open()) {
-    std::cerr << "Error: Unable to open file " << datafilename << std::endl;
     return -1;
   }
   readFldFile(file, fluidData);
-
-
-  //leo archivo de salida de fluid y lo guardo en struct Fluid
   Fluid fluidOut;
   std::ifstream outF(outfilename, std::ios::binary);
   if (!outF.is_open()) {
-    std::cerr << "Error: Unable to open file " << outfilename << std::endl;
     return -1;
   }
   readFldFile(outF, fluidOut);
-
-
   //comparo resultados de leer cada archivo con un cierto margen de error
   for(int i = 0; i<fluidOut.numberparticles; i++){
-    if ((fluidOut.particles[i].px - tolerance > fluidData.particles[i].px or fluidOut.particles[i].px + tolerance < fluidData.particles[i].px)
-        or (fluidOut.particles[i].py - tolerance > fluidData.particles[i].py or fluidOut.particles[i].py + tolerance < fluidData.particles[i].py)
-        or (fluidOut.particles[i].pz - tolerance > fluidData.particles[i].pz or fluidOut.particles[i].pz + tolerance < fluidData.particles[i].pz)
-        or (fluidOut.particles[i].hvx - tolerance > fluidData.particles[i].hvx or fluidOut.particles[i].hvx + tolerance < fluidData.particles[i].hvx)
-        or (fluidOut.particles[i].hvy - tolerance > fluidData.particles[i].hvy or fluidOut.particles[i].hvy + tolerance < fluidData.particles[i].hvy)
-        or (fluidOut.particles[i].hvz - tolerance > fluidData.particles[i].hvz or fluidOut.particles[i].hvz + tolerance < fluidData.particles[i].hvz)
-        or (fluidOut.particles[i].vx - tolerance > fluidData.particles[i].vx or fluidOut.particles[i].vx + tolerance < fluidData.particles[i].vx)
-        or (fluidOut.particles[i].vy - tolerance > fluidData.particles[i].vy or fluidOut.particles[i].vy + tolerance < fluidData.particles[i].vy)
-        or (fluidOut.particles[i].vz - tolerance > fluidData.particles[i].vz or fluidOut.particles[i].vz + tolerance < fluidData.particles[i].vz)
+    if ((fluidOut.particles[i].px - tolerance > fluidData.particles[i].px or fluidOut.particles[i].px + tolerance < fluidData.particles[i].px) or (fluidOut.particles[i].py - tolerance > fluidData.particles[i].py or fluidOut.particles[i].py + tolerance < fluidData.particles[i].py) or (fluidOut.particles[i].pz - tolerance > fluidData.particles[i].pz or fluidOut.particles[i].pz + tolerance < fluidData.particles[i].pz)
+        or (fluidOut.particles[i].hvx - tolerance > fluidData.particles[i].hvx or fluidOut.particles[i].hvx + tolerance < fluidData.particles[i].hvx) or (fluidOut.particles[i].hvy - tolerance > fluidData.particles[i].hvy or fluidOut.particles[i].hvy + tolerance < fluidData.particles[i].hvy) or (fluidOut.particles[i].hvz - tolerance > fluidData.particles[i].hvz or fluidOut.particles[i].hvz + tolerance < fluidData.particles[i].hvz)
+        or (fluidOut.particles[i].vx - tolerance > fluidData.particles[i].vx or fluidOut.particles[i].vx + tolerance < fluidData.particles[i].vx) or (fluidOut.particles[i].vy - tolerance > fluidData.particles[i].vy or fluidOut.particles[i].vy + tolerance < fluidData.particles[i].vy) or (fluidOut.particles[i].vz - tolerance > fluidData.particles[i].vz or fluidOut.particles[i].vz + tolerance < fluidData.particles[i].vz)
         or (fluidOut.particles[i].density - tolerance > fluidData.particles[i].density or fluidOut.particles[i].density + tolerance < fluidData.particles[i].density)
-        or (fluidOut.particles[i].ax - tolerance > fluidData.particles[i].ax or fluidOut.particles[i].ax + tolerance < fluidData.particles[i].ax)
-        or (fluidOut.particles[i].ay - tolerance > fluidData.particles[i].ay or fluidOut.particles[i].ay + tolerance < fluidData.particles[i].ay)
-        or (fluidOut.particles[i].az - tolerance > fluidData.particles[i].az or fluidOut.particles[i].az + tolerance < fluidData.particles[i].az)){
-        std::cout <<  "La partícula de fluidOut " << fluidOut.particles[i].id << " Densidad: " << fluidOut.particles[i].density
-                   << " x: " << fluidOut.particles[i].px << " y: " << fluidOut.particles[i].py
-                  << " z: " << fluidOut.particles[i].pz << " Velocidad: (" << fluidOut.particles[i].vx << ", " << fluidOut.particles[i].vy << ", "
-                  << fluidOut.particles[i].vz << ")"
-                  << "     Aceleración: (" << fluidOut.particles[i].ax << ", " << fluidOut.particles[i].ay << ", "
-                  << fluidOut.particles[i].az << ")" << '\n';
-        std::cout <<  "La partícula de fluidData " << fluidData.particles[i].id << " Densidad: " << fluidData.particles[i].density
-                  << " x: " << fluidData.particles[i].px << " y: " << fluidData.particles[i].py
-                  << " z: " << fluidData.particles[i].pz << " Velocidad: (" << fluidData.particles[i].vx << ", " << fluidData.particles[i].vy << ", "
-                  << fluidData.particles[i].vz << ")"
-                  << "     Aceleración: (" << fluidData.particles[i].ax << ", " << fluidData.particles[i].ay << ", "
-                  << fluidData.particles[i].az << ")" << '\n';
-      }
-          return -1;
+        or (fluidOut.particles[i].ax - tolerance > fluidData.particles[i].ax or fluidOut.particles[i].ax + tolerance < fluidData.particles[i].ax) or (fluidOut.particles[i].ay - tolerance > fluidData.particles[i].ay or fluidOut.particles[i].ay + tolerance < fluidData.particles[i].ay) or (fluidOut.particles[i].az - tolerance > fluidData.particles[i].az or fluidOut.particles[i].az + tolerance < fluidData.particles[i].az)){
+      return -1;
     }
-
+  }
   return 0;
+}
+
+int main(int argc, char** argv){
+  if (argc != 4){
+      std::cerr<<"Número inválido de argumentos para filesComparator.cpp. \n";
+      return -2;
+  }
+
+  std::span const args_view{argv, static_cast<std::size_t>(argc)};
+  std::vector<std::string> const arguments{args_view.begin() + 1, args_view.end()};
+  const std::string& fileData = arguments[0];
+  const std::string& fileOutput = arguments[1];
+  const double tolerance = std::stod(arguments[2]);
+
+  const int code = compareFiles(fileData, fileOutput, tolerance);
+  return code;
+
 }
