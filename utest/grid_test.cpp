@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "sim/grid.cpp"
+#include "sim/grid.hpp"
 //constantes para resolver errores clang-tidy
 const double decimal5_value = 0.5;
 const double double_2_value = 2.0;

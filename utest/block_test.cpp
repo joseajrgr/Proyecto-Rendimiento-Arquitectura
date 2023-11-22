@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include "sim/block.cpp"
 #include "sim/block.hpp"
 
 //Test para comprobr que se añade bien una particula
