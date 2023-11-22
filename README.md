@@ -14,7 +14,7 @@ Para ejecutar los utests se cuenta con el script runutest.sh
 
 `sbatch runutest.sh`
 
-Para ejecutar ftests se ha realizado un script `ftest/ftest.sh` y se ejecuta con
+Para ejecutar ftests se ha realizado un script `ftest/testFluid.sh` (el cual recibe dos parámetros: la ruta de fluid.sh y la ruta de ftest.sh) y se ejecuta con
 
 `sbatch runftest.sh`
 
