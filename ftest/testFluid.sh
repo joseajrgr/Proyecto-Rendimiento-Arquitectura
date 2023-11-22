@@ -1,17 +1,20 @@
 #!/bin/bash
 
+ruta_fluid=$1
+ruta_ftest=$2
+
 pruebas_pasadas=0
 
 #Esta función va a comparar si el resultado obtenido tanto en fluid como en ftest es el esperado, validando esa ejecución
 ejecutar_FLUID_cpp() {
     # Ejecutar el programa fluid con los argumentos proporcionados, valor de retorno en resultado
-    ./ftest/ejecutables/fluid "$1" "$2" "$3"
+    $ruta_fluid "$1" "$2" "$3"
     resultado=$?
 
     if [ "$resultado" -eq "$4" ]; then
       if [ "$resultado" -eq 0 ]; then
           # Ejecutar el programa ftest con los argumentos proporcionados, valor de retorno en equal
-          ./ftest/ejecutables/ftest "$5" "$3" "1e-4"
+          $ruta_ftest "$5" "$3" "1e-4"
           equal=$?
            if [ "$equal" -eq 0 ]; then
                 ((pruebas_pasadas++))
